@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0b21" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="我们专属的家庭菜单记录 App" />
+  <title>LoveMenu 🍽️</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ====== AUTH GATE ====== -->
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="auth-content">
+      <div class="auth-logo">🍽️</div>
+      <h1 class="auth-title">LoveMenu</h1>
+      <p class="auth-subtitle">我们的专属小厨房 ✨</p>
+      <div class="auth-form">
+        <input
+          type="password"
+          id="password-input"
+          class="password-input"
+          placeholder="输入专属密码"
+          maxlength="10"
+          autocomplete="current-password"
+        />
+        <button class="login-btn" onclick="handleLogin()">进入 →</button>
+      </div>
+      <p id="auth-error" class="auth-error"></p>
+    </div>
+  </div>
+
+  <!-- ====== MAIN APP ====== -->
+  <div id="app" class="app hidden">
+
+    <!-- Pages Container -->
+    <div class="pages-container">
+
+      <!-- Page: 菜谱大厅 -->
+      <section id="page-hall" class="page page-active" data-page="hall">
+        <header class="page-header">
+          <h1 class="page-title">🏠 菜谱大厅</h1>
+          <button class="icon-btn" id="search-toggle-btn" onclick="toggleSearch()" aria-label="搜索">🔍</button>
+        </header>
+        <div id="search-bar" class="search-bar hidden">
+          <input type="text" id="search-input" class="search-input" placeholder="搜索菜品…" oninput="filterDishes(this.value)" />
+        </div>
+        <div class="page-scroll">
+          <div id="hall-loading" class="skeleton-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+          <div id="dish-grid" class="dish-grid hidden"></div>
+          <div id="hall-empty" class="empty-state hidden">
+            <div class="empty-icon">🥣</div>
+            <p>还没有菜谱，快去添加吧！</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: 今日菜单 -->
+      <section id="page-today" class="page" data-page="today">
+        <header class="page-header">
+          <h1 class="page-title">🍽️ 今日菜单</h1>
+          <span id="today-date-label" class="header-date"></span>
+        </header>
+        <div class="page-scroll">
+          <div id="today-empty" class="empty-state hidden">
+            <div class="empty-icon">🥢</div>
+            <p>今天还没点菜哦<br>去菜谱大厅逛逛吧！</p>
+          </div>
+          <div id="today-list" class="today-list"></div>
+          <div id="confirm-area" class="confirm-area hidden">
+            <button id="confirm-btn" class="confirm-btn" onclick="confirmMeal()">✅ 确认开饭！</button>
+          </div>
+          <div id="confirmed-msg" class="confirmed-msg hidden">
+            🎉 今天已打卡，大厨辛苦了～
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: 历史记录 -->
+      <section id="page-history" class="page" data-page="history">
+        <header class="page-header">
+          <h1 class="page-title">📅 时光机</h1>
+        </header>
+        <div class="date-strip-outer">
+          <div id="date-strip" class="date-strip"></div>
+        </div>
+        <div class="page-scroll">
+          <div id="history-empty" class="empty-state hidden">
+            <div class="empty-icon">📭</div>
+            <p>这天还没有记录</p>
+          </div>
+          <div id="history-list" class="history-list"></div>
+        </div>
+      </section>
+
+      <!-- Page: 新增菜品 -->
+      <section id="page-add" class="page" data-page="add">
+        <header class="page-header">
+          <h1 class="page-title">➕ 新增菜品</h1>
+        </header>
+        <div class="page-scroll">
+          <div class="add-form">
+            <div class="form-group">
+              <label class="form-label">菜名 <span class="required">*</span></label>
+              <input
+                type="text"
+                id="dish-name-input"
+                class="form-input"
+                placeholder="比如：番茄炒蛋"
+                maxlength="20"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">选个表情</label>
+              <div id="emoji-picker" class="emoji-picker"></div>
+            </div>
+            <button id="save-dish-btn" class="save-dish-btn" onclick="saveDish()">保存菜品 ✨</button>
+            <div id="save-success" class="save-success hidden">✅ 已加入菜谱！</div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /pages-container -->
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item nav-active" data-page="hall" onclick="navigateTo('hall')" aria-label="菜谱大厅">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">菜谱</span>
+      </button>
+      <button class="nav-item" data-page="today" onclick="navigateTo('today')" aria-label="今日菜单">
+        <span class="nav-icon">🍽️</span>
+        <span class="nav-label">今日</span>
+        <span id="nav-badge" class="nav-badge hidden"></span>
+      </button>
+      <button class="nav-item" data-page="history" onclick="navigateTo('history')" aria-label="历史记录">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">记录</span>
+      </button>
+      <button class="nav-item" data-page="add" onclick="navigateTo('add')" aria-label="新增菜品">
+        <span class="nav-icon">➕</span>
+        <span class="nav-label">新增</span>
+      </button>
+    </nav>
+
+  </div><!-- /app -->
+
+  <!-- Celebration Overlay -->
+  <div id="celebration" class="celebration hidden">
+    <div id="particles" class="particles"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
