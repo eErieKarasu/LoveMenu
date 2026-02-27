@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lovemenu-v1';
+const CACHE_NAME = 'lovemenu-v2';
 const ASSETS = [
     './',
     './index.html',
