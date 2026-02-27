@@ -55,6 +55,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  overscroll-behavior-y: none;
 }
 button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
 input  { font-family: inherit; }
@@ -204,10 +205,12 @@ input  { font-family: inherit; }
    APP SHELL
    ============================================ */
 .app {
-  position: fixed; inset: 0;
+  position: fixed; top: 0; left: 0; right: 0;
   display: flex; flex-direction: column;
   background: linear-gradient(160deg, #0d0b21 0%, #111029 55%, #0c1020 100%);
   max-width: 480px; margin: 0 auto; overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
 }
 
 /* ============================================
@@ -218,7 +221,6 @@ input  { font-family: inherit; }
 }
 .page {
   position: absolute; inset: 0;
-  bottom: var(--nav-h);
   display: flex; flex-direction: column;
   opacity: 0; pointer-events: none;
   transform: translateX(60px);
@@ -239,7 +241,9 @@ input  { font-family: inherit; }
    ============================================ */
 .page-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 10px; flex-shrink: 0;
+  padding: 18px 20px 10px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+  flex-shrink: 0;
   min-height: var(--header-h);
 }
 .page-title {
