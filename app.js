@@ -184,9 +184,8 @@ function renderDishes() {
         <span class="dish-name">${dish.name}</span>
         <button
           class="dish-add-btn ${added ? 'added' : ''}"
-          onclick="addToToday('${dish.id}','${dish.name.replace(/'/g, "\\'")}','${safeEmoji}')"
-          ${added ? 'disabled' : ''}
-          aria-label="${added ? '已加入今日' : '加入今日菜单'}"
+          onclick="${added ? `removeFromToday('${dish.id}')` : `addToToday('${dish.id}','${dish.name.replace(/'/g, "\\'")}','${safeEmoji}')`}"
+          aria-label="${added ? '从今日移除' : '加入今日菜单'}"
         >${added ? '✓' : '+'}</button>
       </div>`;
     }).join('');
@@ -231,7 +230,7 @@ async function addToToday(dishId, dishName, dishEmoji) {
 
     const newItems = [...items, { dish_id: dishId, dish_name: dishName, emoji: dishEmoji }];
 
-    if (menu) {
+    if (menu && menu.id) {
         const { error } = await supabaseClient
             .from('daily_menus').update({ items: newItems }).eq('date', today);
         if (error) { console.error('addToToday update:', error); return; }
