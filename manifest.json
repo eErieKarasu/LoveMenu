@@ -1,18 +1,18 @@
 {
-    "name": "LoveMenu",
-    "short_name": "LoveMenu",
-    "description": "我们的专属家庭菜单",
-    "start_url": "./",
-    "display": "standalone",
-    "orientation": "portrait",
-    "theme_color": "#0d0b21",
-    "background_color": "#0d0b21",
-    "icons": [
-        {
-            "src": "icons/icon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "LoveMenu",
+  "short_name": "LoveMenu",
+  "description": "家庭内部的菜谱、每日菜单和采购提醒工具",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#f8f3ea",
+  "background_color": "#f8f3ea",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

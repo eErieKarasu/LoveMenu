@@ -1,569 +1,868 @@
-/* ============================================
-   LoveMenu — App Logic
-   ============================================ */
+const categories = ["全部", "荤菜", "素菜", "汤", "主食", "早餐", "快手菜"];
 
-// === CONSTANTS ===
-const PASSWORD = '240520';
-const EMOJIS = ['🍅', '🥩', '🐟', '🍜', '🥗', '🍲', '🥘', '🍱', '🍣', '🍛',
-    '🥚', '🥦', '🧆', '🍖', '🦐', '🥕', '🍄', '🧀', '🌽', '🥟'];
-const PAGE_ORDER = ['hall', 'today', 'history', 'add'];
+const recipes = [
+  {
+    id: "tomato-egg",
+    name: "番茄炒蛋",
+    categories: ["快手菜"],
+    ingredients: ["番茄", "鸡蛋", "小葱"],
+    pantry: ["鸡蛋", "小葱", "盐"],
+    buy: ["番茄"],
+    prep: 5,
+    cook: 7,
+    time: 12,
+    difficulty: "简单",
+    flavor: "清淡",
+    spice: "不辣",
+    tags: ["快手", "下饭", "适合晚餐"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "喜欢" },
+    steps: ["番茄去蒂切块，鸡蛋加少量盐打散。", "热锅滑蛋至刚凝固，盛出备用。", "番茄炒出汁后回锅鸡蛋，轻轻翻匀。"],
+    favorite: true,
+    recent: "3 天前",
+    notThisWeek: false
+  },
+  {
+    id: "broccoli",
+    name: "清炒西兰花",
+    categories: ["素菜", "快手菜"],
+    ingredients: ["西兰花", "蒜", "橄榄油"],
+    pantry: ["蒜", "盐", "橄榄油"],
+    buy: ["西兰花"],
+    prep: 6,
+    cook: 6,
+    time: 12,
+    difficulty: "简单",
+    flavor: "清爽",
+    spice: "不辣",
+    tags: ["多菜少肉", "清淡", "快手"],
+    likes: { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" },
+    steps: ["西兰花掰小朵，淡盐水浸泡后焯 40 秒。", "蒜片小火煸香，放入西兰花。", "少量盐调味，保持脆口即可出锅。"],
+    favorite: false,
+    recent: "5 天前",
+    notThisWeek: false
+  },
+  {
+    id: "cola-wings",
+    name: "可乐鸡翅",
+    categories: ["荤菜"],
+    ingredients: ["鸡翅中", "可乐", "姜"],
+    pantry: ["姜", "生抽", "老抽"],
+    buy: ["鸡翅中", "可乐"],
+    prep: 8,
+    cook: 22,
+    time: 30,
+    difficulty: "普通",
+    flavor: "微甜",
+    spice: "不辣",
+    tags: ["小朋友喜欢", "周末", "下饭"],
+    likes: { "我": "喜欢", "伴侣": "一般", "小朋友": "喜欢" },
+    steps: ["鸡翅划两刀，冷水下锅焯去浮沫。", "煎至两面微黄，加入姜片、生抽和可乐。", "中小火收汁，汤汁能挂住鸡翅即可。"],
+    favorite: true,
+    recent: "上周",
+    notThisWeek: true
+  },
+  {
+    id: "seaweed-soup",
+    name: "紫菜蛋花汤",
+    categories: ["汤", "快手菜"],
+    ingredients: ["紫菜", "鸡蛋", "虾皮"],
+    pantry: ["紫菜", "鸡蛋", "香油"],
+    buy: ["虾皮"],
+    prep: 3,
+    cook: 5,
+    time: 8,
+    difficulty: "简单",
+    flavor: "清淡",
+    spice: "不辣",
+    tags: ["快手汤", "清淡", "早餐也可"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "喜欢" },
+    steps: ["清水煮开后放入紫菜和虾皮。", "鸡蛋液细细淋入锅中形成蛋花。", "关火后滴香油，按口味加盐。"],
+    favorite: true,
+    recent: "昨天",
+    notThisWeek: false
+  },
+  {
+    id: "beef-potato",
+    name: "土豆炖牛腩",
+    categories: ["荤菜"],
+    ingredients: ["牛腩", "土豆", "胡萝卜"],
+    pantry: ["八角", "生抽", "姜"],
+    buy: ["牛腩", "土豆", "胡萝卜"],
+    prep: 15,
+    cook: 70,
+    time: 85,
+    difficulty: "进阶",
+    flavor: "浓郁",
+    spice: "微辣可选",
+    tags: ["周末", "耐心菜", "适合晚餐"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "一般" },
+    steps: ["牛腩焯水后冲净，土豆和胡萝卜切大块。", "牛腩与香料煸香，加热水炖至软烂。", "加入土豆胡萝卜再炖 20 分钟，收至汤汁浓厚。"],
+    favorite: false,
+    recent: "半个月前",
+    notThisWeek: true
+  },
+  {
+    id: "lettuce",
+    name: "蒜蓉生菜",
+    categories: ["素菜", "快手菜"],
+    ingredients: ["生菜", "蒜", "蚝油"],
+    pantry: ["蒜", "蚝油"],
+    buy: ["生菜"],
+    prep: 4,
+    cook: 4,
+    time: 8,
+    difficulty: "简单",
+    flavor: "清爽",
+    spice: "不辣",
+    tags: ["多菜少肉", "快手", "清淡"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "不爱吃" },
+    steps: ["生菜洗净沥干，蒜切末。", "蒜末小火炒香，加入少量蚝油和水。", "放入生菜快速翻匀，断生即出锅。"],
+    favorite: false,
+    recent: "4 天前",
+    notThisWeek: false
+  },
+  {
+    id: "salmon",
+    name: "香煎三文鱼",
+    categories: ["荤菜", "快手菜"],
+    ingredients: ["三文鱼", "柠檬", "黑胡椒"],
+    pantry: ["黑胡椒", "海盐", "橄榄油"],
+    buy: ["三文鱼", "柠檬"],
+    prep: 5,
+    cook: 9,
+    time: 14,
+    difficulty: "普通",
+    flavor: "鲜香",
+    spice: "不辣",
+    tags: ["少辣", "鱼类", "轻晚餐"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "一般" },
+    steps: ["三文鱼擦干，两面撒海盐和黑胡椒。", "中火先煎鱼皮面，至边缘变色。", "翻面再煎 2 分钟，出锅挤少量柠檬汁。"],
+    favorite: true,
+    recent: "两周前",
+    notThisWeek: true
+  },
+  {
+    id: "millet",
+    name: "小米粥",
+    categories: ["早餐", "主食"],
+    ingredients: ["小米", "南瓜", "清水"],
+    pantry: ["小米"],
+    buy: ["南瓜"],
+    prep: 3,
+    cook: 28,
+    time: 31,
+    difficulty: "简单",
+    flavor: "温和",
+    spice: "不辣",
+    tags: ["早餐", "暖胃", "小朋友喜欢"],
+    likes: { "我": "一般", "伴侣": "喜欢", "小朋友": "喜欢" },
+    steps: ["小米淘洗后浸泡 10 分钟。", "南瓜切小块，与小米一同入锅。", "小火煮至米粒开花，静置 3 分钟更稠。"],
+    favorite: false,
+    recent: "今天早上",
+    notThisWeek: false
+  },
+  {
+    id: "scallion-noodle",
+    name: "葱油拌面",
+    categories: ["主食", "快手菜"],
+    ingredients: ["面条", "小葱", "生抽"],
+    pantry: ["面条", "生抽", "白糖"],
+    buy: ["小葱"],
+    prep: 5,
+    cook: 10,
+    time: 15,
+    difficulty: "简单",
+    flavor: "咸香",
+    spice: "不辣",
+    tags: ["快手主食", "宵夜", "少洗碗"],
+    likes: { "我": "喜欢", "伴侣": "一般", "小朋友": "喜欢" },
+    steps: ["小葱切段，小火炸至边缘微焦。", "生抽、老抽、少量糖调成酱汁。", "面条煮熟拌入葱油和酱汁。"],
+    favorite: true,
+    recent: "6 天前",
+    notThisWeek: false
+  },
+  {
+    id: "wintermelon-soup",
+    name: "冬瓜排骨汤",
+    categories: ["汤", "荤菜"],
+    ingredients: ["冬瓜", "排骨", "姜"],
+    pantry: ["姜", "盐"],
+    buy: ["冬瓜", "排骨"],
+    prep: 12,
+    cook: 55,
+    time: 67,
+    difficulty: "普通",
+    flavor: "清润",
+    spice: "不辣",
+    tags: ["清淡", "适合周末", "汤"],
+    likes: { "我": "喜欢", "伴侣": "喜欢", "小朋友": "一般" },
+    steps: ["排骨冷水下锅焯水，洗净浮沫。", "排骨和姜片先炖 40 分钟。", "加入冬瓜再煮 15 分钟，出锅前调盐。"],
+    favorite: false,
+    recent: "上周",
+    notThisWeek: true
+  }
+];
 
-// === STATE ===
+const menuSets = [
+  {
+    label: "今晚推荐",
+    dishes: ["cola-wings", "broccoli", "seaweed-soup", "scallion-noodle"]
+  },
+  {
+    label: "清淡一点",
+    dishes: ["salmon", "lettuce", "wintermelon-soup", "millet"]
+  },
+  {
+    label: "周末耐心菜",
+    dishes: ["beef-potato", "lettuce", "seaweed-soup", "scallion-noodle"]
+  }
+];
+
+const grocerySeed = [
+  { id: "g1", category: "蔬菜", name: "西兰花", source: ["清炒西兰花"], checked: false },
+  { id: "g2", category: "蔬菜", name: "番茄", source: ["番茄炒蛋"], checked: true },
+  { id: "g3", category: "蔬菜", name: "生菜", source: ["蒜蓉生菜"], checked: false },
+  { id: "g4", category: "肉蛋", name: "鸡翅中", source: ["可乐鸡翅"], checked: false },
+  { id: "g5", category: "肉蛋", name: "排骨", source: ["冬瓜排骨汤"], checked: false },
+  { id: "g6", category: "水产", name: "三文鱼", source: ["香煎三文鱼"], checked: false },
+  { id: "g7", category: "调味品", name: "可乐", source: ["可乐鸡翅"], checked: false },
+  { id: "g8", category: "主食", name: "小葱", source: ["葱油拌面", "番茄炒蛋"], checked: true },
+  { id: "g9", category: "其他", name: "柠檬", source: ["香煎三文鱼"], checked: false }
+];
+
 const state = {
-    dishes: [],
-    todayMenu: null,          // { date, status, items[] }
-    selectedEmoji: '🍅',
-    currentPage: 'hall',
-    selectedHistoryDate: '',
-    searchQuery: '',
+  page: "today",
+  category: "全部",
+  query: "",
+  menuIndex: 0,
+  selectedRecipeId: "tomato-egg",
+  selectedDay: 0,
+  groceries: grocerySeed.map(item => ({ ...item, source: [...item.source] })),
+  loading: true,
+  toastTimer: null
 };
 
-// ============================================
-// UTILS
-// ============================================
-function getToday() {
-    // Natural day based on device local time
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+let weekPlan = createWeekPlan();
+
+function icon(name, extraClass = "") {
+  return `<svg class="icon ${extraClass}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 }
 
-function daysSince(dateStr) {
-    if (!dateStr) return null;
-    const past = new Date(dateStr + 'T00:00:00');
-    const today = new Date(getToday() + 'T00:00:00');
-    return Math.round((today - past) / 86400000);
+function recipeById(id) {
+  return recipes.find(recipe => recipe.id === id);
 }
 
-function getTimeBadge(lastDate) {
-    if (!lastDate) return { text: '✨ 还没做过', cls: 'badge-new' };
-    const d = daysSince(lastDate);
-    if (d === 0) return { text: '今天做的', cls: 'badge-today' };
-    if (d === 1) return { text: '昨天', cls: 'badge-recent' };
-    if (d <= 3) return { text: `${d}天前`, cls: 'badge-recent' };
-    if (d <= 7) return { text: `${d}天前`, cls: 'badge-medium' };
-    return { text: `${d}天前`, cls: 'badge-old' };
+function getTodayParts(offset = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  const week = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()];
+  return {
+    date,
+    day: date.getDate(),
+    month: date.getMonth() + 1,
+    week,
+    label: `${date.getMonth() + 1}月${date.getDate()}日 ${week}`
+  };
 }
 
-function formatDateLabel(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    const M = d.getMonth() + 1;
-    const D = d.getDate();
-    const w = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()];
-    return `${M}月${D}日 ${w}`;
+function currentPeriod() {
+  const hour = new Date().getHours();
+  if (hour < 10) return "早餐";
+  if (hour < 15) return "午餐";
+  return "晚餐";
 }
 
-// ============================================
-// AUTH
-// ============================================
-function checkAuth() {
-    if (sessionStorage.getItem('lm_auth') === '1') {
-        document.getElementById('auth-gate').classList.add('hidden');
-        showApp();
-    }
+function spicePill(recipe) {
+  if (recipe.spice.includes("辣")) return `<span class="pill rose">${icon("flame")}${recipe.spice}</span>`;
+  return `<span class="pill sage">${icon("leaf")}${recipe.spice}</span>`;
 }
 
-function handleLogin() {
-    const input = document.getElementById('password-input');
-    const error = document.getElementById('auth-error');
-    if (input.value === PASSWORD) {
-        sessionStorage.setItem('lm_auth', '1');
-        const gate = document.getElementById('auth-gate');
-        gate.classList.add('fade-out');
-        setTimeout(() => { gate.classList.add('hidden'); showApp(); }, 420);
-    } else {
-        input.classList.remove('shake');
-        void input.offsetWidth; // reflow to restart animation
-        input.classList.add('shake');
-        error.textContent = '密码不对哦，再试试～';
-        input.value = '';
-        setTimeout(() => { input.classList.remove('shake'); }, 550);
-    }
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = `${renderCurrentPage()}${renderBottomNav()}`;
 }
 
-function showApp() {
-    const app = document.getElementById('app');
-    app.classList.remove('hidden');
-    app.classList.add('fade-in');
-    state.selectedHistoryDate = getToday();
-    init();
+function renderCurrentPage() {
+  if (state.loading) return renderLoading();
+  if (state.page === "today") return renderToday();
+  if (state.page === "recipes") return renderRecipes();
+  if (state.page === "detail") return renderDetail();
+  if (state.page === "week") return renderWeek();
+  if (state.page === "grocery") return renderGrocery();
+  return renderMine();
 }
 
-// ============================================
-// NAVIGATION
-// ============================================
-function navigateTo(page) {
-    if (page === state.currentPage) return;
-    const prev = state.currentPage;
-    state.currentPage = page;
-
-    const prevEl = document.getElementById(`page-${prev}`);
-    const nextEl = document.getElementById(`page-${page}`);
-    const goRight = PAGE_ORDER.indexOf(page) > PAGE_ORDER.indexOf(prev);
-
-    // Nav buttons
-    document.querySelectorAll('.nav-item').forEach(b =>
-        b.classList.toggle('nav-active', b.dataset.page === page)
-    );
-
-    // Exit animation
-    prevEl.classList.remove('page-active');
-    prevEl.classList.add(goRight ? 'page-exit-left' : 'page-exit-right');
-
-    // Enter animation
-    nextEl.classList.add(goRight ? 'page-from-right' : 'page-from-left');
-    nextEl.classList.remove('page-active');
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            nextEl.classList.remove('page-from-right', 'page-from-left');
-            nextEl.classList.add('page-active');
-        });
-    });
-
-    setTimeout(() => {
-        prevEl.classList.remove('page-exit-left', 'page-exit-right');
-    }, 380);
-
-    // Load data for page
-    if (page === 'today') loadToday();
-    if (page === 'history') renderDateStrip();
-    if (page === 'add') initAddPage();
-}
-
-// ============================================
-// HALL PAGE
-// ============================================
-async function loadDishes() {
-    document.getElementById('hall-loading').classList.remove('hidden');
-    document.getElementById('dish-grid').classList.add('hidden');
-
-    const { data, error } = await supabaseClient
-        .from('dishes')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-    document.getElementById('hall-loading').classList.add('hidden');
-
-    if (error) { console.error('loadDishes:', error); return; }
-    state.dishes = data || [];
-    renderDishes();
-}
-
-function renderDishes() {
-    const grid = document.getElementById('dish-grid');
-    const emptyEl = document.getElementById('hall-empty');
-    const todayIds = new Set((state.todayMenu?.items || []).map(i => i.dish_id));
-    const q = state.searchQuery.trim();
-
-    const filtered = q
-        ? state.dishes.filter(d => d.name.includes(q))
-        : state.dishes;
-
-    if (filtered.length === 0) {
-        grid.innerHTML = '';
-        grid.classList.add('hidden');
-        emptyEl.classList.remove('hidden');
-        return;
-    }
-
-    emptyEl.classList.add('hidden');
-    grid.classList.remove('hidden');
-
-    grid.innerHTML = filtered.map((dish, i) => {
-        const badge = getTimeBadge(dish.last_cooked_date);
-        const added = todayIds.has(dish.id);
-        const delay = `${i * 0.045}s`;
-        const safeEmoji = dish.emoji || '🍽️';
-        return `
-      <div class="dish-card" style="animation-delay:${delay}" data-id="${dish.id}">
-        <span class="dish-badge ${badge.cls}">${badge.text}</span>
-        <span class="dish-emoji">${safeEmoji}</span>
-        <span class="dish-name">${dish.name}</span>
-        <button
-          class="dish-add-btn ${added ? 'added' : ''}"
-          onclick="${added ? `removeFromToday('${dish.id}')` : `addToToday('${dish.id}','${dish.name.replace(/'/g, "\\'")}','${safeEmoji}')`}"
-          aria-label="${added ? '从今日移除' : '加入今日菜单'}"
-        >${added ? '✓' : '+'}</button>
-      </div>`;
-    }).join('');
-}
-
-function filterDishes(q) {
-    state.searchQuery = q;
-    renderDishes();
-}
-
-function toggleSearch() {
-    const bar = document.getElementById('search-bar');
-    const hidden = bar.classList.contains('hidden');
-    bar.classList.toggle('hidden', !hidden);
-    if (hidden) {
-        document.getElementById('search-input').focus();
-    } else {
-        state.searchQuery = '';
-        document.getElementById('search-input').value = '';
-        renderDishes();
-    }
-}
-
-async function addToToday(dishId, dishName, dishEmoji) {
-    const today = getToday();
-
-    // Animate button
-    const btn = document.querySelector(`.dish-card[data-id="${dishId}"] .dish-add-btn`);
-    if (btn) { btn.classList.add('bounce'); setTimeout(() => btn.classList.remove('bounce'), 420); }
-
-    // Get or create today's record
-    let menu = state.todayMenu;
-    if (!menu || menu.date !== today) {
-        const { data, error } = await supabaseClient
-            .from('daily_menus').select('*').eq('date', today).maybeSingle();
-        if (error) { console.error('addToToday get:', error); return; }
-        menu = data;
-    }
-
-    const items = menu ? [...(menu.items || [])] : [];
-    if (items.some(i => i.dish_id === dishId)) return; // already added
-
-    const newItems = [...items, { dish_id: dishId, dish_name: dishName, emoji: dishEmoji }];
-
-    if (menu && menu.id) {
-        const { error } = await supabaseClient
-            .from('daily_menus').update({ items: newItems }).eq('date', today);
-        if (error) { console.error('addToToday update:', error); return; }
-        state.todayMenu = { ...menu, items: newItems };
-    } else {
-        const { data, error } = await supabaseClient
-            .from('daily_menus')
-            .insert({ date: today, status: 'draft', items: newItems })
-            .select().single();
-        if (error) { console.error('addToToday insert:', error); return; }
-        state.todayMenu = data;
-    }
-
-    renderDishes();
-    updateNavBadge();
-}
-
-// ============================================
-// TODAY PAGE
-// ============================================
-async function loadToday() {
-    const today = getToday();
-    document.getElementById('today-date-label').textContent = formatDateLabel(today);
-
-    const { data, error } = await supabaseClient
-        .from('daily_menus').select('*').eq('date', today).maybeSingle();
-
-    if (error) { console.error('loadToday:', error); return; }
-    state.todayMenu = data || { date: today, status: 'draft', items: [] };
-    renderToday();
-    updateNavBadge();
+function renderLoading() {
+  return `
+    <section class="screen">
+      <div class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">LoveMenu</p>
+          <h1 class="title">正在整理家里的菜单</h1>
+        </div>
+      </div>
+      <div class="skeleton-list">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+  `;
 }
 
 function renderToday() {
-    const list = document.getElementById('today-list');
-    const emptyEl = document.getElementById('today-empty');
-    const confirmArea = document.getElementById('confirm-area');
-    const confirmBtn = document.getElementById('confirm-btn');
-    const confirmedEl = document.getElementById('confirmed-msg');
+  const today = getTodayParts();
+  const menu = menuSets[state.menuIndex];
+  const menuRecipes = menu.dishes.map(recipeById);
+  const recent = recipes.filter(recipe => !recipe.notThisWeek).slice(0, 5);
+  const missing = recipes.filter(recipe => recipe.notThisWeek).slice(0, 5);
 
-    const items = state.todayMenu?.items || [];
-    const isCompleted = state.todayMenu?.status === 'completed';
+  return `
+    <section class="screen">
+      <header class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">${today.label} · ${currentPeriod()}</p>
+          <h1 class="title">今晚吃点什么？</h1>
+          <p class="subtitle">打开就能看到今日组合，也能按家里库存快速换一组。</p>
+        </div>
+        <button class="round-icon-btn" type="button" onclick="changeMenu()" aria-label="换一组菜单">${icon("refresh")}</button>
+      </header>
 
-    if (items.length === 0) {
-        list.innerHTML = '';
-        emptyEl.classList.remove('hidden');
-        confirmArea.classList.add('hidden');
-        confirmedEl.classList.add('hidden');
-        return;
-    }
+      <section class="hero-card">
+        <div class="hero-topline">
+          <span class="meal-period">${icon("today")}${menu.label}</span>
+          <span class="date-note">4 道菜 · 约 45 分钟</span>
+        </div>
+        <div class="menu-grid">
+          ${menuRecipes.map((recipe, index) => renderMenuDish(recipe, index)).join("")}
+        </div>
+        <div class="action-row">
+          <button class="secondary-btn" type="button" onclick="changeMenu()">${icon("refresh")}换一组菜单</button>
+          <button class="primary-btn" type="button" onclick="addMenuToGrocery()">${icon("grocery")}加入采购清单</button>
+        </div>
+      </section>
 
-    emptyEl.classList.add('hidden');
+      <section class="section">
+        <h2 class="section-title">最近常吃</h2>
+        <div class="horizontal-list">
+          ${recent.map(recipe => renderMiniDish(recipe)).join("")}
+        </div>
+      </section>
 
-    list.innerHTML = items.map((item, i) => `
-    <div class="today-item" style="animation-delay:${i * 0.07}s">
-      <span class="today-item-emoji">${item.emoji || '🍽️'}</span>
-      <span class="today-item-name">${item.dish_name}</span>
-      ${!isCompleted
-            ? `<button class="today-remove-btn" onclick="removeFromToday('${item.dish_id}')" aria-label="移除">✕</button>`
-            : ''}
-    </div>`).join('');
+      <section class="section">
+        <h2 class="section-title">本周还没吃过</h2>
+        <div class="horizontal-list">
+          ${missing.map(recipe => renderMiniDish(recipe)).join("")}
+        </div>
+      </section>
+    </section>
+  `;
+}
 
-    if (isCompleted) {
-        confirmArea.classList.add('hidden');
-        confirmedEl.classList.remove('hidden');
+function renderMenuDish(recipe, index) {
+  const marks = ["", "sage", "blue", "rose"];
+  const role = ["主菜", "素菜", "汤", "主食"][index] || "菜品";
+  return `
+    <article class="menu-dish">
+      <div class="dish-mark ${marks[index] || ""}">${icon(index === 2 ? "today" : index === 1 ? "leaf" : "star")}</div>
+      <div>
+        <p class="dish-name">${role} · ${recipe.name}</p>
+        <div class="dish-meta">
+          <span class="pill">${icon("clock")}${recipe.time} 分钟</span>
+          <span class="pill blue">${recipe.flavor}</span>
+          ${spicePill(recipe)}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderMiniDish(recipe) {
+  return `
+    <button class="mini-dish" type="button" onclick="openRecipe('${recipe.id}')">
+      <strong>${recipe.name}</strong>
+      <span>${recipe.recent} · ${recipe.tags.slice(0, 2).join(" / ")}</span>
+    </button>
+  `;
+}
+
+function renderRecipes() {
+  const filtered = recipes.filter(recipe => {
+    const matchCategory = state.category === "全部" || recipe.categories.includes(state.category);
+    const text = `${recipe.name} ${recipe.ingredients.join(" ")} ${recipe.tags.join(" ")}`;
+    return matchCategory && text.includes(state.query.trim());
+  });
+
+  return `
+    <section class="screen">
+      <header class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">家庭常做菜</p>
+          <h1 class="title">菜谱库</h1>
+        </div>
+      </header>
+
+      <label class="search-panel">
+        ${icon("search")}
+        <input type="search" value="${state.query}" placeholder="搜索菜名、食材或标签" oninput="setSearch(this.value)" />
+      </label>
+
+      <div class="tabs" role="tablist" aria-label="菜谱分类">
+        ${categories.map(category => `
+          <button class="chip ${state.category === category ? "active" : ""}" type="button" onclick="setCategory('${category}')">${category}</button>
+        `).join("")}
+      </div>
+
+      ${filtered.length ? `
+        <div class="recipe-list">
+          ${filtered.map(recipe => renderRecipeCard(recipe)).join("")}
+        </div>
+      ` : renderEmpty("search", "没有找到合适的菜", "换个关键词，或者点右下角新增一道家里常做菜。")}
+
+      <button class="fab" type="button" onclick="showToast('新增菜品入口已预留，后续可接入真实表单')" aria-label="新增菜品">${icon("plus")}</button>
+    </section>
+  `;
+}
+
+function renderRecipeCard(recipe) {
+  const likeText = Object.entries(recipe.likes).map(([member, value]) => `${member}${value}`).join(" · ");
+  return `
+    <button class="recipe-card" type="button" onclick="openRecipe('${recipe.id}')">
+      <div>
+        <div class="recipe-title-row">
+          <h2 class="recipe-title">${recipe.name}</h2>
+          <span class="pill">${icon("clock")}${recipe.time} 分钟</span>
+        </div>
+        <p class="recipe-ingredients">${recipe.ingredients.join(" / ")} · ${recipe.difficulty}</p>
+        <div class="family-tags">
+          <span class="pill sage">${likeText}</span>
+          <span class="pill blue">${recipe.tags[0]}</span>
+        </div>
+      </div>
+      <div class="chevron-cell">
+        <span class="favorite-btn ${recipe.favorite ? "active" : ""}" onclick="toggleFavorite(event, '${recipe.id}')" aria-label="收藏状态">${icon("heart")}</span>
+        ${icon("chevron")}
+      </div>
+    </button>
+  `;
+}
+
+function renderDetail() {
+  const recipe = recipeById(state.selectedRecipeId) || recipes[0];
+  return `
+    <section class="screen">
+      <header class="screen-header">
+        <button class="back-btn" type="button" onclick="goRecipes()" aria-label="返回菜谱库">${icon("chevron")}</button>
+        <button class="round-icon-btn" type="button" onclick="toggleFavorite(event, '${recipe.id}')" aria-label="收藏">${icon("heart")}</button>
+      </header>
+
+      <section class="detail-hero">
+        <div class="dish-meta">
+          ${recipe.tags.map((tag, index) => `<span class="pill ${index === 0 ? "accent" : index === 1 ? "sage" : "blue"}">${tag}</span>`).join("")}
+        </div>
+        <h1 class="detail-title">${recipe.name}</h1>
+        <div class="stat-grid">
+          <div class="stat"><span>准备</span><strong>${recipe.prep} 分钟</strong></div>
+          <div class="stat"><span>烹饪</span><strong>${recipe.cook} 分钟</strong></div>
+          <div class="stat"><span>难度</span><strong>${recipe.difficulty}</strong></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">食材</h2>
+        <div class="ingredient-list">
+          ${recipe.pantry.map(item => renderIngredient(item, "家里常备", false)).join("")}
+          ${recipe.buy.map(item => renderIngredient(item, "需要购买", true)).join("")}
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">做法</h2>
+        <div class="steps">
+          ${recipe.steps.map((step, index) => `
+            <div class="step-item">
+              <div class="step-index">${index + 1}</div>
+              <div><strong>${step}</strong><span>保持步骤短，饭前查看不用反复滑动。</span></div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">家庭评分</h2>
+        <div class="score-list">
+          ${Object.entries(recipe.likes).map(([member, value]) => `
+            <div class="score-item">
+              ${icon(value === "喜欢" ? "heart" : value === "一般" ? "star" : "leaf")}
+              <div><strong>${member}：${value}</strong><span>${value === "不爱吃" ? "可替换为同类清淡蔬菜" : "适合加入常用菜单"}</span></div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+
+      <div class="detail-actions">
+        <button class="primary-btn" type="button" onclick="addToToday('${recipe.id}')">${icon("today")}加入今日菜单</button>
+        <button class="secondary-btn" type="button" onclick="addRecipeToGrocery('${recipe.id}')">${icon("grocery")}加入采购清单</button>
+        <button class="secondary-btn" type="button" onclick="showToast('编辑入口已预留，后续可改成真实表单')">${icon("edit")}编辑</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderIngredient(name, note, buy) {
+  return `
+    <div class="ingredient-item">
+      <span class="ingredient-dot ${buy ? "buy" : ""}"></span>
+      <div><strong>${name}</strong><span>${note}</span></div>
+    </div>
+  `;
+}
+
+function renderWeek() {
+  const selected = weekPlan[state.selectedDay];
+  return `
+    <section class="screen">
+      <header class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">未来 7 天</p>
+          <h1 class="title">一周菜单规划</h1>
+        </div>
+        <button class="round-icon-btn" type="button" onclick="autoGenerateWeek()" aria-label="自动生成一周菜单">${icon("refresh")}</button>
+      </header>
+
+      <div class="date-strip">
+        ${weekPlan.map((day, index) => `
+          <button class="date-pill ${index === state.selectedDay ? "active" : ""}" type="button" onclick="selectWeekDay(${index})">
+            <span>${day.week}</span>
+            <strong>${day.day}</strong>
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="balance-card">
+        <p><strong>平衡提醒</strong></p>
+        <p>本周鱼类偏少，可以加入香煎三文鱼；连续两天偏辣，建议明晚选择清淡汤菜。</p>
+      </div>
+
+      <div class="meal-plan">
+        ${renderMealBlock("早餐", selected.meals.breakfast)}
+        ${renderMealBlock("午餐", selected.meals.lunch)}
+        ${renderMealBlock("晚餐", selected.meals.dinner)}
+      </div>
+    </section>
+  `;
+}
+
+function renderMealBlock(label, items) {
+  return `
+    <article class="meal-block">
+      <div class="meal-heading">
+        <h3>${label}</h3>
+        <span>${items.length ? `${items.length} 道` : "未安排"}</span>
+      </div>
+      <div class="meal-items">
+        ${items.length ? items.map(name => `<span class="meal-item">${name}</span>`).join("") : `
+          <button class="meal-empty" type="button" onclick="fillEmptyMeal('${label}')">${icon("plus")}还没安排，点我添加</button>
+        `}
+      </div>
+    </article>
+  `;
+}
+
+function renderGrocery() {
+  const groups = ["蔬菜", "肉蛋", "水产", "调味品", "主食", "其他"];
+  const visibleGroups = groups.map(group => ({
+    name: group,
+    items: state.groceries.filter(item => item.category === group)
+  })).filter(group => group.items.length);
+
+  return `
+    <section class="screen grocery-screen">
+      <header class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">自动汇总缺少食材</p>
+          <h1 class="title">采购清单</h1>
+        </div>
+        <button class="round-icon-btn" type="button" onclick="clearPurchased()" aria-label="清空已购买">${icon("check")}</button>
+      </header>
+
+      ${visibleGroups.length ? visibleGroups.map(renderGroceryGroup).join("") : renderEmpty("grocery", "采购清单已清空", "今天的菜单暂时不缺食材，可以安心做饭。")}
+      <div class="bottom-copy">
+        <button class="copy-btn" type="button" onclick="copyGroceryList()">${icon("copy")}复制清单</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderGroceryGroup(group) {
+  return `
+    <section class="grocery-group">
+      <div class="group-title">
+        <h3>${group.name}</h3>
+        <span>${group.items.length} 项</span>
+      </div>
+      <div class="grocery-list">
+        ${group.items.map(item => `
+          <article class="grocery-item ${item.checked ? "checked" : ""}">
+            <button class="check-btn" type="button" onclick="toggleGrocery('${item.id}')" aria-label="${item.checked ? "取消勾选" : "标记已购买"}">${icon("check")}</button>
+            <div>
+              <p class="grocery-name">${item.name}</p>
+              <p class="grocery-source">来自：${item.source.join("、")}</p>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderMine() {
+  return `
+    <section class="screen">
+      <header class="screen-header">
+        <div class="header-stack">
+          <p class="eyebrow">家庭偏好</p>
+          <h1 class="title">我的</h1>
+          <p class="subtitle">这里保留家庭成员口味、库存偏好和后续设置入口。</p>
+        </div>
+      </header>
+
+      <section class="profile-card">
+        <h3>家庭成员</h3>
+        <p>默认三人家庭，可在后续真实项目里改成可编辑成员。</p>
+        <div class="member-grid">
+          <div class="member-row"><strong>我</strong><span>少辣 · 喜欢鱼类</span></div>
+          <div class="member-row"><strong>伴侣</strong><span>多菜少肉 · 汤可以多一点</span></div>
+          <div class="member-row"><strong>小朋友</strong><span>不吃太辣 · 喜欢鸡翅和粥</span></div>
+        </div>
+      </section>
+
+      <section class="profile-card">
+        <h3>库存提醒</h3>
+        <p>常备：鸡蛋、面条、紫菜、生抽、姜蒜。低库存：绿叶菜、鱼类、排骨。</p>
+      </section>
+
+      <section class="profile-card">
+        <h3>轻提示示例</h3>
+        <p>点击任意菜单按钮会出现 Toast，用于反馈换菜单、加入采购清单、复制清单等轻操作。</p>
+      </section>
+    </section>
+  `;
+}
+
+function renderEmpty(iconName, title, description) {
+  return `
+    <div class="empty-state">
+      <div class="empty-box">
+        ${icon(iconName === "search" ? "search" : iconName === "grocery" ? "grocery" : "today")}
+        <strong>${title}</strong>
+        <p>${description}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderBottomNav() {
+  const items = [
+    ["today", "today", "今日"],
+    ["recipes", "book", "菜谱"],
+    ["week", "week", "一周"],
+    ["grocery", "grocery", "采购"],
+    ["mine", "user", "我的"]
+  ];
+  const active = state.page === "detail" ? "recipes" : state.page;
+
+  return `
+    <nav class="bottom-nav" aria-label="底部导航">
+      ${items.map(([page, iconName, label]) => `
+        <button class="nav-item ${active === page ? "active" : ""}" type="button" onclick="navigate('${page}')" aria-label="${label}">
+          ${icon(iconName)}
+          <span>${label}</span>
+        </button>
+      `).join("")}
+    </nav>
+  `;
+}
+
+function navigate(page) {
+  state.page = page;
+  render();
+}
+
+function goRecipes() {
+  state.page = "recipes";
+  render();
+}
+
+function changeMenu() {
+  state.menuIndex = (state.menuIndex + 1) % menuSets.length;
+  render();
+  showToast("已换成另一组更适合今天的菜单");
+}
+
+function addMenuToGrocery() {
+  const menu = menuSets[state.menuIndex];
+  menu.dishes.forEach(id => addRecipeIngredients(id, false));
+  render();
+  showToast("已按今日菜单补充采购清单");
+}
+
+function addRecipeIngredients(recipeId, shouldToast = true) {
+  const recipe = recipeById(recipeId);
+  if (!recipe) return;
+  recipe.buy.forEach(name => {
+    const existing = state.groceries.find(item => item.name === name);
+    if (existing) {
+      if (!existing.source.includes(recipe.name)) existing.source.push(recipe.name);
+      existing.checked = false;
     } else {
-        confirmArea.classList.remove('hidden');
-        confirmedEl.classList.add('hidden');
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = '✅ 确认开饭！';
-    }
-}
-
-async function removeFromToday(dishId) {
-    const today = getToday();
-    const newItems = (state.todayMenu?.items || []).filter(i => i.dish_id !== dishId);
-
-    const { error } = await supabaseClient
-        .from('daily_menus').update({ items: newItems }).eq('date', today);
-
-    if (error) { console.error('removeFromToday:', error); return; }
-
-    state.todayMenu = { ...state.todayMenu, items: newItems };
-    renderToday();
-    renderDishes();
-    updateNavBadge();
-}
-
-async function confirmMeal() {
-    const today = getToday();
-    const items = state.todayMenu?.items || [];
-    if (!items.length) return;
-
-    const btn = document.getElementById('confirm-btn');
-    btn.disabled = true;
-    btn.textContent = '记录中…';
-
-    // 1. Mark menu as completed
-    const { error: menuErr } = await supabaseClient
-        .from('daily_menus')
-        .upsert({ date: today, status: 'completed', items }, { onConflict: 'date' });
-    if (menuErr) {
-        console.error('confirmMeal menu:', menuErr);
-        btn.disabled = false; btn.textContent = '✅ 确认开饭！'; return;
-    }
-
-    // 2. Update last_cooked_date for all dishes in the menu
-    const ids = items.map(i => i.dish_id);
-    const { error: dishErr } = await supabaseClient
-        .from('dishes').update({ last_cooked_date: today }).in('id', ids);
-    if (dishErr) console.error('confirmMeal dishes:', dishErr);
-
-    // Update local state
-    state.todayMenu = { ...state.todayMenu, status: 'completed' };
-
-    // Refresh dishes to update time badges
-    await loadDishes();
-    renderToday();
-    updateNavBadge();
-    showCelebration();
-}
-
-function updateNavBadge() {
-    const badge = document.getElementById('nav-badge');
-    const count = (state.todayMenu?.items || []).length;
-    const done = state.todayMenu?.status === 'completed';
-    if (count > 0 && !done) {
-        badge.textContent = count;
-        badge.classList.remove('hidden');
-    } else {
-        badge.classList.add('hidden');
-    }
-}
-
-// ============================================
-// HISTORY PAGE
-// ============================================
-function renderDateStrip() {
-    const strip = document.getElementById('date-strip');
-    const today = new Date();
-    const chips = [];
-
-    for (let i = 0; i < 30; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const isToday = dateStr === getToday();
-        const isSelected = dateStr === state.selectedHistoryDate;
-        const week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
-
-        chips.push(`
-      <button class="date-chip ${isSelected ? 'active' : ''}"
-        data-date="${dateStr}" onclick="selectHistoryDate('${dateStr}')"
-        aria-label="${dateStr}">
-        <span class="date-chip-week">周${week}</span>
-        <span class="date-chip-day">${isToday ? '今' : d.getDate()}</span>
-        <span class="date-chip-month">${d.getMonth() + 1}月</span>
-      </button>`);
-    }
-
-    strip.innerHTML = chips.join('');
-
-    // Scroll selected chip into view
-    requestAnimationFrame(() => {
-        const active = strip.querySelector('.date-chip.active');
-        if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-    });
-
-    loadHistory(state.selectedHistoryDate);
-}
-
-function selectHistoryDate(date) {
-    state.selectedHistoryDate = date;
-    document.querySelectorAll('.date-chip').forEach(c =>
-        c.classList.toggle('active', c.dataset.date === date)
-    );
-    loadHistory(date);
-}
-
-async function loadHistory(date) {
-    const list = document.getElementById('history-list');
-    const emptyEl = document.getElementById('history-empty');
-
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">加载中…</div>';
-    emptyEl.classList.add('hidden');
-
-    const { data, error } = await supabaseClient
-        .from('daily_menus').select('*').eq('date', date).maybeSingle();
-
-    if (error) { console.error('loadHistory:', error); return; }
-
-    if (!data || !data.items || data.items.length === 0) {
-        list.innerHTML = '';
-        emptyEl.classList.remove('hidden');
-        return;
-    }
-
-    const badgeHtml = data.status === 'completed'
-        ? '<span class="status-badge completed">已打卡 ✅</span>'
-        : '<span class="status-badge draft">草稿 📝</span>';
-
-    list.innerHTML = `<div class="history-header">${badgeHtml}</div>` +
-        data.items.map((item, i) => `
-      <div class="history-item" style="animation-delay:${i * 0.07}s">
-        <span class="history-item-emoji">${item.emoji || '🍽️'}</span>
-        <span class="history-item-name">${item.dish_name}</span>
-      </div>`).join('');
-}
-
-// ============================================
-// ADD DISH PAGE
-// ============================================
-function initAddPage() {
-    const picker = document.getElementById('emoji-picker');
-    if (picker.childElementCount > 0) return;
-
-    picker.innerHTML = EMOJIS.map(e => `
-    <button class="emoji-btn ${e === state.selectedEmoji ? 'selected' : ''}"
-      onclick="selectEmoji('${e}')" aria-label="${e}">${e}</button>`).join('');
-}
-
-function selectEmoji(emoji) {
-    state.selectedEmoji = emoji;
-    document.querySelectorAll('.emoji-btn').forEach(b =>
-        b.classList.toggle('selected', b.textContent.trim() === emoji)
-    );
-}
-
-async function saveDish() {
-    const nameInput = document.getElementById('dish-name-input');
-    const name = nameInput.value.trim();
-
-    if (!name) {
-        nameInput.classList.remove('shake');
-        void nameInput.offsetWidth;
-        nameInput.classList.add('shake');
-        setTimeout(() => nameInput.classList.remove('shake'), 550);
-        return;
-    }
-
-    const btn = document.getElementById('save-dish-btn');
-    btn.disabled = true; btn.textContent = '保存中…';
-
-    const { error } = await supabaseClient.from('dishes').insert({
+      state.groceries.push({
+        id: `g${Date.now()}${Math.random().toString(16).slice(2)}`,
+        category: inferGroceryCategory(name),
         name,
-        emoji: state.selectedEmoji,
-        created_at: getToday(),
-        last_cooked_date: null,
-    });
-
-    btn.disabled = false; btn.textContent = '保存菜品 ✨';
-
-    if (error) { console.error('saveDish:', error); return; }
-
-    nameInput.value = '';
-
-    const successEl = document.getElementById('save-success');
-    successEl.classList.remove('hidden');
-    setTimeout(() => successEl.classList.add('hidden'), 2200);
-
-    // Reload dishes in background
-    loadDishes();
-}
-
-// ============================================
-// CELEBRATION
-// ============================================
-function showCelebration() {
-    const overlay = document.getElementById('celebration');
-    const container = document.getElementById('particles');
-    const SYMBOLS = ['❤️', '🧡', '💛', '🍽️', '🎉', '✨', '🥳', '💚', '💜', '🌟'];
-
-    overlay.classList.remove('hidden');
-    container.innerHTML = '';
-
-    for (let i = 0; i < 28; i++) {
-        const el = document.createElement('div');
-        el.className = 'heart-particle';
-        el.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-        el.style.left = `${Math.random() * 100}vw`;
-        el.style.fontSize = `${Math.random() * 22 + 14}px`;
-        el.style.animationDelay = `${Math.random() * 1.4}s`;
-        el.style.animationDuration = `${Math.random() * 2 + 2.2}s`;
-        container.appendChild(el);
+        source: [recipe.name],
+        checked: false
+      });
     }
-
-    setTimeout(() => {
-        overlay.classList.add('hidden');
-        container.innerHTML = '';
-    }, 4200);
+  });
+  if (shouldToast) showToast(`已加入 ${recipe.name} 的缺少食材`);
 }
 
-// ============================================
-// REALTIME SUBSCRIPTIONS
-// ============================================
-function setupRealtime() {
-    supabaseClient.channel('realtime:dishes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'dishes' }, () => {
-            loadDishes();
-        }).subscribe();
-
-    supabaseClient.channel('realtime:menus')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_menus' },
-            payload => {
-                const today = getToday();
-                const row = payload.new || payload.old;
-                if (row?.date === today) {
-                    state.todayMenu = payload.new || { date: today, status: 'draft', items: [] };
-                    if (state.currentPage === 'today') renderToday();
-                    renderDishes();
-                    updateNavBadge();
-                }
-            }).subscribe();
+function inferGroceryCategory(name) {
+  if (["鸡翅中", "排骨", "牛腩", "鸡蛋"].some(word => name.includes(word))) return "肉蛋";
+  if (["三文鱼", "虾皮"].some(word => name.includes(word))) return "水产";
+  if (["可乐", "生抽", "蚝油", "柠檬"].some(word => name.includes(word))) return "调味品";
+  if (["小米", "面条", "小葱"].some(word => name.includes(word))) return "主食";
+  if (["番茄", "西兰花", "生菜", "冬瓜", "土豆", "胡萝卜", "南瓜"].some(word => name.includes(word))) return "蔬菜";
+  return "其他";
 }
 
-// ============================================
-// INIT
-// ============================================
-async function init() {
-    await Promise.all([loadDishes(), loadToday()]);
-    setupRealtime();
+function setSearch(value) {
+  state.query = value;
+  render();
+}
 
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
+function setCategory(category) {
+  state.category = category;
+  render();
+}
+
+function openRecipe(id) {
+  state.selectedRecipeId = id;
+  state.page = "detail";
+  render();
+}
+
+function toggleFavorite(event, id) {
+  event.stopPropagation();
+  const recipe = recipeById(id);
+  recipe.favorite = !recipe.favorite;
+  render();
+  showToast(recipe.favorite ? "已收藏到家庭常做菜" : "已取消收藏");
+}
+
+function addToToday(recipeId) {
+  const recipe = recipeById(recipeId);
+  showToast(`${recipe.name} 已加入今日菜单`);
+}
+
+function addRecipeToGrocery(recipeId) {
+  addRecipeIngredients(recipeId, true);
+  render();
+}
+
+function createWeekPlan() {
+  return Array.from({ length: 7 }, (_, index) => {
+    const parts = getTodayParts(index);
+    const preset = [
+      { breakfast: ["小米粥"], lunch: ["番茄炒蛋", "清炒西兰花"], dinner: ["可乐鸡翅", "紫菜蛋花汤", "葱油拌面"] },
+      { breakfast: [], lunch: ["葱油拌面"], dinner: ["香煎三文鱼", "蒜蓉生菜"] },
+      { breakfast: ["小米粥"], lunch: [], dinner: ["冬瓜排骨汤", "番茄炒蛋"] },
+      { breakfast: [], lunch: ["清炒西兰花", "紫菜蛋花汤"], dinner: [] },
+      { breakfast: ["小米粥"], lunch: ["可乐鸡翅"], dinner: ["土豆炖牛腩", "蒜蓉生菜"] },
+      { breakfast: [], lunch: [], dinner: ["香煎三文鱼", "紫菜蛋花汤"] },
+      { breakfast: ["小米粥"], lunch: ["葱油拌面"], dinner: [] }
+    ][index];
+
+    return { ...parts, meals: preset };
+  });
+}
+
+function selectWeekDay(index) {
+  state.selectedDay = index;
+  render();
+}
+
+function autoGenerateWeek() {
+  weekPlan = createWeekPlan().map((day, index) => ({
+    ...day,
+    meals: {
+      breakfast: day.meals.breakfast.length ? day.meals.breakfast : ["小米粥"],
+      lunch: day.meals.lunch.length ? day.meals.lunch : [["番茄炒蛋", "蒜蓉生菜"], ["葱油拌面", "紫菜蛋花汤"]][index % 2],
+      dinner: day.meals.dinner.length ? day.meals.dinner : [["香煎三文鱼", "清炒西兰花"], ["冬瓜排骨汤", "番茄炒蛋"]][index % 2]
     }
+  }));
+  render();
+  showToast("已自动补齐未来 7 天菜单");
 }
 
-// ============================================
-// BOOT
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    const pwInput = document.getElementById('password-input');
-    if (pwInput) pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-    checkAuth();
+function fillEmptyMeal(label) {
+  const day = weekPlan[state.selectedDay];
+  const key = label === "早餐" ? "breakfast" : label === "午餐" ? "lunch" : "dinner";
+  day.meals[key] = label === "早餐" ? ["小米粥"] : label === "午餐" ? ["番茄炒蛋", "蒜蓉生菜"] : ["香煎三文鱼", "紫菜蛋花汤"];
+  render();
+  showToast(`${label}已添加一组家常搭配`);
+}
+
+function toggleGrocery(id) {
+  const item = state.groceries.find(entry => entry.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  render();
+}
+
+function clearPurchased() {
+  const before = state.groceries.length;
+  state.groceries = state.groceries.filter(item => !item.checked);
+  render();
+  showToast(before === state.groceries.length ? "还没有勾选已购买食材" : "已清空勾选的食材");
+}
+
+async function copyGroceryList() {
+  const text = state.groceries
+    .filter(item => !item.checked)
+    .map(item => `${item.category}：${item.name}（${item.source.join("、")}）`)
+    .join("\n");
+
+  if (!text) {
+    showToast("没有需要复制的未购买食材");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("采购清单已复制");
+  } catch {
+    showToast("浏览器限制了复制，可手动选择清单内容");
+  }
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  render();
+  window.setTimeout(() => {
+    state.loading = false;
+    render();
+  }, 520);
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
 });
