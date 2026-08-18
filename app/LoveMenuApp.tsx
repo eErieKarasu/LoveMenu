@@ -1,0 +1,54 @@
+"use client";
+
+import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    __loveMenuLoaded?: boolean;
+  }
+}
+
+const iconSprite = `
+  <symbol id="icon-today" viewBox="0 0 24 24"><path d="M4 12.5h16"/><path d="M6 12.5a6 6 0 0 1 12 0"/><path d="M12 6.5v-2"/><path d="M3.5 16.5h17"/><path d="M6.5 20h11"/></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24"><path d="M5 4.75h5.2A2.8 2.8 0 0 1 13 7.55v11.7a3.4 3.4 0 0 0-3.4-3.4H5z"/><path d="M19 4.75h-5.2A2.8 2.8 0 0 0 11 7.55v11.7a3.4 3.4 0 0 1 3.4-3.4H19z"/></symbol>
+  <symbol id="icon-week" viewBox="0 0 24 24"><path d="M7 3.75v3"/><path d="M17 3.75v3"/><rect x="4" y="5.75" width="16" height="14.5" rx="3"/><path d="M4 10h16"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/></symbol>
+  <symbol id="icon-grocery" viewBox="0 0 24 24"><path d="M7 8.25h10l1.25 12H5.75z"/><path d="M9 8.25a3 3 0 0 1 6 0"/><path d="M9.5 13h5"/><path d="M9.5 16h3"/></symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.25"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="5.75"/><path d="m15.2 15.2 4.05 4.05"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.65-7.5-10.1A4.15 4.15 0 0 1 12 7.45a4.15 4.15 0 0 1 7.5 2.45C19.5 15.35 12 20 12 20z"/></symbol>
+  <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 4.5 2.25 4.55 5.02.73-3.63 3.54.86 5-4.5-2.36-4.5 2.36.86-5-3.63-3.54 5.02-.73z"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="icon-leaf" viewBox="0 0 24 24"><path d="M19.25 4.75C10.5 4.8 5.5 9.1 5.5 15.25c0 2.4 1.65 4 4.05 4 5.9 0 9.6-5.5 9.7-14.5z"/><path d="M5.25 19.25c3.2-4.9 6.5-7.4 10.5-9.5"/></symbol>
+  <symbol id="icon-flame" viewBox="0 0 24 24"><path d="M12.5 3.75c1.2 3.2-.5 4.6-2.2 6.25-1.5 1.45-2.8 2.75-2.8 5.05a4.5 4.5 0 0 0 9 0c0-2.7-1.9-4.35-3.05-5.8-.9-1.1-1.25-2.5-.95-5.5z"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12.5 4.25 4.25L19 7"/></symbol>
+  <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.45 5.85"/><path d="M4 12A8 8 0 0 1 17.45 6.15"/><path d="M17.5 3.75v3h-3"/><path d="M6.5 20.25v-3h3"/></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M5 19h4.25L19 9.25 14.75 5 5 14.75z"/><path d="m13.5 6.25 4.25 4.25"/></symbol>
+  <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="10" height="12" rx="2"/><path d="M6 16H5.5A1.5 1.5 0 0 1 4 14.5v-9A1.5 1.5 0 0 1 5.5 4h8A1.5 1.5 0 0 1 15 5.5V6"/></symbol>
+`;
+
+export function LoveMenuApp() {
+  useEffect(() => {
+    if (window.__loveMenuLoaded) return;
+    window.__loveMenuLoaded = true;
+    const script = document.createElement("script");
+    script.src = "/lovemenu.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  return (
+    <>
+      <svg
+        className="svg-sprite"
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: iconSprite }}
+      />
+      <div className="browser-canvas">
+        <main id="app" className="mobile-app" aria-live="polite" />
+      </div>
+      <div id="toast" className="toast" role="status" aria-live="polite" />
+    </>
+  );
+}

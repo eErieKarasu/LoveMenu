@@ -1,0 +1,26 @@
+@import "../style.css";
+
+.nav-glyph {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.welcome-card {
+  padding: 18px;
+}
+
+.welcome-card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.welcome-card p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.welcome-card .primary-btn {
+  margin-top: 18px;
+}

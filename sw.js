@@ -1,9 +1,9 @@
-const CACHE_NAME = "lovemenu-v4";
+const CACHE_NAME = "lovemenu-v9";
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css",
-  "./app.js",
+  "./style.css?v=20260611e",
+  "./app.js?v=20260611e",
   "./manifest.json",
   "./icons/icon.svg"
 ];
