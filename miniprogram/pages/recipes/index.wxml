@@ -23,5 +23,5 @@
       </view>
     </view>
   </view>
-  <view wx:else class="empty-state"><text class="headline">没有找到合适的菜</text><text>换个关键词，或者新增一道家里常做菜。</text></view>
+  <view wx:else class="empty-state"><text class="headline">{{emptyTitle}}</text><text>{{emptyCopy}}</text></view>
 </view>

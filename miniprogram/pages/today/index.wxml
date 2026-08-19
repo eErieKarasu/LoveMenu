@@ -39,7 +39,7 @@
       </view>
     </view>
 
-    <view class="section">
+    <view class="section" wx:if="{{recent.length}}">
       <text class="section-title">快速点菜</text>
       <scroll-view scroll-x class="scroll-row" enable-flex>
         <view class="mini-card" wx:for="{{recent}}" wx:key="id" bindtap="openRecipe" data-id="{{item.id}}">

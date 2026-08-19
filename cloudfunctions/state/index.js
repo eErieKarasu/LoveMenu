@@ -8,7 +8,7 @@ const MAX_PAYLOAD_BYTES = 900000;
 
 function validState(value) {
   return Boolean(
-    value && value.version === 2 &&
+    value && value.version === 3 &&
     Array.isArray(value.recipes) &&
     Array.isArray(value.groceries) &&
     Array.isArray(value.selectedToday) &&

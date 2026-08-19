@@ -35,19 +35,20 @@ function addRecipeIngredients(state, recipeId) {
 }
 
 function buildWeekPlan(recipes, offsetSeed = 0) {
-  const meals = recipes.length ? recipes : [{ name: "待添加菜品", categories: [] }];
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
-    const pick = (shift) => meals[(index * 2 + shift + offsetSeed) % meals.length].name;
+    const pick = (shift) => recipes.length
+      ? [recipes[(index * 2 + shift + offsetSeed) % recipes.length].name]
+      : [];
     return {
       key: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
       week: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()],
       day: date.getDate(),
       meals: {
-        breakfast: [pick(0)],
-        lunch: [pick(1)],
-        dinner: [pick(2), pick(3)]
+        breakfast: pick(0),
+        lunch: pick(1),
+        dinner: pick(2).concat(pick(3))
       }
     };
   });
@@ -59,7 +60,7 @@ function selectedTodayRecipes(state) {
 
 function normalizeState(state) {
   return {
-    version: 2,
+    version: 3,
     recipes: Array.isArray(state.recipes) ? state.recipes : [],
     groceries: Array.isArray(state.groceries) ? state.groceries : [],
     selectedToday: Array.isArray(state.selectedToday) ? state.selectedToday : [],

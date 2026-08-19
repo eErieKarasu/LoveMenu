@@ -5,13 +5,6 @@
     <view class="metric-grid"><view class="metric"><text class="value">{{recipeCount}}</text><text class="name">菜谱</text></view><view class="metric"><text class="value">{{favoriteCount}}</text><text class="name">收藏</text></view><view class="metric"><text class="value">{{groceryCount}}</text><text class="name">待采购</text></view></view>
   </view>
   <view class="card profile-card">
-    <text class="heading">家庭成员</text>
-    <text class="body">当前保留三人家庭口味，用于菜谱评分和做饭参考。</text>
-    <view class="member-row"><text>我</text><text class="note">少辣 · 喜欢鱼类</text></view>
-    <view class="member-row"><text>伴侣</text><text class="note">多菜少肉 · 喜欢汤</text></view>
-    <view class="member-row"><text>小朋友</text><text class="note">不吃太辣 · 喜欢鸡翅</text></view>
-  </view>
-  <view class="card profile-card">
     <text class="heading">数据同步</text>
     <text class="body">{{syncStatus}}。{{cloudEnabled ? '数据由微信 OpenID 隔离，不需要单独注册账号。' : '当前环境未启用微信云开发，仅保存在本机。'}}</text>
     <button class="secondary" style="margin-top: 24rpx" bindtap="syncNow">立即同步</button>

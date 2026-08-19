@@ -4,7 +4,12 @@
     <button class="round-btn" bindtap="regenerate">↻</button>
   </view>
   <view wx:if="{{loading}}" class="loading">正在生成一周菜单…</view>
-  <block wx:elif="{{selected}}">
+  <view wx:elif="{{!hasRecipes}}" class="empty-state">
+    <text class="headline">还没有可安排的菜谱</text>
+    <text>先记录几道家常菜，再回来生成一周菜单。</text>
+    <button class="primary" style="margin-top: 28rpx" bindtap="goRecipes">去添加菜谱</button>
+  </view>
+  <block wx:else>
     <scroll-view scroll-x class="date-strip">
       <button wx:for="{{weekPlan}}" wx:key="key" class="date-pill {{selectedDay === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectDay"><text>{{item.week}}</text><text class="day">{{item.day}}</text></button>
     </scroll-view>

@@ -5,7 +5,7 @@ const app = getApp();
 function blankForm() {
   return {
     name: "", categories: ["快手菜"], prep: 8, cook: 12, difficulty: "简单",
-    flavor: "家常", spice: "不辣", tagsText: "快手、适合晚餐", pantryText: "", buyText: "", stepsText: ""
+    flavor: "家常", spice: "不辣", tagsText: "", pantryText: "", buyText: "", stepsText: ""
   };
 }
 
