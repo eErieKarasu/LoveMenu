@@ -9,7 +9,7 @@
     "pages/editor/index"
   ],
   "window": {
-    "navigationBarTitleText": "LoveMenu",
+    "navigationBarTitleText": "大王今天的饭",
     "navigationBarBackgroundColor": "#fffaf4",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f6f1e9",

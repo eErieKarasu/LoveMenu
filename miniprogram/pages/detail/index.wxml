@@ -14,12 +14,14 @@
 
   <view class="section card">
     <text class="section-title">食材</text>
-    <view class="ingredient-item" wx:for="{{recipe.pantry}}" wx:key="*this">
-      <view class="dot"></view><view class="item-main"><text class="name">{{item}}</text><text class="note">家里常备</text></view>
+    <view class="ingredient-item" wx:for="{{recipe.ingredientItems}}" wx:key="id">
+      <view class="dot {{item.inStock ? '' : 'buy'}}"></view>
+      <view class="item-main">
+        <text class="name">{{item.name}}</text>
+        <text class="note">{{item.quantity}} {{item.unit}} · {{item.inStock ? '家里有' : '需要购买'}}</text>
+      </view>
     </view>
-    <view class="ingredient-item" wx:for="{{recipe.buy}}" wx:key="*this">
-      <view class="dot buy"></view><view class="item-main"><text class="name">{{item}}</text><text class="note">需要购买</text></view>
-    </view>
+    <text wx:if="{{!recipe.ingredientItems.length}}" class="muted-empty">还没有录入食材</text>
   </view>
 
   <view class="section card">

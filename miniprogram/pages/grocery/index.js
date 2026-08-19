@@ -6,7 +6,14 @@ Page({
   async onShow() { await app.ensureReady(); this.refresh(); },
   refresh() {
     const groceries = app.getState().groceries;
-    const groups = GROCERY_GROUPS.map((name) => ({ name, items: groceries.filter((item) => item.category === name).map((item) => ({ ...item, sourceText: item.source.join("、") })) })).filter((group) => group.items.length);
+    const groups = GROCERY_GROUPS.map((name) => ({
+      name,
+      items: groceries.filter((item) => item.category === name).map((item) => ({
+        ...item,
+        quantityText: `${item.quantity} ${item.unit}`,
+        sourceText: item.source.join("、")
+      }))
+    })).filter((group) => group.items.length);
     this.setData({ loading: false, groups });
   },
   toggleItem(event) {
@@ -24,7 +31,10 @@ Page({
     }});
   },
   copyList() {
-    const text = app.getState().groceries.filter((item) => !item.checked).map((item) => `□ ${item.name}（${item.source.join("、")}）`).join("\n");
+    const text = app.getState().groceries
+      .filter((item) => !item.checked)
+      .map((item) => `□ ${item.name} × ${item.quantity} ${item.unit}（${item.source.join("、")}）`)
+      .join("\n");
     if (!text) { wx.showToast({ title: "没有待采购食材", icon: "none" }); return; }
     wx.setClipboardData({ data: text });
   }

@@ -1,8 +1,17 @@
-const { addRecipeIngredients, selectedTodayRecipes } = require("../../utils/domain");
+const { addRecipeIngredients, mealContextForHour, selectedTodayRecipes } = require("../../utils/domain");
 const app = getApp();
 
 Page({
-  data: { loading: true, selected: [], recent: [], dateLabel: "", period: "", totalTime: 0 },
+  data: {
+    loading: true,
+    selected: [],
+    recent: [],
+    dateLabel: "",
+    period: "",
+    titleText: "",
+    subtitleText: "",
+    totalTime: 0
+  },
 
   async onShow() {
     await app.ensureReady();
@@ -14,12 +23,15 @@ Page({
     const now = new Date();
     const week = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][now.getDay()];
     const selected = selectedTodayRecipes(state).map((recipe) => ({ ...recipe, initial: recipe.name.charAt(0) }));
+    const mealContext = mealContextForHour(now.getHours());
     this.setData({
       loading: false,
       selected,
       recent: state.recipes.slice(0, 6).map((recipe) => ({ ...recipe, tagSummary: recipe.tags.slice(0, 2).join(" / ") })),
       dateLabel: `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
-      period: now.getHours() < 10 ? "早餐" : now.getHours() < 15 ? "午餐" : "晚餐",
+      period: mealContext.period,
+      titleText: selected.length ? `${mealContext.period}已选菜单` : mealContext.prompt,
+      subtitleText: selected.length ? "按家里真实想吃的来，不需要凑齐固定搭配。" : "还没决定，选一道今天真正想吃的。",
       totalTime: selected.reduce((sum, recipe) => sum + recipe.time, 0)
     });
   },

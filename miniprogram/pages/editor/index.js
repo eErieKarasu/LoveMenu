@@ -1,11 +1,25 @@
 const { CATEGORIES } = require("../../utils/constants");
 const { recipeById } = require("../../utils/domain");
 const app = getApp();
+const INGREDIENT_UNITS = ["个", "克", "斤", "毫升", "升", "勺", "根", "把", "片", "块", "颗", "瓶", "袋", "盒", "份"];
+let ingredientIdSeed = 0;
+
+function blankIngredient() {
+  ingredientIdSeed += 1;
+  return {
+    id: `ingredient-new-${Date.now()}-${ingredientIdSeed}`,
+    name: "",
+    quantity: 1,
+    unit: INGREDIENT_UNITS[0],
+    unitIndex: 0,
+    inStock: false
+  };
+}
 
 function blankForm() {
   return {
     name: "", categories: ["快手菜"], prep: 8, cook: 12, difficulty: "简单",
-    flavor: "家常", spice: "不辣", tagsText: "", pantryText: "", buyText: "", stepsText: ""
+    tagsText: "", ingredientItems: [blankIngredient()], stepsText: ""
   };
 }
 
@@ -18,6 +32,7 @@ Page({
     id: "",
     dishCategories: CATEGORIES.filter((item) => item !== "全部").map((name) => ({ name, active: name === "快手菜" })),
     difficulties: ["简单", "普通", "进阶"],
+    ingredientUnits: INGREDIENT_UNITS,
     form: blankForm(),
     nameError: false
   },
@@ -29,9 +44,15 @@ Page({
     if (!recipe) return;
     const form = {
       name: recipe.name, categories: recipe.categories.slice(), prep: recipe.prep, cook: recipe.cook,
-      difficulty: recipe.difficulty, flavor: recipe.flavor, spice: recipe.spice,
-      tagsText: recipe.tags.join("、"), pantryText: recipe.pantry.join("、"),
-      buyText: recipe.buy.join("、"), stepsText: recipe.steps.join("\n")
+      difficulty: recipe.difficulty,
+      tagsText: recipe.tags.join("、"),
+      ingredientItems: recipe.ingredientItems.length
+        ? recipe.ingredientItems.map((item) => ({
+          ...item,
+          unitIndex: Math.max(0, INGREDIENT_UNITS.indexOf(item.unit))
+        }))
+        : [blankIngredient()],
+      stepsText: recipe.steps.join("\n")
     };
     this.setData({ form, dishCategories: this.data.dishCategories.map((item) => ({ ...item, active: form.categories.includes(item.name) })) });
   },
@@ -43,6 +64,32 @@ Page({
     const field = event.currentTarget.dataset.field;
     const delta = Number(event.currentTarget.dataset.delta);
     this.setData({ [`form.${field}`]: Math.max(1, Math.min(180, Number(this.data.form[field]) + delta)) });
+  },
+  updateIngredient(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const field = event.currentTarget.dataset.field;
+    this.setData({ [`form.ingredientItems[${index}].${field}`]: event.detail.value });
+  },
+  changeIngredientUnit(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const unitIndex = Number(event.detail.value);
+    this.setData({
+      [`form.ingredientItems[${index}].unitIndex`]: unitIndex,
+      [`form.ingredientItems[${index}].unit`]: INGREDIENT_UNITS[unitIndex]
+    });
+  },
+  toggleIngredientStock(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const current = this.data.form.ingredientItems[index];
+    this.setData({ [`form.ingredientItems[${index}].inStock`]: !current.inStock });
+  },
+  addIngredient() {
+    this.setData({ "form.ingredientItems": this.data.form.ingredientItems.concat(blankIngredient()) });
+  },
+  removeIngredient(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const items = this.data.form.ingredientItems.filter((_, itemIndex) => itemIndex !== index);
+    this.setData({ "form.ingredientItems": items.length ? items : [blankIngredient()] });
   },
   toggleCategory(event) {
     const value = event.currentTarget.dataset.value;
@@ -58,18 +105,35 @@ Page({
   cancel() { wx.navigateBack(); },
   save() {
     const form = this.data.form;
+    const existingRecipe = this.data.id ? recipeById(app.getState(), this.data.id) : null;
     const name = form.name.trim();
     if (!name) { this.setData({ nameError: true }); wx.showToast({ title: "请先填写菜名", icon: "none" }); return; }
     const steps = form.stepsText.split(/\n/).map((item) => item.trim()).filter(Boolean);
+    const ingredientItems = form.ingredientItems
+      .filter((item) => item.name.trim())
+      .map((item) => ({
+        id: item.id,
+        name: item.name.trim(),
+        quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
+        unit: item.unit,
+        inStock: Boolean(item.inStock)
+      }));
     const data = {
       name,
       categories: form.categories.length ? form.categories : ["快手菜"],
       prep: Number(form.prep), cook: Number(form.cook), time: Number(form.prep) + Number(form.cook),
-      difficulty: form.difficulty, flavor: form.flavor.trim() || "家常", spice: form.spice.trim() || "不辣",
-      tags: splitText(form.tagsText), pantry: splitText(form.pantryText), buy: splitText(form.buyText),
+      difficulty: form.difficulty,
+      flavor: existingRecipe && existingRecipe.flavor ? existingRecipe.flavor : "家常",
+      spice: existingRecipe && existingRecipe.spice ? existingRecipe.spice : "不辣",
+      tags: splitText(form.tagsText),
+      ingredientItems,
+      pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
+      buy: ingredientItems.filter((item) => !item.inStock).map((item) => item.name),
       steps: steps.length ? steps : ["处理主要食材。", "热锅后按顺序下锅并调味。", "试味后出锅。"],
-      ingredients: Array.from(new Set(splitText(form.pantryText).concat(splitText(form.buyText)))),
-      likes: { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" }, recent: "刚刚", favorite: false
+      ingredients: ingredientItems.map((item) => item.name),
+      likes: existingRecipe && existingRecipe.likes ? existingRecipe.likes : { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" },
+      recent: existingRecipe && existingRecipe.recent ? existingRecipe.recent : "刚刚",
+      favorite: existingRecipe ? Boolean(existingRecipe.favorite) : false
     };
     app.update((state) => {
       if (this.data.id) Object.assign(recipeById(state, this.data.id), data);

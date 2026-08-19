@@ -10,7 +10,10 @@
       <view class="card">
         <view class="grocery-item {{food.checked ? 'checked' : ''}}" wx:for="{{item.items}}" wx:for-item="food" wx:key="id">
           <button class="check-box {{food.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{food.id}}">✓</button>
-          <view><text class="grocery-name">{{food.name}}</text><text class="grocery-source">来自：{{food.sourceText}}</text></view>
+          <view class="grocery-main">
+            <view class="grocery-title"><text class="grocery-name">{{food.name}}</text><text class="grocery-amount">× {{food.quantityText}}</text></view>
+            <text class="grocery-source">来自：{{food.sourceText}}</text>
+          </view>
         </view>
       </view>
     </view>

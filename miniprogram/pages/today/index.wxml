@@ -4,15 +4,15 @@
     <view class="page-header">
       <view>
         <text class="eyebrow">{{dateLabel}} · {{period}}</text>
-        <text class="title">{{selected.length ? '今日已选菜单' : '今晚吃点什么？'}}</text>
-        <text class="subtitle">{{selected.length ? '按家里真实想吃的来，不需要凑齐固定搭配。' : '还没决定今天吃什么，先去菜谱里挑一道。'}}</text>
+        <text class="title">{{titleText}}</text>
+        <text class="subtitle">{{subtitleText}}</text>
       </view>
     </view>
 
     <view class="hero-card">
       <view class="topline">
         <text class="strong">{{selected.length ? '已选菜单' : '还没选菜'}}</text>
-        <text>{{selected.length ? selected.length + ' 道 · 约 ' + totalTime + ' 分钟' : '等待手动选择'}}</text>
+        <text wx:if="{{selected.length}}">{{selected.length}} 道 · 约 {{totalTime}} 分钟</text>
       </view>
       <block wx:if="{{selected.length}}">
         <view class="dish-row" wx:for="{{selected}}" wx:key="id">
@@ -33,8 +33,8 @@
         </view>
       </block>
       <view wx:else class="empty-copy">
-        <text class="headline">今天还没决定吃什么</text>
-        <text class="body">从菜谱里挑真正想吃的菜。这里只做手动选择，不会替你强行配套餐。</text>
+        <text class="headline">想吃什么？</text>
+        <text class="body">去菜谱看一看。</text>
         <button class="primary" bindtap="goRecipes">去菜谱点菜</button>
       </view>
     </view>

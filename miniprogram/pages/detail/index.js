@@ -14,7 +14,6 @@ Page({
       { mark: "小", name: `小朋友：${recipe.likes["小朋友"]}`, note: "少辣优先" }
     ];
     this.setData({ recipe, scores });
-    wx.setNavigationBarTitle({ title: recipe.name });
   },
   toggleFavorite() {
     app.update((state) => { const recipe = recipeById(state, this.data.id); recipe.favorite = !recipe.favorite; });

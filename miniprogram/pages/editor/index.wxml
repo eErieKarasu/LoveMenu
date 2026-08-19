@@ -3,17 +3,45 @@
   <view class="card form-card">
     <view class="field"><text class="label">菜名 *</text><input class="input {{nameError ? 'error' : ''}}" value="{{form.name}}" placeholder="请输入菜名" data-field="name" bindinput="updateField" /></view>
     <view class="field"><text class="label">分类</text><view class="meta-row"><button wx:for="{{dishCategories}}" wx:key="name" class="chip {{item.active ? 'active' : ''}}" data-value="{{item.name}}" bindtap="toggleCategory">{{item.name}}</button></view></view>
-    <view class="split">
-      <view class="field"><text class="label">准备</text><view class="action-row"><button class="secondary small-btn" data-field="prep" data-delta="-1" bindtap="adjustTime">−</button><text class="pill">{{form.prep}} 分钟</text><button class="secondary small-btn" data-field="prep" data-delta="1" bindtap="adjustTime">＋</button></view></view>
-      <view class="field"><text class="label">烹饪</text><view class="action-row"><button class="secondary small-btn" data-field="cook" data-delta="-1" bindtap="adjustTime">−</button><text class="pill">{{form.cook}} 分钟</text><button class="secondary small-btn" data-field="cook" data-delta="1" bindtap="adjustTime">＋</button></view></view>
+    <view class="field time-field">
+      <text class="label">准备</text>
+      <view class="time-control">
+        <button class="time-step" data-field="prep" data-delta="-1" bindtap="adjustTime">−</button>
+        <view class="time-value"><text class="time-number">{{form.prep}}</text><text>分钟</text></view>
+        <button class="time-step" data-field="prep" data-delta="1" bindtap="adjustTime">＋</button>
+      </view>
+    </view>
+    <view class="field time-field">
+      <text class="label">烹饪</text>
+      <view class="time-control">
+        <button class="time-step" data-field="cook" data-delta="-1" bindtap="adjustTime">−</button>
+        <view class="time-value"><text class="time-number">{{form.cook}}</text><text>分钟</text></view>
+        <button class="time-step" data-field="cook" data-delta="1" bindtap="adjustTime">＋</button>
+      </view>
     </view>
     <view class="field"><text class="label">难度</text><view class="meta-row"><button wx:for="{{difficulties}}" wx:key="*this" class="chip {{form.difficulty === item ? 'active' : ''}}" data-value="{{item}}" bindtap="setDifficulty">{{item}}</button></view></view>
-    <view class="split"><view class="field"><text class="label">风味</text><input class="input" value="{{form.flavor}}" data-field="flavor" bindinput="updateField" /></view><view class="field"><text class="label">辣度</text><input class="input" value="{{form.spice}}" data-field="spice" bindinput="updateField" /></view></view>
   </view>
   <view class="card form-card">
     <view class="field"><text class="label">标签</text><input class="input" value="{{form.tagsText}}" placeholder="使用顿号或逗号分隔" data-field="tagsText" bindinput="updateField" /><text class="hint">使用顿号或逗号分隔</text></view>
-    <view class="field"><text class="label">家里常备</text><textarea class="textarea" value="{{form.pantryText}}" placeholder="填写家里已有的食材" data-field="pantryText" bindinput="updateField" /></view>
-    <view class="field"><text class="label">需要购买</text><textarea class="textarea" value="{{form.buyText}}" placeholder="填写需要购买的食材" data-field="buyText" bindinput="updateField" /></view>
+    <view class="field ingredient-field">
+      <text class="label">食材</text>
+      <view class="ingredient-list">
+        <view class="ingredient-row" wx:for="{{form.ingredientItems}}" wx:key="id">
+          <input class="ingredient-name" value="{{item.name}}" placeholder="食材名称" data-index="{{index}}" data-field="name" bindinput="updateIngredient" />
+          <view class="ingredient-amount">
+            <input class="quantity-input" type="digit" value="{{item.quantity}}" data-index="{{index}}" data-field="quantity" bindinput="updateIngredient" />
+            <picker mode="selector" range="{{ingredientUnits}}" value="{{item.unitIndex}}" data-index="{{index}}" bindchange="changeIngredientUnit">
+              <view class="unit-picker">{{item.unit}}⌄</view>
+            </picker>
+          </view>
+          <button class="stock-toggle {{item.inStock ? 'active' : ''}}" data-index="{{index}}" bindtap="toggleIngredientStock">
+            <text>家里有</text><text class="stock-dot"></text>
+          </button>
+          <button class="ingredient-remove" data-index="{{index}}" bindtap="removeIngredient">×</button>
+        </view>
+      </view>
+      <button class="add-ingredient" bindtap="addIngredient">＋ 添加食材</button>
+    </view>
   </view>
   <view class="card form-card"><view class="field"><text class="label">做法步骤</text><textarea class="textarea" value="{{form.stepsText}}" placeholder="每行填写一个步骤" data-field="stepsText" bindinput="updateField" /><text class="hint">每行一个步骤，做饭时更容易查看</text></view></view>
   <view class="save-bar"><button class="secondary" bindtap="cancel">取消</button><button class="primary" bindtap="save">保存菜谱</button></view>

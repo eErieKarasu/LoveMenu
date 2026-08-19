@@ -89,6 +89,7 @@ button::after { border: 0; }
 .ingredient-item:last-child, .step-item:last-child, .score-item:last-child { border: 0; }
 .dot { width: 18rpx; height: 18rpx; border-radius: 9rpx; background: var(--sage); margin-top: 11rpx; }
 .dot.buy { background: var(--accent); }
+.muted-empty { display: block; color: var(--muted); padding: 24rpx 0 6rpx; }
 .item-main { flex: 1; }
 .item-main .name { display: block; font-weight: 750; }
 .item-main .note { display: block; color: var(--muted); font-size: 23rpx; margin-top: 5rpx; }
@@ -132,6 +133,9 @@ button::after { border: 0; }
 .check-box { display: flex; align-items: center; justify-content: center; flex: 0 0 52rpx; width: 52rpx; height: 52rpx; border: 2rpx solid #cdbfb2; border-radius: 17rpx; background: transparent; padding: 0; color: transparent; line-height: 52rpx; }
 .check-box.checked { background: var(--sage); border-color: var(--sage); color: white; }
 .grocery-name { display: block; font-weight: 800; }
+.grocery-main { flex: 1; min-width: 0; }
+.grocery-title { display: flex; align-items: baseline; justify-content: space-between; gap: 18rpx; }
+.grocery-amount { flex: 0 0 auto; color: var(--ink); font-weight: 750; }
 .grocery-source { display: block; color: var(--muted); font-size: 22rpx; margin-top: 6rpx; }
 .profile-card { margin-bottom: 20rpx; }
 .profile-card .heading { display: block; font-size: 31rpx; font-weight: 800; margin-bottom: 12rpx; }

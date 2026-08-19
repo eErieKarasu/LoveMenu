@@ -6,26 +6,71 @@ function inferGroceryCategory(name) {
   if (["鸡翅", "排骨", "牛腩", "鸡蛋", "肉"].some((word) => name.includes(word))) return "肉蛋";
   if (["鱼", "虾", "贝"].some((word) => name.includes(word))) return "水产";
   if (["生抽", "蚝油", "可乐", "柠檬", "醋", "糖", "盐"].some((word) => name.includes(word))) return "调味品";
-  if (["米", "面", "馒头", "小葱"].some((word) => name.includes(word))) return "主食";
-  if (["菜", "瓜", "番茄", "土豆", "胡萝卜", "南瓜", "西兰花"].some((word) => name.includes(word))) return "蔬菜";
+  if (["米", "面", "馒头"].some((word) => name.includes(word))) return "主食";
+  if (["菜", "瓜", "番茄", "西红柿", "土豆", "胡萝卜", "南瓜", "西兰花", "小葱"].some((word) => name.includes(word))) return "蔬菜";
   return "其他";
+}
+
+function normalizeQuantity(value) {
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+}
+
+function ingredientItemsForRecipe(recipe) {
+  if (Array.isArray(recipe.ingredientItems) && recipe.ingredientItems.length) {
+    return recipe.ingredientItems
+      .filter((item) => item && String(item.name || "").trim())
+      .map((item, index) => ({
+        id: item.id || `ingredient-${index}`,
+        name: String(item.name).trim(),
+        quantity: normalizeQuantity(item.quantity),
+        unit: String(item.unit || "份").trim() || "份",
+        inStock: Boolean(item.inStock)
+      }));
+  }
+
+  const pantry = Array.isArray(recipe.pantry) ? recipe.pantry : [];
+  const buy = Array.isArray(recipe.buy) ? recipe.buy : [];
+  return Array.from(new Set(pantry.concat(buy))).map((name, index) => ({
+    id: `ingredient-${index}`,
+    name,
+    quantity: 1,
+    unit: "份",
+    inStock: pantry.includes(name)
+  }));
+}
+
+function normalizeRecipe(recipe) {
+  const ingredientItems = ingredientItemsForRecipe(recipe);
+  return {
+    ...recipe,
+    ingredientItems,
+    ingredients: ingredientItems.map((item) => item.name),
+    pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
+    buy: ingredientItems.filter((item) => !item.inStock).map((item) => item.name)
+  };
 }
 
 function addRecipeIngredients(state, recipeId) {
   const recipe = recipeById(state, recipeId);
   if (!recipe) return 0;
   let added = 0;
-  recipe.buy.forEach((name) => {
-    const existing = state.groceries.find((item) => item.name === name);
+  ingredientItemsForRecipe(recipe).filter((item) => !item.inStock).forEach((ingredient) => {
+    const existing = state.groceries.find((item) => item.name === ingredient.name && item.unit === ingredient.unit);
     if (existing) {
-      if (!existing.source.includes(recipe.name)) existing.source.push(recipe.name);
+      if (!existing.source.includes(recipe.name)) {
+        existing.source.push(recipe.name);
+        existing.quantity = normalizeQuantity(existing.quantity) + ingredient.quantity;
+      }
       existing.checked = false;
       return;
     }
     state.groceries.push({
       id: `g-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      category: inferGroceryCategory(name),
-      name,
+      category: inferGroceryCategory(ingredient.name),
+      name: ingredient.name,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
       source: [recipe.name],
       checked: false
     });
@@ -58,11 +103,22 @@ function selectedTodayRecipes(state) {
   return state.selectedToday.map((id) => recipeById(state, id)).filter(Boolean);
 }
 
+function mealContextForHour(hour) {
+  if (hour < 10) return { period: "早餐", prompt: "早上吃点什么？" };
+  if (hour < 15) return { period: "午餐", prompt: "中午吃点什么？" };
+  return { period: "晚餐", prompt: "今晚吃点什么？" };
+}
+
 function normalizeState(state) {
   return {
     version: 3,
-    recipes: Array.isArray(state.recipes) ? state.recipes : [],
-    groceries: Array.isArray(state.groceries) ? state.groceries : [],
+    recipes: Array.isArray(state.recipes) ? state.recipes.map(normalizeRecipe) : [],
+    groceries: Array.isArray(state.groceries) ? state.groceries.map((item) => ({
+      ...item,
+      quantity: normalizeQuantity(item.quantity),
+      unit: item.unit || "份",
+      source: Array.isArray(item.source) ? item.source : []
+    })) : [],
     selectedToday: Array.isArray(state.selectedToday) ? state.selectedToday : [],
     weekPlan: Array.isArray(state.weekPlan) && state.weekPlan.length === 7
       ? state.weekPlan
@@ -73,7 +129,9 @@ function normalizeState(state) {
 module.exports = {
   addRecipeIngredients,
   buildWeekPlan,
+  ingredientItemsForRecipe,
   inferGroceryCategory,
+  mealContextForHour,
   normalizeState,
   recipeById,
   selectedTodayRecipes

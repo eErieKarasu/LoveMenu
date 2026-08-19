@@ -1,3 +1,151 @@
-.form-card .action-row { align-items: center; margin-top: 0; }
-.form-card .action-row button { flex: 0 0 64rpx; padding: 0; }
-.form-card .action-row .pill { flex: 1; justify-content: center; }
+.time-field { margin-bottom: 28rpx; }
+
+.time-control {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  width: 100%;
+  min-height: 96rpx;
+  padding: 10rpx;
+  background: #f8f4ee;
+  border: 1rpx solid var(--line);
+  border-radius: 22rpx;
+}
+
+.time-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 76rpx;
+  width: 76rpx;
+  height: 76rpx;
+  min-height: 76rpx;
+  padding: 0;
+  background: var(--paper);
+  border: 1rpx solid var(--line);
+  border-radius: 18rpx;
+  color: var(--ink);
+  font-size: 34rpx;
+  line-height: 76rpx;
+}
+
+.time-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex: 1;
+  gap: 8rpx;
+  color: var(--muted);
+  font-size: 24rpx;
+}
+
+.time-number {
+  color: var(--ink);
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.ingredient-field { margin-bottom: 0; }
+
+.ingredient-list {
+  overflow: hidden;
+  border: 1rpx solid var(--line);
+  border-radius: 22rpx;
+  background: #f8f4ee;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 142rpx 142rpx 48rpx;
+  align-items: center;
+  gap: 10rpx;
+  min-height: 94rpx;
+  padding: 12rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.ingredient-row:last-child { border-bottom: 0; }
+
+.ingredient-name {
+  width: 100%;
+  height: 68rpx;
+  padding: 0 14rpx;
+  background: var(--paper);
+  border-radius: 15rpx;
+}
+
+.ingredient-amount {
+  display: flex;
+  align-items: center;
+  height: 68rpx;
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 15rpx;
+}
+
+.quantity-input {
+  width: 58rpx;
+  height: 68rpx;
+  padding-left: 12rpx;
+  text-align: center;
+  font-weight: 750;
+}
+
+.unit-picker {
+  min-width: 76rpx;
+  padding: 0 8rpx;
+  color: var(--muted);
+  font-size: 23rpx;
+  line-height: 68rpx;
+  text-align: center;
+}
+
+.stock-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  width: 100%;
+  height: 68rpx;
+  min-height: 68rpx;
+  padding: 0 10rpx;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22rpx;
+  line-height: 68rpx;
+}
+
+.stock-dot {
+  width: 22rpx;
+  height: 22rpx;
+  border: 2rpx solid #b7aaa0;
+  border-radius: 50%;
+}
+
+.stock-toggle.active { color: var(--ink); }
+.stock-toggle.active .stock-dot { border: 6rpx solid var(--accent); }
+
+.ingredient-remove {
+  width: 48rpx;
+  height: 48rpx;
+  min-height: 48rpx;
+  padding: 0;
+  background: transparent;
+  color: #aa9d93;
+  font-size: 34rpx;
+  line-height: 48rpx;
+}
+
+.add-ingredient {
+  width: 100%;
+  margin-top: 16rpx;
+  min-height: 76rpx;
+  padding: 0;
+  background: transparent;
+  border: 1rpx dashed #d7c8bc;
+  border-radius: 18rpx;
+  color: var(--accent);
+  font-size: 26rpx;
+  font-weight: 750;
+  line-height: 76rpx;
+}
