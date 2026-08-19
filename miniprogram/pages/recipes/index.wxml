@@ -20,7 +20,6 @@
         </view>
       </view>
       <view class="card-footer">
-        <text class="family-note">{{item.likeText}}</text>
         <button class="primary small-btn" catchtap="addToday" data-id="{{item.id}}">加入今日</button>
       </view>
     </view>

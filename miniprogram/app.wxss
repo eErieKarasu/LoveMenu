@@ -73,8 +73,7 @@ button::after { border: 0; }
 .recipe-name { font-family: "Songti SC", serif; font-size: 36rpx; font-weight: 800; }
 .heart { color: var(--accent); font-size: 34rpx; }
 .recipe-desc { display: block; color: var(--muted); line-height: 1.55; margin: 12rpx 0 18rpx; }
-.card-footer { display: flex; align-items: center; justify-content: space-between; gap: 14rpx; margin-top: 20rpx; }
-.family-note { color: var(--muted); font-size: 22rpx; flex: 1; }
+.card-footer { display: flex; align-items: center; justify-content: flex-end; gap: 14rpx; margin-top: 20rpx; }
 
 .empty-state { text-align: center; padding: 90rpx 30rpx; color: var(--muted); }
 .empty-state .headline { display: block; color: var(--ink); font-size: 32rpx; font-weight: 800; margin-bottom: 12rpx; }

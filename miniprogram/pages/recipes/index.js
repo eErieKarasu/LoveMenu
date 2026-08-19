@@ -24,8 +24,7 @@ Page({
       ...recipe,
       ingredientText: recipe.ingredients.join("、"),
       inventoryText: recipe.inventorySummary.text,
-      inventoryReady: recipe.inventorySummary.ready,
-      likeText: Object.entries(recipe.likes).map(([member, value]) => `${member}${value}`).join(" · ")
+      inventoryReady: recipe.inventorySummary.ready
     }));
     this.setData({
       loading: false,
