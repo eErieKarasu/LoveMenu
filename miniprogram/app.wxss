@@ -116,7 +116,6 @@ button::after { border: 0; }
 .date-pill .day { color: var(--ink); font-size: 31rpx; font-weight: 800; margin-top: 8rpx; }
 .date-pill.active { background: var(--ink); color: #ddd5cc; }
 .date-pill.active .day { color: white; }
-.balance-card { background: var(--sage-soft); color: #506650; border-radius: 28rpx; padding: 26rpx; line-height: 1.6; margin: 24rpx 0; }
 .meal-block { margin-bottom: 18rpx; }
 .meal-heading { display: flex; justify-content: space-between; margin-bottom: 14rpx; }
 .meal-heading .name { font-size: 30rpx; font-weight: 800; }

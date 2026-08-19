@@ -13,7 +13,6 @@
     <scroll-view scroll-x class="date-strip">
       <button wx:for="{{weekPlan}}" wx:key="key" class="date-pill {{selectedDay === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectDay"><text>{{item.week}}</text><text class="day">{{item.day}}</text></button>
     </scroll-view>
-    <view class="balance-card"><text>平衡提醒：一周里尽量穿插鱼类、绿叶菜和清淡汤菜。右上角可以随时换一套安排。</text></view>
     <view class="card meal-block"><view class="meal-heading"><text class="name">早餐</text><text class="count">{{selected.meals.breakfast.length}} 道</text></view><view class="meal-items"><text class="meal-item" wx:for="{{selected.meals.breakfast}}" wx:key="*this">{{item}}</text></view></view>
     <view class="card meal-block"><view class="meal-heading"><text class="name">午餐</text><text class="count">{{selected.meals.lunch.length}} 道</text></view><view class="meal-items"><text class="meal-item" wx:for="{{selected.meals.lunch}}" wx:key="*this">{{item}}</text></view></view>
     <view class="card meal-block"><view class="meal-heading"><text class="name">晚餐</text><text class="count">{{selected.meals.dinner.length}} 道</text></view><view class="meal-items"><text class="meal-item" wx:for="{{selected.meals.dinner}}" wx:key="*this">{{item}}</text></view></view>

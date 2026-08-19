@@ -2,7 +2,6 @@
   "pages": [
     "pages/today/index",
     "pages/recipes/index",
-    "pages/week/index",
     "pages/grocery/index",
     "pages/inventory/index",
     "pages/detail/index",
@@ -32,12 +31,6 @@
         "text": "菜谱",
         "iconPath": "assets/tabs/recipes.png",
         "selectedIconPath": "assets/tabs/recipes-active.png"
-      },
-      {
-        "pagePath": "pages/week/index",
-        "text": "一周",
-        "iconPath": "assets/tabs/week.png",
-        "selectedIconPath": "assets/tabs/week-active.png"
       },
       {
         "pagePath": "pages/grocery/index",
