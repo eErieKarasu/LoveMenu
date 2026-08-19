@@ -1,6 +1,6 @@
 <view class="screen">
   <view class="page-header">
-    <view><text class="eyebrow">按菜谱自动汇总</text><text class="title">采购清单</text></view>
+    <view><text class="title">采购清单</text></view>
     <button class="round-btn" bindtap="clearPurchased">✓</button>
   </view>
   <view wx:if="{{loading}}" class="loading">正在整理采购清单…</view>
