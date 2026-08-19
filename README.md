@@ -1,26 +1,44 @@
-# LoveMenu
+# LoveMenu 微信小程序
 
-LoveMenu 是一个面向家庭的菜谱、每日菜单、一周安排和采购清单应用。
+LoveMenu 是一个原生微信小程序，提供家庭菜谱、今日点菜、一周菜单和采购清单。项目不依赖 Sites、React、Cloudflare 或 GPT 登录。
 
 ## 技术结构
 
-- Codex Sites / vinext
-- React 19
-- Cloudflare D1
-- Drizzle ORM 与可版本化数据库迁移
+- 原生微信小程序：WXML、WXSS、JavaScript
+- 微信云开发：云函数与云数据库
+- 微信 OpenID 鉴权：每个微信账号的数据独立存储
+- 本地缓存兜底：云环境不可用时仍可使用，恢复后可重新同步
 
-## 本地开发
-
-```bash
-npm install
-npm run dev
+```text
+miniprogram/          小程序前端
+  pages/              按功能组织的页面
+  services/state.js   云端与本地状态访问
+  utils/              默认数据和业务规则
+cloudfunctions/state/ 读取和保存状态的云函数
 ```
 
-## 验证
+## 在微信开发者工具运行
+
+1. 在微信公众平台注册小程序并取得 AppID。
+2. 用微信开发者工具导入仓库根目录。
+3. 把 `project.config.json` 中的 `touristappid` 换成真实 AppID。
+4. 在开发者工具中开通“云开发”，创建一个环境。
+5. 把云环境 ID 填入 `miniprogram/env.js` 的 `CLOUD_ENV_ID`。
+6. 在云数据库创建集合 `app_states`，权限设为客户端不可直接读写。
+7. 右键 `cloudfunctions/state`，选择“上传并部署：云端安装依赖”。
+8. 点击“编译”，用真机预览验证微信云同步。
+
+首次启动时会使用内置示例菜谱。云函数以当前微信 OpenID 作为文档 ID，因此不需要额外注册账号，也不会信任客户端传入的用户 ID。
+
+## 发布
+
+在开发者工具右上角选择“上传”，然后进入微信公众平台提交版本审核。正式发布前还需要补齐小程序名称、图标、服务类目、隐私保护指引和用户隐私授权说明。
+
+## 本地自检
 
 ```bash
-npm run build
-node --test tests/rendered-html.test.mjs
+npm test
+npm run check
 ```
 
-`prototype.html` 保留了迁移到 Sites 之前的原型入口，正式应用由 `app/` 和 `public/lovemenu.js` 提供。
+当前版本按单个微信账号同步；“我、伴侣、小朋友”是菜谱口味档案，还不是三个独立微信账号。若要让多位家庭成员共同编辑同一份菜单，下一步可以增加家庭邀请码和成员权限。

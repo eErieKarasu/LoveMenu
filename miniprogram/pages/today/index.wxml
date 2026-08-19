@@ -1,0 +1,52 @@
+<view class="screen">
+  <view wx:if="{{loading}}" class="loading">正在整理家里的菜单…</view>
+  <block wx:else>
+    <view class="page-header">
+      <view>
+        <text class="eyebrow">{{dateLabel}} · {{period}}</text>
+        <text class="title">{{selected.length ? '今日已选菜单' : '今晚吃点什么？'}}</text>
+        <text class="subtitle">{{selected.length ? '按家里真实想吃的来，不需要凑齐固定搭配。' : '还没决定今天吃什么，先去菜谱里挑一道。'}}</text>
+      </view>
+    </view>
+
+    <view class="hero-card">
+      <view class="topline">
+        <text class="strong">{{selected.length ? '已选菜单' : '还没选菜'}}</text>
+        <text>{{selected.length ? selected.length + ' 道 · 约 ' + totalTime + ' 分钟' : '等待手动选择'}}</text>
+      </view>
+      <block wx:if="{{selected.length}}">
+        <view class="dish-row" wx:for="{{selected}}" wx:key="id">
+          <view class="dish-mark">{{item.initial}}</view>
+          <view class="dish-main" bindtap="openRecipe" data-id="{{item.id}}">
+            <text class="dish-name">{{item.name}}</text>
+            <view class="meta-row">
+              <text class="pill accent">{{item.categories[0]}}</text>
+              <text class="pill">{{item.time}} 分钟</text>
+              <text class="pill sage">{{item.spice}}</text>
+            </view>
+          </view>
+          <button class="check-action" bindtap="removeDish" data-id="{{item.id}}">✓</button>
+        </view>
+        <view class="action-row">
+          <button class="secondary" bindtap="goRecipes">继续加菜</button>
+          <button class="primary" bindtap="addAllToGrocery">加入采购</button>
+        </view>
+      </block>
+      <view wx:else class="empty-copy">
+        <text class="headline">今天还没决定吃什么</text>
+        <text class="body">从菜谱里挑真正想吃的菜。这里只做手动选择，不会替你强行配套餐。</text>
+        <button class="primary" bindtap="goRecipes">去菜谱点菜</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">快速点菜</text>
+      <scroll-view scroll-x class="scroll-row" enable-flex>
+        <view class="mini-card" wx:for="{{recent}}" wx:key="id" bindtap="openRecipe" data-id="{{item.id}}">
+          <text class="name">{{item.name}}</text>
+          <text class="note">{{item.recent}} · {{item.tagSummary}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+</view>

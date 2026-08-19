@@ -1,0 +1,2 @@
+.recipe-head { align-items: center; }
+.detail-title { flex: 1; }

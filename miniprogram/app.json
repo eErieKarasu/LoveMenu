@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/today/index",
+    "pages/recipes/index",
+    "pages/week/index",
+    "pages/grocery/index",
+    "pages/mine/index",
+    "pages/detail/index",
+    "pages/editor/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "LoveMenu",
+    "navigationBarBackgroundColor": "#fffaf4",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f1e9",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#8a8177",
+    "selectedColor": "#d46245",
+    "backgroundColor": "#fffdf9",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/today/index",
+        "text": "今日",
+        "iconPath": "assets/tabs/today.png",
+        "selectedIconPath": "assets/tabs/today-active.png"
+      },
+      {
+        "pagePath": "pages/recipes/index",
+        "text": "菜谱",
+        "iconPath": "assets/tabs/recipes.png",
+        "selectedIconPath": "assets/tabs/recipes-active.png"
+      },
+      {
+        "pagePath": "pages/week/index",
+        "text": "一周",
+        "iconPath": "assets/tabs/week.png",
+        "selectedIconPath": "assets/tabs/week-active.png"
+      },
+      {
+        "pagePath": "pages/grocery/index",
+        "text": "采购",
+        "iconPath": "assets/tabs/grocery.png",
+        "selectedIconPath": "assets/tabs/grocery-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "assets/tabs/mine.png",
+        "selectedIconPath": "assets/tabs/mine-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

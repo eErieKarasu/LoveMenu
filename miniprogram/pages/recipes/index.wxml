@@ -1,0 +1,27 @@
+<view class="screen">
+  <view class="page-header">
+    <view><text class="eyebrow">家庭常做菜</text><text class="title">菜谱库</text></view>
+    <button class="round-btn" bindtap="openEditor">＋</button>
+  </view>
+  <view class="search"><text>⌕</text><input placeholder="搜索菜名、食材或标签" value="{{query}}" bindinput="onSearch" /></view>
+  <scroll-view scroll-x class="tabs">
+    <button wx:for="{{categories}}" wx:key="*this" class="chip {{category === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectCategory">{{item}}</button>
+  </scroll-view>
+  <view wx:if="{{loading}}" class="loading">正在读取菜谱…</view>
+  <view wx:elif="{{recipes.length}}">
+    <view class="card recipe-card" wx:for="{{recipes}}" wx:key="id">
+      <view bindtap="openRecipe" data-id="{{item.id}}">
+        <view class="recipe-head"><text class="recipe-name">{{item.name}}</text><text class="heart">{{item.favorite ? '♥' : '♡'}}</text></view>
+        <text class="recipe-desc">{{item.ingredientText}}</text>
+        <view class="meta-row">
+          <text class="pill accent">{{item.categories[0]}}</text><text class="pill">{{item.time}} 分钟</text><text class="pill sage">{{item.difficulty}}</text>
+        </view>
+      </view>
+      <view class="card-footer">
+        <text class="family-note">{{item.likeText}}</text>
+        <button class="primary small-btn" catchtap="addToday" data-id="{{item.id}}">加入今日</button>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="empty-state"><text class="headline">没有找到合适的菜</text><text>换个关键词，或者新增一道家里常做菜。</text></view>
+</view>

@@ -1,0 +1,20 @@
+<view class="screen">
+  <view class="page-header">
+    <view><text class="eyebrow">按菜谱自动汇总</text><text class="title">采购清单</text></view>
+    <button class="round-btn" bindtap="clearPurchased">✓</button>
+  </view>
+  <view wx:if="{{loading}}" class="loading">正在整理采购清单…</view>
+  <block wx:elif="{{groups.length}}">
+    <view wx:for="{{groups}}" wx:key="name">
+      <view class="group-title"><text class="name">{{item.name}}</text><text class="count">{{item.items.length}} 项</text></view>
+      <view class="card">
+        <view class="grocery-item {{food.checked ? 'checked' : ''}}" wx:for="{{item.items}}" wx:for-item="food" wx:key="id">
+          <button class="check-box {{food.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{food.id}}">✓</button>
+          <view><text class="grocery-name">{{food.name}}</text><text class="grocery-source">来自：{{food.sourceText}}</text></view>
+        </view>
+      </view>
+    </view>
+    <button class="primary" style="margin-top: 30rpx" bindtap="copyList">复制未购买清单</button>
+  </block>
+  <view wx:else class="empty-state"><text class="headline">采购清单已清空</text><text>从今日菜单或菜谱详情加入需要购买的食材。</text></view>
+</view>

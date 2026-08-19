@@ -39,6 +39,11 @@ yarn-error.log*
 /outputs/
 /work/
 
+# wechat miniprogram
+/cloudfunctions/*/node_modules/
+/miniprogram_npm/
+/project.private.config.json
+
 # local product notes
 /PRD.md
 /Plan.md

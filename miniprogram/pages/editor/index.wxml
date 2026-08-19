@@ -1,0 +1,20 @@
+<view class="screen">
+  <view class="page-header"><view><text class="eyebrow">{{id ? '更新家常菜' : '记录家常菜'}}</text><text class="title">{{id ? '编辑菜谱' : '新增菜品'}}</text></view></view>
+  <view class="card form-card">
+    <view class="field"><text class="label">菜名 *</text><input class="input {{nameError ? 'error' : ''}}" value="{{form.name}}" placeholder="例如：番茄炒蛋" data-field="name" bindinput="updateField" /></view>
+    <view class="field"><text class="label">分类</text><view class="meta-row"><button wx:for="{{dishCategories}}" wx:key="name" class="chip {{item.active ? 'active' : ''}}" data-value="{{item.name}}" bindtap="toggleCategory">{{item.name}}</button></view></view>
+    <view class="split">
+      <view class="field"><text class="label">准备</text><view class="action-row"><button class="secondary small-btn" data-field="prep" data-delta="-1" bindtap="adjustTime">−</button><text class="pill">{{form.prep}} 分钟</text><button class="secondary small-btn" data-field="prep" data-delta="1" bindtap="adjustTime">＋</button></view></view>
+      <view class="field"><text class="label">烹饪</text><view class="action-row"><button class="secondary small-btn" data-field="cook" data-delta="-1" bindtap="adjustTime">−</button><text class="pill">{{form.cook}} 分钟</text><button class="secondary small-btn" data-field="cook" data-delta="1" bindtap="adjustTime">＋</button></view></view>
+    </view>
+    <view class="field"><text class="label">难度</text><view class="meta-row"><button wx:for="{{difficulties}}" wx:key="*this" class="chip {{form.difficulty === item ? 'active' : ''}}" data-value="{{item}}" bindtap="setDifficulty">{{item}}</button></view></view>
+    <view class="split"><view class="field"><text class="label">风味</text><input class="input" value="{{form.flavor}}" data-field="flavor" bindinput="updateField" /></view><view class="field"><text class="label">辣度</text><input class="input" value="{{form.spice}}" data-field="spice" bindinput="updateField" /></view></view>
+  </view>
+  <view class="card form-card">
+    <view class="field"><text class="label">标签</text><input class="input" value="{{form.tagsText}}" placeholder="快手、下饭、清淡" data-field="tagsText" bindinput="updateField" /><text class="hint">使用顿号或逗号分隔</text></view>
+    <view class="field"><text class="label">家里常备</text><textarea class="textarea" value="{{form.pantryText}}" placeholder="鸡蛋、盐、生抽" data-field="pantryText" bindinput="updateField" /></view>
+    <view class="field"><text class="label">需要购买</text><textarea class="textarea" value="{{form.buyText}}" placeholder="番茄、小葱" data-field="buyText" bindinput="updateField" /></view>
+  </view>
+  <view class="card form-card"><view class="field"><text class="label">做法步骤</text><textarea class="textarea" value="{{form.stepsText}}" placeholder="每行填写一个步骤" data-field="stepsText" bindinput="updateField" /><text class="hint">每行一个步骤，做饭时更容易查看</text></view></view>
+  <view class="save-bar"><button class="secondary" bindtap="cancel">取消</button><button class="primary" bindtap="save">保存菜谱</button></view>
+</view>
