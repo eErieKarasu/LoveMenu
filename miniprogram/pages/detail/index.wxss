@@ -1,2 +1,6 @@
 .recipe-head { align-items: center; }
 .detail-title { flex: 1; }
+.ingredient-heading { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin: 0 4rpx 8rpx; }
+.ingredient-heading .section-title { margin: 0; }
+.inventory-summary { color: #9b5e35; font-size: 22rpx; text-align: right; }
+.inventory-summary.ready { color: var(--sage); }

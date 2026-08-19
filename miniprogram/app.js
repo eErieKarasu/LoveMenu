@@ -23,10 +23,11 @@ App({
 
   async bootstrap() {
     const result = await stateService.loadState(this.globalData.state);
+    const migrated = !result.state || result.state.version !== 4;
     this.globalData.state = normalizeState(result.state);
     this.globalData.ready = true;
     this.globalData.syncStatus = result.source === "cloud" ? "已同步到微信云" : "当前使用本地缓存";
-    if (result.source === "local" && this.globalData.cloudEnabled) this.scheduleSave();
+    if (migrated || (result.source === "local" && this.globalData.cloudEnabled)) this.scheduleSave();
     return this.globalData.state;
   },
 

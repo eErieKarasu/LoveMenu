@@ -33,12 +33,10 @@
               <view class="unit-picker">{{item.unit}}⌄</view>
             </picker>
           </view>
-          <button class="stock-toggle {{item.inStock ? 'active' : ''}}" data-index="{{index}}" bindtap="toggleIngredientStock">
-            <text>家里有</text><text class="stock-dot"></text>
-          </button>
           <button class="ingredient-remove" data-index="{{index}}" bindtap="removeIngredient">×</button>
         </view>
       </view>
+      <text class="hint ingredient-hint">库存状态会从“库存”页面自动读取，不需要在每道菜里重复标记。</text>
       <button class="add-ingredient" bindtap="addIngredient">＋ 添加食材</button>
     </view>
   </view>

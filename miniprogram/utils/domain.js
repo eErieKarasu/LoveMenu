@@ -11,9 +11,68 @@ function inferGroceryCategory(name) {
   return "其他";
 }
 
+function ingredientKey(name) {
+  return String(name || "").trim().toLowerCase().replace(/\s+/g, "");
+}
+
 function normalizeQuantity(value) {
   const quantity = Number(value);
   return Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+}
+
+function normalizeStockQuantity(value) {
+  if (value === "" || value === null || typeof value === "undefined") return null;
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity >= 0 ? quantity : null;
+}
+
+function normalizeInventoryItem(item, index = 0) {
+  const name = String(item && item.name || "").trim();
+  const quantity = normalizeStockQuantity(item && item.quantity);
+  const allowedLevels = ["enough", "low", "out"];
+  let level = allowedLevels.includes(item && item.level) ? item.level : "enough";
+  if (quantity === 0) level = "out";
+  return {
+    id: item && item.id || `inventory-${index}`,
+    ingredientKey: ingredientKey(item && item.ingredientKey || name),
+    name,
+    category: item && item.category || inferGroceryCategory(name),
+    level,
+    quantity,
+    unit: String(item && item.unit || "份").trim() || "份",
+    expiresAt: String(item && item.expiresAt || ""),
+    updatedAt: Number(item && item.updatedAt) || Date.now()
+  };
+}
+
+function inventoryItemForIngredient(stateOrInventory, name) {
+  const inventory = Array.isArray(stateOrInventory)
+    ? stateOrInventory
+    : Array.isArray(stateOrInventory && stateOrInventory.inventory) ? stateOrInventory.inventory : [];
+  const key = ingredientKey(name);
+  return inventory.find((item) => ingredientKey(item.ingredientKey || item.name) === key);
+}
+
+function ingredientStock(inventory, ingredient) {
+  const item = inventoryItemForIngredient(inventory, ingredient.name);
+  const required = normalizeQuantity(ingredient.quantity);
+  if (!item || item.level === "out") {
+    return { item, status: "missing", shortage: required, statusText: "需要购买" };
+  }
+  if (item.quantity !== null && item.unit === ingredient.unit) {
+    const shortage = Math.max(0, required - item.quantity);
+    if (!shortage) return { item, status: "enough", shortage: 0, statusText: `库存 ${item.quantity} ${item.unit}` };
+    return {
+      item,
+      status: item.quantity > 0 ? "low" : "missing",
+      shortage,
+      statusText: item.quantity > 0 ? `库存 ${item.quantity} ${item.unit}，还缺 ${shortage} ${item.unit}` : "需要购买"
+    };
+  }
+  if (item.level === "low") {
+    return { item, status: "low", shortage: required, statusText: "库存不多，建议补充" };
+  }
+  return { item, status: "enough", shortage: 0, statusText: "库存充足" };
 }
 
 function ingredientItemsForRecipe(recipe) {
@@ -75,17 +134,62 @@ function normalizeRecipe(recipe) {
   };
 }
 
+function decorateRecipeWithInventory(recipe, inventory) {
+  const ingredientItems = ingredientItemsForRecipe(recipe).map((ingredient) => {
+    const stock = ingredientStock(inventory, ingredient);
+    return {
+      ...ingredient,
+      inStock: stock.status === "enough",
+      stockStatus: stock.status,
+      stockText: stock.statusText,
+      shortage: stock.shortage
+    };
+  });
+  const availableCount = ingredientItems.filter((item) => item.stockStatus === "enough").length;
+  const shortageCount = ingredientItems.length - availableCount;
+  return {
+    ...recipe,
+    ingredientItems,
+    ingredients: ingredientItems.map((item) => item.name),
+    pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
+    buy: ingredientItems.filter((item) => !item.inStock).map((item) => item.name),
+    inventorySummary: {
+      availableCount,
+      shortageCount,
+      totalCount: ingredientItems.length,
+      ready: ingredientItems.length > 0 && shortageCount === 0,
+      text: ingredientItems.length
+        ? shortageCount ? `已有 ${availableCount}/${ingredientItems.length} · 缺 ${shortageCount} 样` : "库存齐全 · 可以开做"
+        : "尚未录入食材"
+    }
+  };
+}
+
 function addRecipeIngredients(state, recipeId) {
   const recipe = recipeById(state, recipeId);
   if (!recipe) return 0;
   let added = 0;
-  ingredientItemsForRecipe(recipe).filter((item) => !item.inStock).forEach((ingredient) => {
-    const existing = state.groceries.find((item) => item.name === ingredient.name && item.unit === ingredient.unit);
+  ingredientItemsForRecipe(recipe).forEach((ingredient) => {
+    const existing = state.groceries.find((item) => ingredientKey(item.name) === ingredientKey(ingredient.name) && item.unit === ingredient.unit);
+    const sourceRecipeIds = existing && Array.isArray(existing.sourceRecipeIds) && existing.sourceRecipeIds.length
+      ? existing.sourceRecipeIds.slice()
+      : existing ? state.recipes.filter((entry) => existing.source.includes(entry.name)).map((entry) => entry.id) : [];
+    if (!sourceRecipeIds.includes(recipe.id)) sourceRecipeIds.push(recipe.id);
+    const totalRequired = state.recipes
+      .filter((entry) => sourceRecipeIds.includes(entry.id))
+      .reduce((total, entry) => total + ingredientItemsForRecipe(entry)
+        .filter((item) => ingredientKey(item.name) === ingredientKey(ingredient.name) && item.unit === ingredient.unit)
+        .reduce((recipeTotal, item) => recipeTotal + item.quantity, 0), 0);
+    const stock = ingredientStock(state.inventory, { ...ingredient, quantity: totalRequired });
+    const purchaseQuantity = stock.shortage;
+    if (!purchaseQuantity) {
+      if (existing) state.groceries = state.groceries.filter((item) => item.id !== existing.id);
+      return;
+    }
     if (existing) {
-      if (!existing.source.includes(recipe.name)) {
-        existing.source.push(recipe.name);
-        existing.quantity = normalizeQuantity(existing.quantity) + ingredient.quantity;
-      }
+      if (!existing.source.includes(recipe.name)) existing.source.push(recipe.name);
+      existing.sourceRecipeIds = sourceRecipeIds;
+      existing.quantity = purchaseQuantity;
       existing.checked = false;
       return;
     }
@@ -93,14 +197,42 @@ function addRecipeIngredients(state, recipeId) {
       id: `g-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       category: inferGroceryCategory(ingredient.name),
       name: ingredient.name,
-      quantity: ingredient.quantity,
+      quantity: purchaseQuantity,
       unit: ingredient.unit,
       source: [recipe.name],
+      sourceRecipeIds: [recipe.id],
       checked: false
     });
     added += 1;
   });
   return added;
+}
+
+function movePurchasedToInventory(state) {
+  const purchased = state.groceries.filter((item) => item.checked);
+  purchased.forEach((grocery) => {
+    const existing = inventoryItemForIngredient(state, grocery.name);
+    if (existing) {
+      if (existing.quantity !== null && existing.unit === grocery.unit) {
+        existing.quantity += normalizeQuantity(grocery.quantity);
+      }
+      existing.level = "enough";
+      existing.category = grocery.category || existing.category;
+      existing.updatedAt = Date.now();
+      return;
+    }
+    state.inventory.push(normalizeInventoryItem({
+      id: `inventory-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name: grocery.name,
+      category: grocery.category,
+      level: "enough",
+      quantity: normalizeQuantity(grocery.quantity),
+      unit: grocery.unit,
+      updatedAt: Date.now()
+    }));
+  });
+  state.groceries = state.groceries.filter((item) => !item.checked);
+  return purchased.length;
 }
 
 function buildWeekPlan(recipes, offsetSeed = 0) {
@@ -134,14 +266,37 @@ function mealContextForHour(hour) {
 }
 
 function normalizeState(state) {
+  state = state || {};
+  const normalizedRecipes = Array.isArray(state.recipes) ? state.recipes.map(normalizeRecipe) : [];
+  const migratedInventory = [];
+  if (!Array.isArray(state.inventory)) {
+    normalizedRecipes.forEach((recipe) => {
+      ingredientItemsForRecipe(recipe).filter((item) => item.inStock).forEach((item) => {
+        if (inventoryItemForIngredient(migratedInventory, item.name)) return;
+        migratedInventory.push(normalizeInventoryItem({
+          id: `inventory-migrated-${migratedInventory.length}`,
+          name: item.name,
+          category: inferGroceryCategory(item.name),
+          level: "enough",
+          quantity: null,
+          unit: item.unit
+        }, migratedInventory.length));
+      });
+    });
+  }
+  const inventory = (Array.isArray(state.inventory) ? state.inventory : migratedInventory)
+    .map(normalizeInventoryItem)
+    .filter((item) => item.name);
   return {
-    version: 3,
-    recipes: Array.isArray(state.recipes) ? state.recipes.map(normalizeRecipe) : [],
+    version: 4,
+    recipes: normalizedRecipes.map((recipe) => decorateRecipeWithInventory(recipe, inventory)),
+    inventory,
     groceries: Array.isArray(state.groceries) ? state.groceries.map((item) => ({
       ...item,
       quantity: normalizeQuantity(item.quantity),
       unit: item.unit || "份",
-      source: Array.isArray(item.source) ? item.source : []
+      source: Array.isArray(item.source) ? item.source : [],
+      sourceRecipeIds: Array.isArray(item.sourceRecipeIds) ? item.sourceRecipeIds : []
     })) : [],
     selectedToday: Array.isArray(state.selectedToday) ? state.selectedToday : [],
     weekPlan: Array.isArray(state.weekPlan) && state.weekPlan.length === 7
@@ -153,9 +308,15 @@ function normalizeState(state) {
 module.exports = {
   addRecipeIngredients,
   buildWeekPlan,
+  decorateRecipeWithInventory,
+  ingredientKey,
   ingredientItemsForRecipe,
+  ingredientStock,
   inferGroceryCategory,
+  inventoryItemForIngredient,
   mealContextForHour,
+  movePurchasedToInventory,
+  normalizeInventoryItem,
   normalizeState,
   recipeById,
   selectedTodayRecipes,

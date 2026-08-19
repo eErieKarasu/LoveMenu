@@ -4,6 +4,7 @@
     "pages/recipes/index",
     "pages/week/index",
     "pages/grocery/index",
+    "pages/inventory/index",
     "pages/detail/index",
     "pages/editor/index"
   ],
@@ -43,6 +44,12 @@
         "text": "采购",
         "iconPath": "assets/tabs/grocery.png",
         "selectedIconPath": "assets/tabs/grocery-active.png"
+      },
+      {
+        "pagePath": "pages/inventory/index",
+        "text": "库存",
+        "iconPath": "assets/tabs/inventory.png",
+        "selectedIconPath": "assets/tabs/inventory-active.png"
       }
     ]
   },

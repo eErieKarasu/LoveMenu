@@ -16,7 +16,7 @@
         <view class="recipe-head"><text class="recipe-name">{{item.name}}</text><text class="heart">{{item.favorite ? '♥' : '♡'}}</text></view>
         <text class="recipe-desc">{{item.ingredientText}}</text>
         <view class="meta-row">
-          <text class="pill accent">{{item.categories[0]}}</text><text class="pill">{{item.time}} 分钟</text><text class="pill sage">{{item.difficulty}}</text>
+          <text class="pill accent">{{item.categories[0]}}</text><text class="pill">{{item.time}} 分钟</text><text class="pill sage">{{item.difficulty}}</text><text class="pill {{item.inventoryReady ? 'sage' : 'stock-missing'}}">{{item.inventoryText}}</text>
         </view>
       </view>
       <view class="card-footer">

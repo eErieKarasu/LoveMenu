@@ -1,7 +1,17 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
-const { addRecipeIngredients, buildWeekPlan, inferGroceryCategory, ingredientItemsForRecipe, mealContextForHour, normalizeState, stepItemsForRecipe } = require("../miniprogram/utils/domain");
+const {
+  addRecipeIngredients,
+  buildWeekPlan,
+  inferGroceryCategory,
+  ingredientItemsForRecipe,
+  ingredientStock,
+  mealContextForHour,
+  movePurchasedToInventory,
+  normalizeState,
+  stepItemsForRecipe
+} = require("../miniprogram/utils/domain");
 
 function sampleRecipe() {
   return {
@@ -22,17 +32,21 @@ function sampleRecipe() {
 
 test("默认状态为空且保留完整的一周结构", () => {
   const state = createInitialState();
-  assert.equal(state.version, 3);
+  assert.equal(state.version, 4);
   assert.equal(state.weekPlan.length, 7);
   assert.deepEqual(state.recipes, []);
+  assert.deepEqual(state.inventory, []);
   assert.deepEqual(state.groceries, []);
   assert.deepEqual(state.selectedToday, []);
   assert.ok(state.weekPlan.every((day) => Object.values(day.meals).every((meal) => meal.length === 0)));
 });
 
 test("加入食材时合并同名采购项和来源", () => {
-  const state = createInitialState();
-  state.recipes = [sampleRecipe()];
+  const state = normalizeState({
+    ...createInitialState(),
+    recipes: [sampleRecipe()],
+    inventory: [{ id: "ginger", name: "姜", level: "enough", quantity: null, unit: "片" }]
+  });
   addRecipeIngredients(state, "cola-wings");
   addRecipeIngredients(state, "cola-wings");
   assert.equal(state.groceries.length, 2);
@@ -61,6 +75,59 @@ test("旧菜谱食材自动迁移为结构化条目", () => {
   ]);
 });
 
+test("v3 菜谱里的家里有标记会合并迁入全局库存", () => {
+  const state = normalizeState({ version: 3, recipes: [sampleRecipe()], groceries: [], selectedToday: [], weekPlan: [] });
+  assert.equal(state.version, 4);
+  assert.deepEqual(state.inventory.map((item) => item.name), ["姜"]);
+  assert.equal(state.recipes[0].ingredientItems.find((item) => item.name === "姜").stockStatus, "enough");
+  assert.equal(state.recipes[0].inventorySummary.shortageCount, 2);
+});
+
+test("精确库存只把短缺数量加入采购清单", () => {
+  const recipe = {
+    ...sampleRecipe(),
+    ingredientItems: [{ id: "egg", name: "鸡蛋", quantity: 6, unit: "个" }]
+  };
+  const state = normalizeState({
+    ...createInitialState(),
+    recipes: [recipe],
+    inventory: [{ id: "eggs", name: "鸡蛋", level: "low", quantity: 2, unit: "个" }]
+  });
+  const stock = ingredientStock(state.inventory, recipe.ingredientItems[0]);
+  assert.equal(stock.shortage, 4);
+  addRecipeIngredients(state, recipe.id);
+  assert.equal(state.groceries[0].quantity, 4);
+});
+
+test("多道菜共用食材时只扣除一次库存", () => {
+  const first = { ...sampleRecipe(), id: "egg-a", name: "蒸蛋", ingredientItems: [{ id: "a", name: "鸡蛋", quantity: 6, unit: "个" }] };
+  const second = { ...sampleRecipe(), id: "egg-b", name: "蛋炒饭", ingredientItems: [{ id: "b", name: "鸡蛋", quantity: 4, unit: "个" }] };
+  const state = normalizeState({
+    ...createInitialState(),
+    recipes: [first, second],
+    inventory: [{ id: "eggs", name: "鸡蛋", level: "low", quantity: 2, unit: "个" }]
+  });
+  addRecipeIngredients(state, first.id);
+  addRecipeIngredients(state, second.id);
+  assert.equal(state.groceries.length, 1);
+  assert.equal(state.groceries[0].quantity, 8);
+  assert.deepEqual(state.groceries[0].source, ["蒸蛋", "蛋炒饭"]);
+});
+
+test("已购买项目可以入库并从采购清单移除", () => {
+  const state = normalizeState({
+    ...createInitialState(),
+    inventory: [{ id: "eggs", name: "鸡蛋", level: "low", quantity: 2, unit: "个" }],
+    groceries: [
+      { id: "g1", category: "肉蛋", name: "鸡蛋", quantity: 4, unit: "个", source: ["蛋炒饭"], checked: true },
+      { id: "g2", category: "蔬菜", name: "番茄", quantity: 2, unit: "个", source: ["番茄炒蛋"], checked: false }
+    ]
+  });
+  assert.equal(movePurchasedToInventory(state), 1);
+  assert.equal(state.inventory.find((item) => item.name === "鸡蛋").quantity, 6);
+  assert.deepEqual(state.groceries.map((item) => item.name), ["番茄"]);
+});
+
 test("旧菜谱做法自动迁移为结构化步骤", () => {
   assert.deepEqual(stepItemsForRecipe({ steps: "洗净西红柿\n切块后翻炒" }), [
     { id: "step-0", text: "洗净西红柿" },
@@ -77,7 +144,7 @@ test("采购分类和状态修复规则稳定", () => {
   assert.equal(inferGroceryCategory("西兰花"), "蔬菜");
   assert.equal(inferGroceryCategory("小葱"), "蔬菜");
   const state = normalizeState({ recipes: [], groceries: [], selectedToday: [], weekPlan: [] });
-  assert.equal(state.version, 3);
+  assert.equal(state.version, 4);
   assert.equal(state.weekPlan.length, 7);
 });
 

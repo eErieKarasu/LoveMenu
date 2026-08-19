@@ -27,8 +27,9 @@ Page({
     wx.showToast({ title: added ? "已加入今日菜单" : "已经选过啦", icon: "none" });
   },
   addGrocery() {
-    app.update((state) => addRecipeIngredients(state, this.data.id));
-    wx.showToast({ title: "已加入采购清单", icon: "success" });
+    let added = 0;
+    app.update((state) => { added = addRecipeIngredients(state, this.data.id); });
+    wx.showToast({ title: added ? `已加入 ${added} 项缺货` : "库存已齐或清单已有", icon: "none" });
   },
   editRecipe() { wx.navigateTo({ url: `/pages/editor/index?id=${this.data.id}` }); }
 });

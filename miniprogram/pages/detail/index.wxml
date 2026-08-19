@@ -13,12 +13,12 @@
   </view>
 
   <view class="section card">
-    <text class="section-title">食材</text>
+    <view class="ingredient-heading"><text class="section-title">食材</text><text class="inventory-summary {{recipe.inventorySummary.ready ? 'ready' : ''}}">{{recipe.inventorySummary.text}}</text></view>
     <view class="ingredient-item" wx:for="{{recipe.ingredientItems}}" wx:key="id">
-      <view class="dot {{item.inStock ? '' : 'buy'}}"></view>
+      <view class="dot {{item.stockStatus}}"></view>
       <view class="item-main">
         <text class="name">{{item.name}}</text>
-        <text class="note">{{item.quantity}} {{item.unit}} · {{item.inStock ? '家里有' : '需要购买'}}</text>
+        <text class="note">需要 {{item.quantity}} {{item.unit}} · {{item.stockText}}</text>
       </view>
     </view>
     <text wx:if="{{!recipe.ingredientItems.length}}" class="muted-empty">还没有录入食材</text>
@@ -39,7 +39,7 @@
 
   <view class="sticky-actions">
     <button class="primary" bindtap="addToday">加入今日</button>
-    <button class="secondary" bindtap="addGrocery">加入采购</button>
+    <button class="secondary" bindtap="addGrocery">补齐缺货</button>
     <button class="secondary" bindtap="editRecipe">编辑</button>
   </view>
 </view>

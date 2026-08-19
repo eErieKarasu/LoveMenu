@@ -1,5 +1,9 @@
-const STORAGE_KEY = "lovemenu-state-v3";
-const LEGACY_STORAGE_KEYS = ["lovemenu-state-v2"];
+const STORAGE_KEY = "lovemenu-state-v4";
+const LEGACY_STORAGE_KEYS = ["lovemenu-state-v3", "lovemenu-state-v2"];
+
+function supportedState(state) {
+  return Boolean(state && (state.version === 3 || state.version === 4));
+}
 
 function cloudAvailable() {
   return Boolean(wx.cloud && wx.cloud.callFunction);
@@ -7,9 +11,13 @@ function cloudAvailable() {
 
 function readLocal(fallback) {
   try {
-    LEGACY_STORAGE_KEYS.forEach((key) => wx.removeStorageSync(key));
     const stored = wx.getStorageSync(STORAGE_KEY);
-    return stored && stored.version === 3 ? stored : fallback;
+    if (supportedState(stored)) return stored;
+    for (const key of LEGACY_STORAGE_KEYS) {
+      const legacy = wx.getStorageSync(key);
+      if (supportedState(legacy)) return legacy;
+    }
+    return fallback;
   } catch (error) {
     return fallback;
   }
@@ -24,8 +32,8 @@ async function loadState(fallback) {
   if (!cloudAvailable()) return { state: local, source: "local" };
   try {
     const response = await wx.cloud.callFunction({ name: "state", data: { action: "load" } });
-    if (response.result && response.result.ok && response.result.state && response.result.state.version === 3) {
-      writeLocal(response.result.state);
+    if (response.result && response.result.ok && supportedState(response.result.state)) {
+      if (response.result.state.version === 4) writeLocal(response.result.state);
       return { state: response.result.state, source: "cloud" };
     }
     return { state: local, source: "local" };

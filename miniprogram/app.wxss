@@ -54,6 +54,7 @@ button::after { border: 0; }
 .pill.accent { background: var(--accent-soft); color: #a94630; }
 .pill.sage { background: var(--sage-soft); color: #506d52; }
 .pill.blue { background: var(--blue-soft); color: #557184; }
+.pill.stock-missing { background: #f5e9de; color: #9b5e35; }
 .check-action { width: 66rpx; height: 66rpx; min-height: 66rpx; border-radius: 33rpx; background: var(--sage); color: white; line-height: 66rpx; padding: 0; }
 
 .scroll-row { white-space: nowrap; margin-right: -28rpx; }
@@ -88,7 +89,8 @@ button::after { border: 0; }
 .ingredient-item, .step-item, .score-item { display: flex; align-items: flex-start; gap: 18rpx; padding: 22rpx 0; border-bottom: 1rpx solid var(--line); }
 .ingredient-item:last-child, .step-item:last-child, .score-item:last-child { border: 0; }
 .dot { width: 18rpx; height: 18rpx; border-radius: 9rpx; background: var(--sage); margin-top: 11rpx; }
-.dot.buy { background: var(--accent); }
+.dot.low { background: #bd793f; }
+.dot.missing, .dot.buy { background: var(--accent); }
 .muted-empty { display: block; color: var(--muted); padding: 24rpx 0 6rpx; }
 .item-main { flex: 1; }
 .item-main .name { display: block; font-weight: 750; }
@@ -137,6 +139,7 @@ button::after { border: 0; }
 .grocery-title { display: flex; align-items: baseline; justify-content: space-between; gap: 18rpx; }
 .grocery-amount { flex: 0 0 auto; color: var(--ink); font-weight: 750; }
 .grocery-source { display: block; color: var(--muted); font-size: 22rpx; margin-top: 6rpx; }
+.grocery-hint { display: block; margin: 18rpx 20rpx 0; color: var(--muted); font-size: 22rpx; line-height: 1.55; text-align: center; }
 .profile-card { margin-bottom: 20rpx; }
 .profile-card .heading { display: block; font-size: 31rpx; font-weight: 800; margin-bottom: 12rpx; }
 .profile-card .body { display: block; color: var(--muted); line-height: 1.65; }

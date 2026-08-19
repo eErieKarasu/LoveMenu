@@ -12,8 +12,7 @@ function blankIngredient() {
     name: "",
     quantity: 1,
     unit: INGREDIENT_UNITS[0],
-    unitIndex: 0,
-    inStock: false
+    unitIndex: 0
   };
 }
 
@@ -82,11 +81,6 @@ Page({
       [`form.ingredientItems[${index}].unit`]: INGREDIENT_UNITS[unitIndex]
     });
   },
-  toggleIngredientStock(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const current = this.data.form.ingredientItems[index];
-    this.setData({ [`form.ingredientItems[${index}].inStock`]: !current.inStock });
-  },
   addIngredient() {
     this.setData({ "form.ingredientItems": this.data.form.ingredientItems.concat(blankIngredient()) });
   },
@@ -137,8 +131,7 @@ Page({
         id: item.id,
         name: item.name.trim(),
         quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
-        unit: item.unit,
-        inStock: Boolean(item.inStock)
+        unit: item.unit
       }));
     const data = {
       name,
@@ -149,8 +142,6 @@ Page({
       spice: existingRecipe && existingRecipe.spice ? existingRecipe.spice : "不辣",
       tags: existingRecipe && Array.isArray(existingRecipe.tags) ? existingRecipe.tags : [],
       ingredientItems,
-      pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
-      buy: ingredientItems.filter((item) => !item.inStock).map((item) => item.name),
       steps,
       ingredients: ingredientItems.map((item) => item.name),
       likes: existingRecipe && existingRecipe.likes ? existingRecipe.likes : { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" },

@@ -1,0 +1,59 @@
+<view class="screen">
+  <view class="page-header">
+    <view><text class="eyebrow">家里现在有什么</text><text class="title">家庭库存</text></view>
+    <button class="round-btn" bindtap="openAdd">＋</button>
+  </view>
+
+  <view class="inventory-hero">
+    <view><text class="inventory-total">{{summary.total}}</text><text class="inventory-unit"> 种食材</text></view>
+    <text class="inventory-copy">记个大概就好，做饭和采购时再顺手更新。</text>
+    <view class="inventory-metrics">
+      <view><text class="value">{{summary.enough}}</text><text class="name">充足</text></view>
+      <view><text class="value warn">{{summary.low}}</text><text class="name">不多了</text></view>
+      <view><text class="value muted">{{summary.out}}</text><text class="name">用完</text></view>
+    </view>
+  </view>
+
+  <view wx:if="{{adding}}" class="card inventory-form">
+    <view class="form-heading"><text>记录一种食材</text><button bindtap="cancelAdd">×</button></view>
+    <view class="field"><text class="label">食材名称</text><input class="input" value="{{form.name}}" placeholder="例如：鸡蛋" data-field="name" bindinput="updateForm" /></view>
+    <view class="stock-level-picker">
+      <button class="level-option {{form.level === 'enough' ? 'active' : ''}}" data-value="enough" bindtap="selectLevel">充足</button>
+      <button class="level-option {{form.level === 'low' ? 'active' : ''}}" data-value="low" bindtap="selectLevel">不多了</button>
+      <button class="level-option {{form.level === 'out' ? 'active' : ''}}" data-value="out" bindtap="selectLevel">用完</button>
+    </view>
+    <view class="inventory-form-grid">
+      <view class="field"><text class="label">数量（可不填）</text><input class="input" type="digit" value="{{form.quantity}}" placeholder="只记状态" data-field="quantity" bindinput="updateForm" /></view>
+      <view class="field"><text class="label">单位</text><picker mode="selector" range="{{units}}" value="{{form.unitIndex}}" bindchange="changeUnit"><view class="input picker-value">{{form.unit}}⌄</view></picker></view>
+      <view class="field category-field"><text class="label">分类</text><picker mode="selector" range="{{categories}}" value="{{form.categoryIndex}}" bindchange="changeCategory"><view class="input picker-value">{{form.category}}⌄</view></picker></view>
+    </view>
+    <button class="primary" bindtap="saveItem">保存到库存</button>
+  </view>
+
+  <view class="search inventory-search"><text>⌕</text><input placeholder="搜索库存食材" value="{{query}}" bindinput="onSearch" /></view>
+  <scroll-view scroll-x class="tabs inventory-tabs">
+    <button wx:for="{{filters}}" wx:key="value" class="chip {{item.active ? 'active' : ''}}" data-value="{{item.value}}" bindtap="selectFilter">{{item.label}}</button>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="loading">正在整理家庭库存…</view>
+  <view wx:elif="{{items.length}}" class="inventory-list">
+    <view class="inventory-row" wx:for="{{items}}" wx:key="id">
+      <view class="inventory-mark {{item.level}}">{{item.mark}}</view>
+      <view class="inventory-main">
+        <view class="inventory-name-row"><text class="inventory-name">{{item.name}}</text><text class="stock-badge {{item.level}}">{{item.levelLabel}}</text></view>
+        <text class="inventory-note">{{item.category}} · {{item.quantityText}}</text>
+        <view wx:if="{{item.tracked}}" class="quantity-stepper">
+          <button data-id="{{item.id}}" data-delta="-1" bindtap="adjustQuantity">−</button>
+          <text>{{item.quantity}} {{item.unit}}</text>
+          <button data-id="{{item.id}}" data-delta="1" bindtap="adjustQuantity">＋</button>
+        </view>
+        <button wx:else class="start-tracking" data-id="{{item.id}}" bindtap="startTracking">改为记录数量</button>
+      </view>
+      <view class="inventory-actions">
+        <button class="state-action" data-id="{{item.id}}" bindtap="cycleLevel">{{item.levelAction}}</button>
+        <button class="remove-action" data-id="{{item.id}}" bindtap="removeItem">移除</button>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="empty-state"><text class="headline">{{summary.total ? '没有符合条件的食材' : '库存还是空的'}}</text><text>{{summary.total ? '换个状态或关键词看看。' : '先记录几样常用食材，菜谱就能自动判断缺什么。'}}</text><button wx:if="{{!summary.total}}" class="primary empty-action" bindtap="openAdd">记录第一种食材</button></view>
+</view>
