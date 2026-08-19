@@ -22,7 +22,6 @@
     <view class="field"><text class="label">难度</text><view class="meta-row"><button wx:for="{{difficulties}}" wx:key="*this" class="chip {{form.difficulty === item ? 'active' : ''}}" data-value="{{item}}" bindtap="setDifficulty">{{item}}</button></view></view>
   </view>
   <view class="card form-card">
-    <view class="field"><text class="label">标签</text><input class="input" value="{{form.tagsText}}" placeholder="使用顿号或逗号分隔" data-field="tagsText" bindinput="updateField" /><text class="hint">使用顿号或逗号分隔</text></view>
     <view class="field ingredient-field">
       <text class="label">食材</text>
       <view class="ingredient-list">
@@ -43,6 +42,18 @@
       <button class="add-ingredient" bindtap="addIngredient">＋ 添加食材</button>
     </view>
   </view>
-  <view class="card form-card"><view class="field"><text class="label">做法步骤</text><textarea class="textarea" value="{{form.stepsText}}" placeholder="每行填写一个步骤" data-field="stepsText" bindinput="updateField" /><text class="hint">每行一个步骤，做饭时更容易查看</text></view></view>
+  <view class="card form-card">
+    <view class="field step-field">
+      <text class="label">做法步骤</text>
+      <view class="step-list">
+        <view class="step-edit-row" wx:for="{{form.steps}}" wx:key="id">
+          <view class="step-edit-number">{{index + 1}}</view>
+          <textarea class="step-input" auto-height maxlength="-1" value="{{item.text}}" placeholder="描述这一步怎么做" data-index="{{index}}" bindinput="updateStep" />
+          <button class="step-remove" data-index="{{index}}" bindtap="removeStep">×</button>
+        </view>
+      </view>
+      <button class="add-step" bindtap="addStep">＋ 添加步骤</button>
+    </view>
+  </view>
   <view class="save-bar"><button class="secondary" bindtap="cancel">取消</button><button class="primary" bindtap="save">保存菜谱</button></view>
 </view>

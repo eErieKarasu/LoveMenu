@@ -25,10 +25,11 @@
   </view>
 
   <view class="section card">
-    <text class="section-title">做法</text>
-    <view class="step-item" wx:for="{{recipe.steps}}" wx:key="index">
-      <view class="step-number">{{index + 1}}</view><view class="item-main"><text class="name">{{item}}</text><text class="note">做饭前快速查看</text></view>
+    <text class="section-title">做法步骤</text>
+    <view class="step-item" wx:for="{{recipe.steps}}" wx:key="id">
+      <view class="step-number">{{index + 1}}</view><view class="item-main"><text class="name">{{item.text}}</text><text wx:if="{{item.duration}}" class="note">约 {{item.duration}} 分钟</text></view>
     </view>
+    <text wx:if="{{!recipe.steps.length}}" class="muted-empty">还没有录入做法步骤</text>
   </view>
 
   <view class="section card">

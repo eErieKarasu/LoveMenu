@@ -3,6 +3,7 @@ const { recipeById } = require("../../utils/domain");
 const app = getApp();
 const INGREDIENT_UNITS = ["个", "克", "斤", "毫升", "升", "勺", "根", "把", "片", "块", "颗", "瓶", "袋", "盒", "份"];
 let ingredientIdSeed = 0;
+let stepIdSeed = 0;
 
 function blankIngredient() {
   ingredientIdSeed += 1;
@@ -16,15 +17,19 @@ function blankIngredient() {
   };
 }
 
-function blankForm() {
+function blankStep() {
+  stepIdSeed += 1;
   return {
-    name: "", categories: ["快手菜"], prep: 8, cook: 12, difficulty: "简单",
-    tagsText: "", ingredientItems: [blankIngredient()], stepsText: ""
+    id: `step-new-${Date.now()}-${stepIdSeed}`,
+    text: ""
   };
 }
 
-function splitText(value) {
-  return value.split(/[、,，\n]/).map((item) => item.trim()).filter(Boolean);
+function blankForm() {
+  return {
+    name: "", categories: ["快手菜"], prep: 8, cook: 12, difficulty: "简单",
+    ingredientItems: [blankIngredient()], steps: [blankStep()]
+  };
 }
 
 Page({
@@ -45,14 +50,13 @@ Page({
     const form = {
       name: recipe.name, categories: recipe.categories.slice(), prep: recipe.prep, cook: recipe.cook,
       difficulty: recipe.difficulty,
-      tagsText: recipe.tags.join("、"),
       ingredientItems: recipe.ingredientItems.length
         ? recipe.ingredientItems.map((item) => ({
           ...item,
           unitIndex: Math.max(0, INGREDIENT_UNITS.indexOf(item.unit))
         }))
         : [blankIngredient()],
-      stepsText: recipe.steps.join("\n")
+      steps: recipe.steps.length ? recipe.steps.map((step) => ({ ...step })) : [blankStep()]
     };
     this.setData({ form, dishCategories: this.data.dishCategories.map((item) => ({ ...item, active: form.categories.includes(item.name) })) });
   },
@@ -91,6 +95,18 @@ Page({
     const items = this.data.form.ingredientItems.filter((_, itemIndex) => itemIndex !== index);
     this.setData({ "form.ingredientItems": items.length ? items : [blankIngredient()] });
   },
+  updateStep(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    this.setData({ [`form.steps[${index}].text`]: event.detail.value });
+  },
+  addStep() {
+    this.setData({ "form.steps": this.data.form.steps.concat(blankStep()) });
+  },
+  removeStep(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const steps = this.data.form.steps.filter((_, stepIndex) => stepIndex !== index);
+    this.setData({ "form.steps": steps.length ? steps : [blankStep()] });
+  },
   toggleCategory(event) {
     const value = event.currentTarget.dataset.value;
     const selected = this.data.form.categories.includes(value)
@@ -108,7 +124,13 @@ Page({
     const existingRecipe = this.data.id ? recipeById(app.getState(), this.data.id) : null;
     const name = form.name.trim();
     if (!name) { this.setData({ nameError: true }); wx.showToast({ title: "请先填写菜名", icon: "none" }); return; }
-    const steps = form.stepsText.split(/\n/).map((item) => item.trim()).filter(Boolean);
+    const steps = form.steps
+      .filter((step) => step.text.trim())
+      .map((step) => {
+        const normalized = { id: step.id, text: step.text.trim() };
+        if (Number(step.duration) > 0) normalized.duration = Number(step.duration);
+        return normalized;
+      });
     const ingredientItems = form.ingredientItems
       .filter((item) => item.name.trim())
       .map((item) => ({
@@ -125,11 +147,11 @@ Page({
       difficulty: form.difficulty,
       flavor: existingRecipe && existingRecipe.flavor ? existingRecipe.flavor : "家常",
       spice: existingRecipe && existingRecipe.spice ? existingRecipe.spice : "不辣",
-      tags: splitText(form.tagsText),
+      tags: existingRecipe && Array.isArray(existingRecipe.tags) ? existingRecipe.tags : [],
       ingredientItems,
       pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
       buy: ingredientItems.filter((item) => !item.inStock).map((item) => item.name),
-      steps: steps.length ? steps : ["处理主要食材。", "热锅后按顺序下锅并调味。", "试味后出锅。"],
+      steps,
       ingredients: ingredientItems.map((item) => item.name),
       likes: existingRecipe && existingRecipe.likes ? existingRecipe.likes : { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" },
       recent: existingRecipe && existingRecipe.recent ? existingRecipe.recent : "刚刚",

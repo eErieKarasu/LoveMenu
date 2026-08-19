@@ -1,6 +1,6 @@
 <view class="screen">
   <view class="page-header">
-    <view><text class="eyebrow">家庭常做菜</text><text class="title">菜谱库</text></view>
+    <view><text class="title">菜谱库</text></view>
     <button class="round-btn" bindtap="openEditor">＋</button>
   </view>
   <view class="search"><text>⌕</text><input placeholder="搜索菜名、食材或标签" value="{{query}}" bindinput="onSearch" /></view>

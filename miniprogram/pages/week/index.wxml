@@ -1,6 +1,6 @@
 <view class="screen">
   <view class="page-header">
-    <view><text class="eyebrow">未来 7 天</text><text class="title">一周菜单规划</text></view>
+    <view><text class="title">一周菜单规划</text></view>
     <button class="round-btn" bindtap="regenerate">↻</button>
   </view>
   <view wx:if="{{loading}}" class="loading">正在生成一周菜单…</view>

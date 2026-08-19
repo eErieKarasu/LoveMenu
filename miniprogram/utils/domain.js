@@ -40,10 +40,34 @@ function ingredientItemsForRecipe(recipe) {
   }));
 }
 
+function stepItemsForRecipe(recipe) {
+  const source = Array.isArray(recipe.steps)
+    ? recipe.steps
+    : typeof recipe.steps === "string"
+      ? recipe.steps.split(/\n/)
+      : [];
+
+  return source
+    .map((step, index) => {
+      if (typeof step === "string") {
+        return { id: `step-${index}`, text: step.trim() };
+      }
+      if (!step || typeof step !== "object") return null;
+      const normalized = {
+        id: step.id || `step-${index}`,
+        text: String(step.text || "").trim()
+      };
+      if (Number(step.duration) > 0) normalized.duration = Number(step.duration);
+      return normalized;
+    })
+    .filter((step) => step && step.text);
+}
+
 function normalizeRecipe(recipe) {
   const ingredientItems = ingredientItemsForRecipe(recipe);
   return {
     ...recipe,
+    steps: stepItemsForRecipe(recipe),
     ingredientItems,
     ingredients: ingredientItems.map((item) => item.name),
     pantry: ingredientItems.filter((item) => item.inStock).map((item) => item.name),
@@ -134,5 +158,6 @@ module.exports = {
   mealContextForHour,
   normalizeState,
   recipeById,
-  selectedTodayRecipes
+  selectedTodayRecipes,
+  stepItemsForRecipe
 };

@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
-const { addRecipeIngredients, buildWeekPlan, inferGroceryCategory, ingredientItemsForRecipe, mealContextForHour, normalizeState } = require("../miniprogram/utils/domain");
+const { addRecipeIngredients, buildWeekPlan, inferGroceryCategory, ingredientItemsForRecipe, mealContextForHour, normalizeState, stepItemsForRecipe } = require("../miniprogram/utils/domain");
 
 function sampleRecipe() {
   return {
@@ -58,6 +58,17 @@ test("旧菜谱食材自动迁移为结构化条目", () => {
   assert.deepEqual(items.map((item) => ({ name: item.name, quantity: item.quantity, unit: item.unit, inStock: item.inStock })), [
     { name: "鸡蛋", quantity: 1, unit: "份", inStock: true },
     { name: "西红柿", quantity: 1, unit: "份", inStock: false }
+  ]);
+});
+
+test("旧菜谱做法自动迁移为结构化步骤", () => {
+  assert.deepEqual(stepItemsForRecipe({ steps: "洗净西红柿\n切块后翻炒" }), [
+    { id: "step-0", text: "洗净西红柿" },
+    { id: "step-1", text: "切块后翻炒" }
+  ]);
+  assert.deepEqual(stepItemsForRecipe({ steps: ["鸡蛋打散", { id: "finish", text: "盛出装盘", duration: 2 }] }), [
+    { id: "step-0", text: "鸡蛋打散" },
+    { id: "finish", text: "盛出装盘", duration: 2 }
   ]);
 });
 
