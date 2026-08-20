@@ -20,6 +20,7 @@ button { margin: 0; }
 button::after { border: 0; }
 
 .screen { min-height: 100vh; padding: 36rpx 28rpx 64rpx; }
+.tab-screen { padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); }
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin: 8rpx 4rpx 30rpx; }
 .eyebrow { display: block; color: var(--accent); font-size: 23rpx; font-weight: 700; letter-spacing: 2rpx; margin-bottom: 8rpx; }
 .title { display: block; font-family: "Songti SC", serif; font-size: 54rpx; font-weight: 800; line-height: 1.16; }

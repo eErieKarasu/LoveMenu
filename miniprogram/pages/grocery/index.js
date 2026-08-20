@@ -1,10 +1,11 @@
 const { GROCERY_GROUPS } = require("../../utils/constants");
 const { movePurchasedToInventory } = require("../../utils/domain");
+const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
 Page({
   data: { loading: true, groups: [] },
-  async onShow() { await app.ensureReady(); this.refresh(); },
+  async onShow() { selectTab(this, 2); await app.ensureReady(); this.refresh(); },
   refresh() {
     const groceries = app.getState().groceries;
     const groups = GROCERY_GROUPS.map((name) => ({

@@ -1,4 +1,4 @@
-<view class="screen">
+<view class="screen tab-screen">
   <view class="page-header">
     <view><text class="title">采购清单</text></view>
     <button class="round-btn" bindtap="completePurchased">✓</button>

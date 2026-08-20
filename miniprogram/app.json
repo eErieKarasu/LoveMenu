@@ -15,6 +15,7 @@
     "backgroundTextStyle": "light"
   },
   "tabBar": {
+    "custom": true,
     "color": "#8a8177",
     "selectedColor": "#d46245",
     "backgroundColor": "#fffdf9",
@@ -23,26 +24,26 @@
       {
         "pagePath": "pages/today/index",
         "text": "今日",
-        "iconPath": "assets/tabs/today.png",
-        "selectedIconPath": "assets/tabs/today-active.png"
+        "iconPath": "assets/tabs/v2/today.png",
+        "selectedIconPath": "assets/tabs/v2/today-active.png"
       },
       {
         "pagePath": "pages/recipes/index",
         "text": "菜谱",
-        "iconPath": "assets/tabs/recipes.png",
-        "selectedIconPath": "assets/tabs/recipes-active.png"
+        "iconPath": "assets/tabs/v2/recipes.png",
+        "selectedIconPath": "assets/tabs/v2/recipes-active.png"
       },
       {
         "pagePath": "pages/grocery/index",
         "text": "采购",
-        "iconPath": "assets/tabs/grocery.png",
-        "selectedIconPath": "assets/tabs/grocery-active.png"
+        "iconPath": "assets/tabs/v2/grocery.png",
+        "selectedIconPath": "assets/tabs/v2/grocery-active.png"
       },
       {
         "pagePath": "pages/inventory/index",
         "text": "库存",
-        "iconPath": "assets/tabs/inventory.png",
-        "selectedIconPath": "assets/tabs/inventory-active.png"
+        "iconPath": "assets/tabs/v2/inventory.png",
+        "selectedIconPath": "assets/tabs/v2/inventory-active.png"
       }
     ]
   },

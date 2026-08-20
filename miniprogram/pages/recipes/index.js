@@ -1,4 +1,5 @@
 const { CATEGORIES } = require("../../utils/constants");
+const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
 Page({
@@ -11,7 +12,7 @@ Page({
     emptyTitle: "还没有菜谱",
     emptyCopy: "点击右上角的加号，记录第一道家常菜。"
   },
-  async onShow() { await app.ensureReady(); this.filter(); },
+  async onShow() { selectTab(this, 1); await app.ensureReady(); this.filter(); },
   filter() {
     const { category, query } = this.data;
     const normalized = query.trim().toLowerCase();

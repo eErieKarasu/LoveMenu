@@ -1,4 +1,4 @@
-<view class="screen">
+<view class="screen tab-screen">
   <view class="page-header">
     <view><text class="eyebrow">家里现在有什么</text><text class="title">家庭库存</text></view>
     <button class="round-btn" bindtap="openAdd">＋</button>

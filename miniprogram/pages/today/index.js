@@ -1,4 +1,5 @@
 const { addRecipeIngredients, mealContextForHour, selectedTodayRecipes } = require("../../utils/domain");
+const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
 Page({
@@ -14,6 +15,7 @@ Page({
   },
 
   async onShow() {
+    selectTab(this, 0);
     await app.ensureReady();
     this.refresh();
   },

@@ -1,5 +1,6 @@
 const { GROCERY_GROUPS } = require("../../utils/constants");
 const { inferGroceryCategory, inventoryItemForIngredient, normalizeInventoryItem } = require("../../utils/domain");
+const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
 const UNITS = ["个", "克", "斤", "毫升", "升", "勺", "根", "把", "片", "块", "颗", "瓶", "袋", "盒", "份"];
@@ -32,7 +33,7 @@ Page({
     units: UNITS,
     categories: GROCERY_GROUPS
   },
-  async onShow() { await app.ensureReady(); this.refresh(); },
+  async onShow() { selectTab(this, 3); await app.ensureReady(); this.refresh(); },
   refresh() {
     const inventory = app.getState().inventory;
     const query = this.data.query.trim().toLowerCase();

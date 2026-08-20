@@ -31,6 +31,16 @@ for (const page of appConfig.pages) {
 
 for (const tab of appConfig.tabBar.list) {
   if (!appConfig.pages.includes(tab.pagePath)) errors.push(`TabBar 页面未注册：${tab.pagePath}`);
+  for (const icon of [tab.iconPath, tab.selectedIconPath]) {
+    if (!fs.existsSync(path.join(root, "miniprogram", icon))) errors.push(`缺少 TabBar 图标：${icon}`);
+  }
+}
+
+if (appConfig.tabBar.custom) {
+  for (const extension of ["js", "json", "wxml", "wxss"]) {
+    const file = path.join(root, "miniprogram/custom-tab-bar", `index.${extension}`);
+    if (!fs.existsSync(file)) errors.push(`缺少自定义 TabBar 文件：${path.relative(root, file)}`);
+  }
 }
 
 if (!fs.existsSync(path.join(root, "cloudfunctions/state/index.js"))) errors.push("缺少 state 云函数");
