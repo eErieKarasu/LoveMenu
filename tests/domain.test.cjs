@@ -28,7 +28,6 @@ function sampleRecipe() {
       { id: "i3", name: "姜", quantity: 2, unit: "片", inStock: true }
     ],
     tags: [],
-    likes: {},
     steps: [],
     favorite: false
   };

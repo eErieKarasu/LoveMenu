@@ -13,12 +13,7 @@ Page({
   refresh() {
     const recipe = recipeById(app.getState(), this.data.id);
     if (!recipe) { wx.showToast({ title: "菜谱不存在", icon: "none" }); return; }
-    const scores = [
-      { mark: "我", name: `我：${recipe.likes["我"]}`, note: "默认口味" },
-      { mark: "伴", name: `伴侣：${recipe.likes["伴侣"]}`, note: "晚餐参考" },
-      { mark: "小", name: `小朋友：${recipe.likes["小朋友"]}`, note: "少辣优先" }
-    ];
-    this.setData({ recipe, scores, mealTargetLabel: mealLabel(app.getTodayMealTarget()) });
+    this.setData({ recipe, mealTargetLabel: mealLabel(app.getTodayMealTarget()) });
   },
   toggleFavorite() {
     app.update((state) => { const recipe = recipeById(state, this.data.id); recipe.favorite = !recipe.favorite; });

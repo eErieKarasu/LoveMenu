@@ -255,7 +255,6 @@ Page({
       ingredientItems,
       steps,
       ingredients: ingredientItems.map((item) => item.name),
-      likes: existingRecipe && existingRecipe.likes ? existingRecipe.likes : { "我": "喜欢", "伴侣": "一般", "小朋友": "一般" },
       recent: existingRecipe && existingRecipe.recent ? existingRecipe.recent : "刚刚",
       favorite: existingRecipe ? Boolean(existingRecipe.favorite) : false
     };

@@ -34,11 +34,6 @@
     <text wx:if="{{!recipe.steps.length}}" class="muted-empty">还没有录入做法步骤</text>
   </view>
 
-  <view class="section card">
-    <text class="section-title">家庭评分</text>
-    <view class="score-item" wx:for="{{scores}}" wx:key="name"><view class="dish-mark">{{item.mark}}</view><view class="item-main"><text class="name">{{item.name}}</text><text class="note">{{item.note}}</text></view></view>
-  </view>
-
   <view class="sticky-actions">
     <button class="primary" bindtap="addToday">{{mealTargetLabel ? '加入' + mealTargetLabel : '安排到今天'}}</button>
     <button class="secondary" bindtap="editRecipe">编辑</button>
