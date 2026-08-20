@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
+const { imageForRecipe } = require("../miniprogram/utils/recipe-images");
 const {
   addRecipeToTodayMeal,
   addRecipeIngredients,
@@ -33,6 +34,13 @@ function sampleRecipe() {
     favorite: false
   };
 }
+
+test("常见菜名会匹配本地视觉菜谱图", () => {
+  assert.match(imageForRecipe({ name: "番茄炒蛋" }), /dish-tomato-eggs/);
+  assert.match(imageForRecipe({ name: "青椒土豆丝" }), /dish-green-pepper-potato/);
+  assert.match(imageForRecipe({ name: "玉米排骨汤" }), /dish-corn-rib-soup/);
+  assert.equal(imageForRecipe({ name: "未知菜品" }), "");
+});
 
 test("默认状态为空且保留完整的一周结构", () => {
   const state = createInitialState();

@@ -8,18 +8,13 @@ const {
   todayRecipeIds
 } = require("../../utils/domain");
 const { selectTab } = require("../../utils/tab-bar");
+const { imageForRecipe } = require("../../utils/recipe-images");
 const app = getApp();
 
 const MEAL_ILLUSTRATIONS = {
   lunch: "/assets/illustrations/meal-lunch-bowl.svg",
   dinner: "/assets/illustrations/meal-dinner-pot.svg"
 };
-
-function imageForRecipe(recipe) {
-  return /(番茄|西红柿).*(蛋)|(蛋).*(番茄|西红柿)/.test(recipe.name)
-    ? "/assets/images/dish-tomato-eggs-20260820.jpg"
-    : "";
-}
 
 Page({
   data: {
