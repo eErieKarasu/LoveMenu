@@ -5,6 +5,10 @@
     </view>
     <button class="round-btn" bindtap="openEditor">＋</button>
   </view>
+  <view wx:if="{{mealTargetLabel}}" class="meal-target-bar">
+    <view><text class="target-label">正在安排</text><text class="target-meal">{{mealTargetLabel}}</text></view>
+    <button bindtap="clearMealTarget">取消</button>
+  </view>
   <view class="search"><text>⌕</text><input placeholder="搜索菜名、食材或标签" value="{{query}}" bindinput="onSearch" /></view>
   <scroll-view scroll-x class="tabs">
     <button wx:for="{{categories}}" wx:key="*this" class="chip {{category === item ? 'active' : ''}}" data-value="{{item}}" bindtap="selectCategory">{{item}}</button>
@@ -20,7 +24,7 @@
         </view>
       </view>
       <view class="card-footer">
-        <button class="primary small-btn" catchtap="addToday" data-id="{{item.id}}">加入今日</button>
+        <button class="primary small-btn" catchtap="addToday" data-id="{{item.id}}">{{mealTargetLabel ? '加入' + mealTargetLabel : '安排到今天'}}</button>
       </view>
     </view>
   </view>

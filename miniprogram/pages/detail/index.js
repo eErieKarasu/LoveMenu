@@ -1,8 +1,13 @@
-const { addRecipeIngredients, recipeById } = require("../../utils/domain");
+const { TODAY_MEALS, addRecipeIngredients, addRecipeToTodayMeal, recipeById } = require("../../utils/domain");
 const app = getApp();
 
+function mealLabel(mealKey) {
+  const meal = TODAY_MEALS.find((item) => item.key === mealKey);
+  return meal ? meal.label : "";
+}
+
 Page({
-  data: { id: "", recipe: null },
+  data: { id: "", recipe: null, mealTargetLabel: "" },
   onLoad(options) { this.setData({ id: options.id || "" }); },
   async onShow() { await app.ensureReady(); this.refresh(); },
   refresh() {
@@ -13,18 +18,29 @@ Page({
       { mark: "伴", name: `伴侣：${recipe.likes["伴侣"]}`, note: "晚餐参考" },
       { mark: "小", name: `小朋友：${recipe.likes["小朋友"]}`, note: "少辣优先" }
     ];
-    this.setData({ recipe, scores });
+    this.setData({ recipe, scores, mealTargetLabel: mealLabel(app.getTodayMealTarget()) });
   },
   toggleFavorite() {
     app.update((state) => { const recipe = recipeById(state, this.data.id); recipe.favorite = !recipe.favorite; });
     this.refresh();
   },
   addToday() {
-    let added = false;
-    app.update((state) => {
-      if (!state.selectedToday.includes(this.data.id)) { state.selectedToday.push(this.data.id); added = true; }
+    const target = app.getTodayMealTarget();
+    if (target) {
+      this.addToMeal(target);
+      return;
+    }
+    wx.showActionSheet({
+      itemList: TODAY_MEALS.map((meal) => `加入${meal.label}`),
+      success: ({ tapIndex }) => this.addToMeal(TODAY_MEALS[tapIndex].key)
     });
-    wx.showToast({ title: added ? "已加入今日菜单" : "已经选过啦", icon: "none" });
+  },
+  addToMeal(mealKey) {
+    let added = false;
+    app.update((state) => { added = addRecipeToTodayMeal(state, this.data.id, mealKey); });
+    app.clearTodayMealTarget();
+    this.setData({ mealTargetLabel: "" });
+    wx.showToast({ title: added ? `已加入${mealLabel(mealKey)}` : `${mealLabel(mealKey)}已有这道菜`, icon: "none" });
   },
   addGrocery() {
     let added = 0;

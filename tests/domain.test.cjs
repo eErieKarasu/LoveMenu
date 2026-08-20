@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
 const {
+  addRecipeToTodayMeal,
   addRecipeIngredients,
   buildWeekPlan,
   inferGroceryCategory,
@@ -10,6 +11,8 @@ const {
   mealContextForHour,
   movePurchasedToInventory,
   normalizeState,
+  removeRecipeFromTodayMeal,
+  selectedTodayRecipes,
   stepItemsForRecipe
 } = require("../miniprogram/utils/domain");
 
@@ -32,12 +35,12 @@ function sampleRecipe() {
 
 test("默认状态为空且保留完整的一周结构", () => {
   const state = createInitialState();
-  assert.equal(state.version, 4);
+  assert.equal(state.version, 5);
   assert.equal(state.weekPlan.length, 7);
   assert.deepEqual(state.recipes, []);
   assert.deepEqual(state.inventory, []);
   assert.deepEqual(state.groceries, []);
-  assert.deepEqual(state.selectedToday, []);
+  assert.deepEqual(state.todayPlan.meals, { breakfast: [], lunch: [], dinner: [] });
   assert.ok(state.weekPlan.every((day) => Object.values(day.meals).every((meal) => meal.length === 0)));
 });
 
@@ -77,7 +80,7 @@ test("旧菜谱食材自动迁移为结构化条目", () => {
 
 test("v3 菜谱里的家里有标记会合并迁入全局库存", () => {
   const state = normalizeState({ version: 3, recipes: [sampleRecipe()], groceries: [], selectedToday: [], weekPlan: [] });
-  assert.equal(state.version, 4);
+  assert.equal(state.version, 5);
   assert.deepEqual(state.inventory.map((item) => item.name), ["姜"]);
   assert.equal(state.recipes[0].ingredientItems.find((item) => item.name === "姜").stockStatus, "enough");
   assert.equal(state.recipes[0].inventorySummary.shortageCount, 2);
@@ -144,7 +147,7 @@ test("采购分类和状态修复规则稳定", () => {
   assert.equal(inferGroceryCategory("西兰花"), "蔬菜");
   assert.equal(inferGroceryCategory("小葱"), "蔬菜");
   const state = normalizeState({ recipes: [], groceries: [], selectedToday: [], weekPlan: [] });
-  assert.equal(state.version, 4);
+  assert.equal(state.version, 5);
   assert.equal(state.weekPlan.length, 7);
 });
 
@@ -156,9 +159,33 @@ test("重新生成一周菜单保持七天结构", () => {
   assert.ok(plan.every((day) => day.meals.dinner.length === 2));
 });
 
-test("首页标题根据当前餐次变化", () => {
-  assert.deepEqual(mealContextForHour(9), { period: "早餐", prompt: "早上吃点什么？" });
-  assert.deepEqual(mealContextForHour(10), { period: "午餐", prompt: "中午吃点什么？" });
-  assert.deepEqual(mealContextForHour(14), { period: "午餐", prompt: "中午吃点什么？" });
-  assert.deepEqual(mealContextForHour(15), { period: "晚餐", prompt: "今晚吃点什么？" });
+test("当前餐次只用于突出当前时段", () => {
+  assert.deepEqual(mealContextForHour(9), { key: "breakfast", period: "早餐", prompt: "早上吃点什么？" });
+  assert.deepEqual(mealContextForHour(10), { key: "lunch", period: "午餐", prompt: "中午吃点什么？" });
+  assert.deepEqual(mealContextForHour(14), { key: "lunch", period: "午餐", prompt: "中午吃点什么？" });
+  assert.deepEqual(mealContextForHour(15), { key: "dinner", period: "晚餐", prompt: "今晚吃点什么？" });
+});
+
+test("今日菜单按早午晚餐独立安排", () => {
+  const state = normalizeState({ ...createInitialState(), recipes: [sampleRecipe()] });
+  assert.equal(addRecipeToTodayMeal(state, "cola-wings", "lunch"), true);
+  assert.equal(addRecipeToTodayMeal(state, "cola-wings", "lunch"), false);
+  assert.deepEqual(selectedTodayRecipes(state, "breakfast"), []);
+  assert.deepEqual(selectedTodayRecipes(state, "lunch").map((recipe) => recipe.id), ["cola-wings"]);
+  assert.equal(removeRecipeFromTodayMeal(state, "cola-wings", "lunch"), true);
+  assert.deepEqual(selectedTodayRecipes(state, "lunch"), []);
+});
+
+test("旧版扁平今日菜单会迁移到当前餐次", () => {
+  const state = normalizeState({ version: 4, recipes: [sampleRecipe()], inventory: [], groceries: [], selectedToday: ["cola-wings"], weekPlan: [] });
+  assert.deepEqual(selectedTodayRecipes(state).map((recipe) => recipe.id), ["cola-wings"]);
+});
+
+test("隔天后今日菜单自动重置", () => {
+  const state = normalizeState({
+    ...createInitialState(),
+    recipes: [sampleRecipe()],
+    todayPlan: { dateKey: "2000-01-01", meals: { breakfast: ["cola-wings"], lunch: [], dinner: [] } }
+  });
+  assert.deepEqual(selectedTodayRecipes(state), []);
 });

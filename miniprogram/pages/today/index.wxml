@@ -1,46 +1,64 @@
-<view class="screen tab-screen">
-  <view wx:if="{{loading}}" class="loading">正在整理家里的菜单…</view>
+<view class="screen tab-screen today-screen">
+  <view wx:if="{{loading}}" class="loading">正在整理今天的菜单…</view>
   <block wx:else>
-    <view class="page-header">
+    <view class="page-header today-header">
       <view>
-        <text class="eyebrow">{{dateLabel}} · {{period}}</text>
-        <text class="title">{{titleText}}</text>
-        <text class="subtitle">{{subtitleText}}</text>
+        <text class="eyebrow">{{dateLabel}} · 今日菜单</text>
+        <text class="title">今天吃什么？</text>
+        <text class="subtitle">{{summaryText}}</text>
       </view>
     </view>
 
-    <view class="hero-card">
-      <view class="topline">
-        <text class="strong">{{selected.length ? '已选菜单' : '还没选菜'}}</text>
-        <text wx:if="{{selected.length}}">{{selected.length}} 道 · 约 {{totalTime}} 分钟</text>
-      </view>
-      <block wx:if="{{selected.length}}">
-        <view class="dish-row" wx:for="{{selected}}" wx:key="id">
-          <view class="dish-mark">{{item.initial}}</view>
-          <view class="dish-main" bindtap="openRecipe" data-id="{{item.id}}">
-            <text class="dish-name">{{item.name}}</text>
-            <view class="meta-row">
-              <text class="pill accent">{{item.categories[0]}}</text>
-              <text class="pill">{{item.time}} 分钟</text>
-              <text class="pill sage">{{item.spice}}</text>
+    <view class="day-progress" aria-label="今日已安排 {{plannedMealCount}} 餐">
+      <view wx:for="{{meals}}" wx:key="key" class="progress-segment {{item.dishes.length ? 'filled' : ''}} {{item.isCurrent ? 'current' : ''}}"></view>
+    </view>
+
+    <view class="meal-list">
+      <view wx:for="{{meals}}" wx:key="key" class="meal-card {{item.isCurrent ? 'current' : ''}} {{item.dishes.length ? 'planned' : ''}}">
+        <view class="meal-card-head">
+          <view class="meal-title-group">
+            <view class="meal-name-line">
+              <text class="meal-name">{{item.label}}</text>
+              <text wx:if="{{item.isCurrent}}" class="now-pill">现在</text>
             </view>
+            <text class="meal-time">{{item.timeLabel}}</text>
           </view>
-          <button class="check-action" bindtap="removeDish" data-id="{{item.id}}">✓</button>
+          <text class="meal-status">{{item.statusText}}</text>
         </view>
-        <view class="action-row">
-          <button class="secondary" bindtap="goRecipes">继续加菜</button>
-          <button class="primary" bindtap="addAllToGrocery">加入采购</button>
+
+        <block wx:if="{{item.dishes.length}}">
+          <view class="today-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id">
+            <view class="dish-mark">{{dish.initial}}</view>
+            <view class="dish-main" bindtap="openRecipe" data-id="{{dish.id}}">
+              <text class="dish-name">{{dish.name}}</text>
+              <text class="dish-detail">{{dish.categoryLabel}} · {{dish.time}} 分钟 · {{dish.spice}}</text>
+            </view>
+            <button class="remove-action" catchtap="removeDish" data-id="{{dish.id}}" data-meal="{{item.key}}" aria-label="从{{item.label}}移除{{dish.name}}">×</button>
+          </view>
+        </block>
+
+        <view wx:else class="meal-empty">
+          <view>
+            <text class="meal-prompt">{{item.prompt}}</text>
+            <text class="meal-empty-note">选一道家里真正想吃的。</text>
+          </view>
         </view>
-      </block>
-      <view wx:else class="empty-copy">
-        <text class="headline">想吃什么？</text>
-        <text class="body">去菜谱看一看。</text>
-        <button class="primary" bindtap="goRecipes">去菜谱点菜</button>
+
+        <button class="meal-action {{item.actionQuiet ? 'quiet' : ''}}" bindtap="goRecipes" data-meal="{{item.key}}">{{item.actionText}}</button>
       </view>
+    </view>
+
+    <view wx:if="{{selectedCount}}" class="grocery-summary">
+      <view class="grocery-copy">
+        <text class="grocery-eyebrow">今日采购</text>
+        <text class="grocery-title">一次补齐今天要用的食材</text>
+        <text class="grocery-note">已根据库存自动跳过家里已有的。</text>
+      </view>
+      <button class="primary grocery-action" bindtap="addAllToGrocery">汇总加入采购</button>
     </view>
 
     <view class="section" wx:if="{{recent.length}}">
-      <text class="section-title">快速点菜</text>
+      <text class="section-title">{{selectedCount ? '顺手再选一道' : '最近常做'}}</text>
       <scroll-view scroll-x class="scroll-row" enable-flex>
         <view class="mini-card" wx:for="{{recent}}" wx:key="id" bindtap="openRecipe" data-id="{{item.id}}">
           <text class="name">{{item.name}}</text>

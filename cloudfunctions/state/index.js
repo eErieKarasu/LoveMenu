@@ -8,11 +8,13 @@ const MAX_PAYLOAD_BYTES = 900000;
 
 function validState(value) {
   return Boolean(
-    value && value.version === 4 &&
+    value && value.version === 5 &&
     Array.isArray(value.recipes) &&
     Array.isArray(value.inventory) &&
     Array.isArray(value.groceries) &&
-    Array.isArray(value.selectedToday) &&
+    value.todayPlan && typeof value.todayPlan.dateKey === "string" &&
+    value.todayPlan.meals &&
+    ["breakfast", "lunch", "dinner"].every((key) => Array.isArray(value.todayPlan.meals[key])) &&
     Array.isArray(value.weekPlan) && value.weekPlan.length === 7
   );
 }

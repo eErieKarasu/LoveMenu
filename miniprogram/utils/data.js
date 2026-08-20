@@ -1,6 +1,6 @@
-const { buildWeekPlan } = require("./domain");
+const { buildWeekPlan, createEmptyTodayPlan } = require("./domain");
 
-const STATE_VERSION = 4;
+const STATE_VERSION = 5;
 
 function createInitialState() {
   return {
@@ -8,7 +8,7 @@ function createInitialState() {
     recipes: [],
     inventory: [],
     groceries: [],
-    selectedToday: [],
+    todayPlan: createEmptyTodayPlan(),
     weekPlan: buildWeekPlan([])
   };
 }

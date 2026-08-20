@@ -2,6 +2,53 @@ function recipeById(state, id) {
   return state.recipes.find((recipe) => recipe.id === id);
 }
 
+const TODAY_MEALS = [
+  { key: "breakfast", label: "早餐", prompt: "早上吃点什么？", timeLabel: "07:00–10:00" },
+  { key: "lunch", label: "午餐", prompt: "中午吃点什么？", timeLabel: "11:30–14:00" },
+  { key: "dinner", label: "晚餐", prompt: "今晚吃点什么？", timeLabel: "17:30–20:00" }
+];
+
+function dateKeyForDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function mealKeyForHour(hour) {
+  if (hour < 10) return "breakfast";
+  if (hour < 15) return "lunch";
+  return "dinner";
+}
+
+function createEmptyTodayPlan(date = new Date()) {
+  return {
+    dateKey: dateKeyForDate(date),
+    meals: { breakfast: [], lunch: [], dinner: [] }
+  };
+}
+
+function normalizedTodayPlan(state) {
+  const todayKey = dateKeyForDate();
+  const source = state && state.todayPlan;
+  if (source && source.dateKey === todayKey && source.meals) {
+    return {
+      dateKey: todayKey,
+      meals: TODAY_MEALS.reduce((meals, meal) => {
+        meals[meal.key] = Array.isArray(source.meals[meal.key])
+          ? Array.from(new Set(source.meals[meal.key]))
+          : [];
+        return meals;
+      }, {})
+    };
+  }
+
+  const plan = createEmptyTodayPlan();
+  const legacyIds = Array.isArray(state && state.selectedToday) ? Array.from(new Set(state.selectedToday)) : [];
+  if (!source && legacyIds.length) plan.meals[mealKeyForHour(new Date().getHours())] = legacyIds;
+  return plan;
+}
+
 function inferGroceryCategory(name) {
   if (["鸡翅", "排骨", "牛腩", "鸡蛋", "肉"].some((word) => name.includes(word))) return "肉蛋";
   if (["鱼", "虾", "贝"].some((word) => name.includes(word))) return "水产";
@@ -255,14 +302,36 @@ function buildWeekPlan(recipes, offsetSeed = 0) {
   });
 }
 
-function selectedTodayRecipes(state) {
-  return state.selectedToday.map((id) => recipeById(state, id)).filter(Boolean);
+function todayRecipeIds(state, mealKey) {
+  const plan = normalizedTodayPlan(state);
+  if (mealKey && plan.meals[mealKey]) return plan.meals[mealKey].slice();
+  return TODAY_MEALS.flatMap((meal) => plan.meals[meal.key]);
+}
+
+function selectedTodayRecipes(state, mealKey) {
+  return todayRecipeIds(state, mealKey).map((id) => recipeById(state, id)).filter(Boolean);
+}
+
+function addRecipeToTodayMeal(state, recipeId, mealKey) {
+  if (!recipeById(state, recipeId) || !TODAY_MEALS.some((meal) => meal.key === mealKey)) return false;
+  state.todayPlan = normalizedTodayPlan(state);
+  if (state.todayPlan.meals[mealKey].includes(recipeId)) return false;
+  state.todayPlan.meals[mealKey].push(recipeId);
+  return true;
+}
+
+function removeRecipeFromTodayMeal(state, recipeId, mealKey) {
+  state.todayPlan = normalizedTodayPlan(state);
+  if (!state.todayPlan.meals[mealKey]) return false;
+  const previousLength = state.todayPlan.meals[mealKey].length;
+  state.todayPlan.meals[mealKey] = state.todayPlan.meals[mealKey].filter((id) => id !== recipeId);
+  return state.todayPlan.meals[mealKey].length !== previousLength;
 }
 
 function mealContextForHour(hour) {
-  if (hour < 10) return { period: "早餐", prompt: "早上吃点什么？" };
-  if (hour < 15) return { period: "午餐", prompt: "中午吃点什么？" };
-  return { period: "晚餐", prompt: "今晚吃点什么？" };
+  const key = mealKeyForHour(hour);
+  const meal = TODAY_MEALS.find((item) => item.key === key);
+  return { key, period: meal.label, prompt: meal.prompt };
 }
 
 function normalizeState(state) {
@@ -288,7 +357,7 @@ function normalizeState(state) {
     .map(normalizeInventoryItem)
     .filter((item) => item.name);
   return {
-    version: 4,
+    version: 5,
     recipes: normalizedRecipes.map((recipe) => decorateRecipeWithInventory(recipe, inventory)),
     inventory,
     groceries: Array.isArray(state.groceries) ? state.groceries.map((item) => ({
@@ -298,7 +367,7 @@ function normalizeState(state) {
       source: Array.isArray(item.source) ? item.source : [],
       sourceRecipeIds: Array.isArray(item.sourceRecipeIds) ? item.sourceRecipeIds : []
     })) : [],
-    selectedToday: Array.isArray(state.selectedToday) ? state.selectedToday : [],
+    todayPlan: normalizedTodayPlan(state),
     weekPlan: Array.isArray(state.weekPlan) && state.weekPlan.length === 7
       ? state.weekPlan
       : buildWeekPlan(state.recipes || [])
@@ -306,8 +375,12 @@ function normalizeState(state) {
 }
 
 module.exports = {
+  TODAY_MEALS,
+  addRecipeToTodayMeal,
   addRecipeIngredients,
   buildWeekPlan,
+  createEmptyTodayPlan,
+  dateKeyForDate,
   decorateRecipeWithInventory,
   ingredientKey,
   ingredientItemsForRecipe,
@@ -315,10 +388,13 @@ module.exports = {
   inferGroceryCategory,
   inventoryItemForIngredient,
   mealContextForHour,
+  mealKeyForHour,
   movePurchasedToInventory,
   normalizeInventoryItem,
   normalizeState,
   recipeById,
+  removeRecipeFromTodayMeal,
   selectedTodayRecipes,
-  stepItemsForRecipe
+  stepItemsForRecipe,
+  todayRecipeIds
 };

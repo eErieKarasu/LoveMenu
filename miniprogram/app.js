@@ -23,7 +23,7 @@ App({
 
   async bootstrap() {
     const result = await stateService.loadState(this.globalData.state);
-    const migrated = !result.state || result.state.version !== 4;
+    const migrated = !result.state || result.state.version !== 5;
     this.globalData.state = normalizeState(result.state);
     this.globalData.ready = true;
     this.globalData.syncStatus = result.source === "cloud" ? "已同步到微信云" : "当前使用本地缓存";
@@ -37,6 +37,18 @@ App({
 
   getState() {
     return this.globalData.state;
+  },
+
+  setTodayMealTarget(mealKey) {
+    this.globalData.todayMealTarget = mealKey || "";
+  },
+
+  getTodayMealTarget() {
+    return this.globalData.todayMealTarget || "";
+  },
+
+  clearTodayMealTarget() {
+    this.globalData.todayMealTarget = "";
   },
 
   update(mutator) {

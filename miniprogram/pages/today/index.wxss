@@ -1,1 +1,44 @@
-.empty-copy .primary { margin-top: 28rpx; }
+.today-screen { padding-top: 28rpx; }
+.today-header { margin-bottom: 20rpx; }
+.today-header .subtitle { margin-top: 10rpx; }
+
+.day-progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10rpx; margin: 0 4rpx 24rpx; }
+.progress-segment { height: 7rpx; border-radius: 999rpx; background: #ded5cc; }
+.progress-segment.filled { background: var(--accent); }
+.progress-segment.current { outline: 3rpx solid rgba(212, 98, 69, .13); outline-offset: 3rpx; }
+
+.meal-list { display: flex; flex-direction: column; gap: 16rpx; }
+.meal-card { background: rgba(255, 253, 249, .78); border: 1rpx solid rgba(86, 68, 52, .08); border-radius: 30rpx; padding: 24rpx; box-shadow: 0 10rpx 30rpx rgba(75, 52, 34, .055); }
+.meal-card.current { border-color: rgba(212, 98, 69, .24); background: linear-gradient(145deg, #fffaf4, #faebe4); box-shadow: 0 14rpx 36rpx rgba(100, 65, 44, .09); }
+.meal-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18rpx; }
+.meal-title-group { min-width: 0; }
+.meal-name-line { display: flex; align-items: center; gap: 12rpx; }
+.meal-name { font-family: "Songti SC", serif; font-size: 34rpx; font-weight: 800; }
+.meal-time { display: block; color: var(--muted); font-size: 21rpx; margin-top: 4rpx; }
+.meal-status { color: var(--muted); font-size: 22rpx; padding-top: 6rpx; }
+.now-pill { background: var(--accent-soft); color: #a94630; border-radius: 999rpx; font-size: 19rpx; font-weight: 700; line-height: 36rpx; padding: 0 13rpx; }
+
+.today-dish { display: flex; align-items: center; gap: 16rpx; padding: 22rpx 0 12rpx; }
+.today-dish + .today-dish { border-top: 1rpx solid rgba(100, 70, 45, .09); margin-top: 8rpx; }
+.today-dish .dish-mark { flex-basis: 60rpx; width: 60rpx; height: 60rpx; border-radius: 20rpx; }
+.today-dish .dish-name { margin-bottom: 5rpx; }
+.dish-detail { display: block; color: var(--muted); font-size: 21rpx; line-height: 1.45; }
+.remove-action { width: 66rpx; height: 66rpx; min-height: 66rpx; border-radius: 33rpx; background: transparent; color: #9a8f85; font-size: 36rpx; line-height: 62rpx; padding: 0; }
+.remove-action:active { background: #eee6de; transform: scale(.96); }
+
+.meal-empty { padding: 20rpx 0 6rpx; }
+.meal-prompt { display: block; font-size: 28rpx; font-weight: 750; }
+.meal-empty-note { display: block; color: var(--muted); font-size: 22rpx; margin-top: 5rpx; }
+.meal-action { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 82rpx; margin-top: 16rpx; border-radius: 20rpx; background: var(--ink); color: #fffaf3; font-size: 25rpx; font-weight: 700; line-height: 82rpx; }
+.meal-action.quiet { background: transparent; color: var(--accent); border: 1rpx solid rgba(212, 98, 69, .22); }
+.meal-action:active { transform: scale(.98); opacity: .88; }
+
+.grocery-summary { margin-top: 22rpx; background: #667e68; color: white; border-radius: 30rpx; padding: 26rpx; box-shadow: 0 14rpx 34rpx rgba(71, 94, 74, .16); }
+.grocery-eyebrow { display: block; color: rgba(255,255,255,.72); font-size: 21rpx; font-weight: 700; letter-spacing: 2rpx; }
+.grocery-title { display: block; font-size: 29rpx; font-weight: 800; margin-top: 8rpx; }
+.grocery-note { display: block; color: rgba(255,255,255,.75); font-size: 22rpx; line-height: 1.55; margin-top: 6rpx; }
+.grocery-action { width: 100%; min-height: 74rpx; line-height: 74rpx; margin-top: 20rpx; background: #fffaf3; color: #526b55; box-shadow: none; font-size: 25rpx; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .meal-card, .meal-action, .remove-action { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
+}

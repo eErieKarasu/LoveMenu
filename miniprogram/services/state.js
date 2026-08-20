@@ -1,8 +1,8 @@
-const STORAGE_KEY = "lovemenu-state-v4";
-const LEGACY_STORAGE_KEYS = ["lovemenu-state-v3", "lovemenu-state-v2"];
+const STORAGE_KEY = "lovemenu-state-v5";
+const LEGACY_STORAGE_KEYS = ["lovemenu-state-v4", "lovemenu-state-v3", "lovemenu-state-v2"];
 
 function supportedState(state) {
-  return Boolean(state && (state.version === 3 || state.version === 4));
+  return Boolean(state && (state.version === 3 || state.version === 4 || state.version === 5));
 }
 
 function cloudAvailable() {
@@ -33,7 +33,7 @@ async function loadState(fallback) {
   try {
     const response = await wx.cloud.callFunction({ name: "state", data: { action: "load" } });
     if (response.result && response.result.ok && supportedState(response.result.state)) {
-      if (response.result.state.version === 4) writeLocal(response.result.state);
+      if (response.result.state.version === 5) writeLocal(response.result.state);
       return { state: response.result.state, source: "cloud" };
     }
     return { state: local, source: "local" };
