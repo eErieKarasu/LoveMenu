@@ -31,7 +31,7 @@
         <block wx:if="{{item.dishes.length}}">
           <view class="today-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" bindtap="openRecipe" data-id="{{dish.id}}" aria-role="button" aria-label="查看{{dish.name}}">
             <image wx:if="{{dish.imageSrc}}" class="dish-thumb" src="{{dish.imageSrc}}" mode="aspectFill" aria-label="{{dish.name}}菜品图片" />
-            <view wx:else class="dish-mark">{{dish.initial}}</view>
+            <image wx:else class="dish-thumb dish-thumb-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{dish.name}}暂无菜品图片" />
             <view class="dish-main">
               <text class="dish-name">{{dish.name}}</text>
               <text class="dish-detail">{{dish.categoryLabel}} · {{dish.time}} 分钟 · {{dish.spice}}</text>

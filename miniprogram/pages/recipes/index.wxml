@@ -25,7 +25,7 @@
       <view class="recipe-card-grid">
         <view class="recipe-media" bindtap="openRecipe" data-id="{{item.id}}" aria-role="button" aria-label="查看{{item.name}}做法">
           <image wx:if="{{item.imageSrc}}" class="recipe-image" src="{{item.imageSrc}}" mode="aspectFill" aria-label="{{item.name}}菜品图片" />
-          <view wx:else class="recipe-image-fallback"><text>{{item.initial}}</text><text class="fallback-note">家常菜</text></view>
+          <image wx:else class="recipe-image recipe-image-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{item.name}}暂无菜品图片" />
         </view>
 
         <view class="recipe-card-content">

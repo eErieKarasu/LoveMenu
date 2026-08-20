@@ -19,8 +19,8 @@
 
 .today-dish { display: flex; align-items: center; gap: 20rpx; min-height: 150rpx; padding: 20rpx 0 8rpx; }
 .today-dish + .today-dish { border-top: 1rpx solid rgba(100, 70, 45, .08); }
-.dish-thumb { flex: 0 0 138rpx; width: 138rpx; height: 118rpx; border-radius: 24rpx; background: #f2e8dc; }
-.today-dish .dish-mark { flex: 0 0 82rpx; width: 82rpx; height: 82rpx; border-radius: 24rpx; }
+.dish-thumb { flex: 0 0 118rpx; width: 118rpx; height: 118rpx; border-radius: 24rpx; background: #f2e8dc; }
+.dish-thumb-placeholder { box-sizing: border-box; padding: 8rpx; background: #f5efe7; }
 .dish-main { flex: 1; min-width: 0; }
 .today-dish .dish-name { font-size: 31rpx; margin-bottom: 8rpx; }
 .dish-detail { display: block; overflow: hidden; color: var(--muted); font-size: 21rpx; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }

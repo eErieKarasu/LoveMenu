@@ -5,6 +5,8 @@
       <text class="detail-title">{{recipe.name}}</text>
       <button class="round-btn" bindtap="toggleFavorite">{{recipe.favorite ? '♥' : '♡'}}</button>
     </view>
+    <image wx:if="{{recipe.image}}" class="detail-cover" src="{{recipe.image}}" mode="aspectFill" aria-label="{{recipe.name}}菜品图片" />
+    <image wx:else class="detail-cover detail-cover-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{recipe.name}}暂无菜品图片" />
     <view class="stat-grid">
       <view class="stat"><text>准备</text><text class="value">{{recipe.prep}} 分钟</text></view>
       <view class="stat"><text>烹饪</text><text class="value">{{recipe.cook}} 分钟</text></view>

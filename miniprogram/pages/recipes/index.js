@@ -1,6 +1,5 @@
 const { CATEGORIES } = require("../../utils/constants");
 const { TODAY_MEALS, addRecipeToTodayMeal } = require("../../utils/domain");
-const { imageForRecipe } = require("../../utils/recipe-images");
 const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
@@ -39,7 +38,7 @@ Page({
     }).map((recipe) => ({
       ...recipe,
       initial: recipe.name.charAt(0),
-      imageSrc: imageForRecipe(recipe),
+      imageSrc: recipe.image || "",
       ingredientPreview: `${recipe.ingredients.slice(0, 3).join("、")}${recipe.ingredients.length > 3 ? "…" : ""}`,
       typeLabel: recipe.categories[0] || "家常菜",
       inventoryText: recipe.inventorySummary.totalCount

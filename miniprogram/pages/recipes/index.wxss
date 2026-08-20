@@ -22,10 +22,8 @@
 .visual-recipe-card { overflow: hidden; border: 1rpx solid rgba(86, 68, 52, .07); border-radius: 34rpx; background: rgba(255,253,249,.96); box-shadow: 0 12rpx 32rpx rgba(75,52,34,.06); padding: 20rpx; }
 .recipe-card-grid { display: grid; grid-template-columns: 246rpx minmax(0, 1fr); gap: 20rpx; }
 .recipe-media { min-width: 0; }
-.recipe-image, .recipe-image-fallback { display: flex; align-items: center; justify-content: center; width: 246rpx; height: 250rpx; border-radius: 26rpx; background: #f1e7dc; }
-.recipe-image-fallback { flex-direction: column; color: var(--accent); }
-.recipe-image-fallback > text:first-child { font-family: "Songti SC", serif; font-size: 70rpx; font-weight: 800; }
-.fallback-note { color: var(--muted); font-size: 21rpx; margin-top: 4rpx; }
+.recipe-image { display: block; width: 246rpx; height: 246rpx; border-radius: 26rpx; background: #f1e7dc; }
+.recipe-image-placeholder { box-sizing: border-box; padding: 18rpx; background: #f5efe7; }
 .recipe-media:active { opacity: .8; transform: scale(.985); }
 
 .recipe-card-content { min-width: 0; }

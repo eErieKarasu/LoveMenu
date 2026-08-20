@@ -8,7 +8,6 @@ const {
   todayRecipeIds
 } = require("../../utils/domain");
 const { selectTab } = require("../../utils/tab-bar");
-const { imageForRecipe } = require("../../utils/recipe-images");
 const app = getApp();
 
 const MEAL_ILLUSTRATIONS = {
@@ -45,7 +44,7 @@ Page({
         ...recipe,
         initial: recipe.name.charAt(0),
         categoryLabel: recipe.categories[0] || "家常菜",
-        imageSrc: imageForRecipe(recipe)
+        imageSrc: recipe.image || ""
       }));
       const totalTime = dishes.reduce((sum, recipe) => sum + (Number(recipe.time) || 0), 0);
       return {

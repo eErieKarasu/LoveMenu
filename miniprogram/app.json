@@ -48,5 +48,10 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.camera": {
+      "desc": "用于拍摄菜品封面图"
+    }
+  },
   "lazyCodeLoading": "requiredComponents"
 }

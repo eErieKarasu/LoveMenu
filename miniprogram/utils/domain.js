@@ -173,6 +173,7 @@ function normalizeRecipe(recipe) {
   const ingredientItems = ingredientItemsForRecipe(recipe);
   return {
     ...recipe,
+    image: typeof recipe.image === "string" ? recipe.image : "",
     steps: stepItemsForRecipe(recipe),
     ingredientItems,
     ingredients: ingredientItems.map((item) => item.name),
