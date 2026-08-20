@@ -40,21 +40,6 @@
 .meal-cta { position: absolute; z-index: 3; right: 0; bottom: 0; min-width: 156rpx; min-height: 70rpx; border-radius: 20rpx; background: var(--ink); color: #fffaf3; font-size: 24rpx; font-weight: 700; line-height: 70rpx; padding: 0 24rpx; }
 .meal-cta:active { opacity: .84; transform: scale(.97); }
 
-.grocery-summary { position: relative; overflow: hidden; margin-top: 18rpx; min-height: 184rpx; border: 1rpx solid rgba(105, 129, 106, .24); border-radius: 32rpx; background: linear-gradient(135deg, #f2f4e8, #eef2e8); padding: 24rpx 26rpx; box-shadow: 0 10rpx 26rpx rgba(75, 90, 62, .055); }
-.grocery-main-row { position: relative; z-index: 2; display: flex; align-items: center; gap: 18rpx; }
-.grocery-icon { display: flex; align-items: center; justify-content: center; flex: 0 0 70rpx; width: 70rpx; height: 70rpx; border-radius: 35rpx; background: var(--sage); }
-.grocery-icon image { width: 42rpx; height: 42rpx; }
-.grocery-copy { flex: 1; min-width: 0; }
-.grocery-title { display: block; color: var(--ink); font-size: 29rpx; font-weight: 800; }
-.grocery-note { display: block; color: var(--muted); font-size: 21rpx; margin-top: 4rpx; }
-.grocery-link { display: flex; align-items: center; gap: 5rpx; color: #625c54; font-size: 24rpx; }
-.link-chevron { font-family: Arial, sans-serif; font-size: 42rpx; line-height: 1; }
-.grocery-chips { position: relative; z-index: 2; display: flex; gap: 10rpx; margin-top: 18rpx; }
-.grocery-chip { min-width: 76rpx; border: 1rpx solid rgba(105, 129, 106, .24); border-radius: 999rpx; background: rgba(255,255,255,.38); color: #4d554b; font-size: 21rpx; line-height: 46rpx; padding: 0 18rpx; text-align: center; }
-.grocery-chip.ready { min-width: 130rpx; }
-.grocery-leaves { position: absolute; z-index: 1; right: -24rpx; bottom: -34rpx; width: 190rpx; height: 144rpx; opacity: .34; }
-.grocery-summary:active { opacity: .88; transform: scale(.99); }
-
 @media (prefers-reduced-motion: no-preference) {
-  .today-dish, .add-dish-action, .meal-cta, .more-action, .grocery-summary { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
+  .today-dish, .add-dish-action, .meal-cta, .more-action { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
 }

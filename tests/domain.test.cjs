@@ -13,7 +13,8 @@ const {
   normalizeState,
   removeRecipeFromTodayMeal,
   selectedTodayRecipes,
-  stepItemsForRecipe
+  stepItemsForRecipe,
+  syncTodayGroceries
 } = require("../miniprogram/utils/domain");
 
 function sampleRecipe() {
@@ -167,13 +168,51 @@ test("当前餐次只用于突出当前时段", () => {
 });
 
 test("今日菜单按早午晚餐独立安排", () => {
-  const state = normalizeState({ ...createInitialState(), recipes: [sampleRecipe()] });
+  const state = normalizeState({
+    ...createInitialState(),
+    recipes: [sampleRecipe()],
+    inventory: [{ id: "ginger", name: "姜", level: "enough", quantity: null, unit: "片" }]
+  });
   assert.equal(addRecipeToTodayMeal(state, "cola-wings", "lunch"), true);
   assert.equal(addRecipeToTodayMeal(state, "cola-wings", "lunch"), false);
+  assert.deepEqual(state.groceries.map((item) => item.name).sort(), ["可乐", "鸡翅中"]);
   assert.deepEqual(selectedTodayRecipes(state, "breakfast"), []);
   assert.deepEqual(selectedTodayRecipes(state, "lunch").map((recipe) => recipe.id), ["cola-wings"]);
   assert.equal(removeRecipeFromTodayMeal(state, "cola-wings", "lunch"), true);
   assert.deepEqual(selectedTodayRecipes(state, "lunch"), []);
+  assert.deepEqual(state.groceries, []);
+});
+
+test("同一道菜还在其他餐次时保留采购项", () => {
+  const state = normalizeState({ ...createInitialState(), recipes: [sampleRecipe()] });
+  addRecipeToTodayMeal(state, "cola-wings", "breakfast");
+  addRecipeToTodayMeal(state, "cola-wings", "dinner");
+  removeRecipeFromTodayMeal(state, "cola-wings", "breakfast");
+  assert.equal(state.groceries.length, 3);
+  removeRecipeFromTodayMeal(state, "cola-wings", "dinner");
+  assert.deepEqual(state.groceries, []);
+});
+
+test("采购项勾选状态不会被无变化同步重置", () => {
+  const state = normalizeState({ ...createInitialState(), recipes: [sampleRecipe()] });
+  addRecipeToTodayMeal(state, "cola-wings", "lunch");
+  state.groceries[0].checked = true;
+  assert.equal(syncTodayGroceries(state), false);
+  assert.equal(state.groceries[0].checked, true);
+});
+
+test("库存变化后采购清单可重新计算", () => {
+  let state = normalizeState({ ...createInitialState(), recipes: [sampleRecipe()] });
+  addRecipeToTodayMeal(state, "cola-wings", "dinner");
+  assert.equal(state.groceries.length, 3);
+  state.inventory = [
+    { id: "wings", name: "鸡翅中", level: "enough", quantity: 8, unit: "个" },
+    { id: "cola", name: "可乐", level: "enough", quantity: 1, unit: "瓶" },
+    { id: "ginger", name: "姜", level: "enough", quantity: 2, unit: "片" }
+  ];
+  state = normalizeState(state);
+  syncTodayGroceries(state);
+  assert.deepEqual(state.groceries, []);
 });
 
 test("旧版扁平今日菜单会迁移到当前餐次", () => {

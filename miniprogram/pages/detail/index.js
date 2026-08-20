@@ -1,4 +1,4 @@
-const { TODAY_MEALS, addRecipeIngredients, addRecipeToTodayMeal, recipeById } = require("../../utils/domain");
+const { TODAY_MEALS, addRecipeToTodayMeal, recipeById } = require("../../utils/domain");
 const app = getApp();
 
 function mealLabel(mealKey) {
@@ -41,11 +41,6 @@ Page({
     app.clearTodayMealTarget();
     this.setData({ mealTargetLabel: "" });
     wx.showToast({ title: added ? `已加入${mealLabel(mealKey)}` : `${mealLabel(mealKey)}已有这道菜`, icon: "none" });
-  },
-  addGrocery() {
-    let added = 0;
-    app.update((state) => { added = addRecipeIngredients(state, this.data.id); });
-    wx.showToast({ title: added ? `已加入 ${added} 项缺货` : "库存已齐或清单已有", icon: "none" });
   },
   editRecipe() { wx.navigateTo({ url: `/pages/editor/index?id=${this.data.id}` }); }
 });

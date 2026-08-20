@@ -26,15 +26,17 @@ Page({
   completePurchased() {
     const count = app.getState().groceries.filter((item) => item.checked).length;
     if (!count) { wx.showToast({ title: "还没有已购买项目", icon: "none" }); return; }
-    wx.showActionSheet({ itemList: ["已购买并加入库存", "仅从采购清单移除"], success: (result) => {
-      if (result.tapIndex === 0) {
+    wx.showModal({
+      title: "完成采购",
+      content: `将已勾选的 ${count} 项食材加入库存，并从采购清单移除。`,
+      confirmText: "确认入库",
+      success: (result) => {
+        if (!result.confirm) return;
         app.update((state) => movePurchasedToInventory(state));
         wx.showToast({ title: `已入库 ${count} 项`, icon: "success" });
-      } else {
-        app.update((state) => { state.groceries = state.groceries.filter((item) => !item.checked); });
+        this.refresh();
       }
-      this.refresh();
-    }});
+    });
   },
   copyList() {
     const text = app.getState().groceries

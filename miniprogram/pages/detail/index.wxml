@@ -39,7 +39,6 @@
 
   <view class="sticky-actions">
     <button class="primary" bindtap="addToday">{{mealTargetLabel ? '加入' + mealTargetLabel : '安排到今天'}}</button>
-    <button class="secondary" bindtap="addGrocery">补齐缺货</button>
     <button class="secondary" bindtap="editRecipe">编辑</button>
   </view>
 </view>

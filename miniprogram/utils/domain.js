@@ -218,9 +218,10 @@ function addRecipeIngredients(state, recipeId) {
   let added = 0;
   ingredientItemsForRecipe(recipe).forEach((ingredient) => {
     const existing = state.groceries.find((item) => ingredientKey(item.name) === ingredientKey(ingredient.name) && item.unit === ingredient.unit);
-    const sourceRecipeIds = existing && Array.isArray(existing.sourceRecipeIds) && existing.sourceRecipeIds.length
+    const previousSourceRecipeIds = existing && Array.isArray(existing.sourceRecipeIds) && existing.sourceRecipeIds.length
       ? existing.sourceRecipeIds.slice()
       : existing ? state.recipes.filter((entry) => existing.source.includes(entry.name)).map((entry) => entry.id) : [];
+    const sourceRecipeIds = previousSourceRecipeIds.slice();
     if (!sourceRecipeIds.includes(recipe.id)) sourceRecipeIds.push(recipe.id);
     const totalRequired = state.recipes
       .filter((entry) => sourceRecipeIds.includes(entry.id))
@@ -235,9 +236,10 @@ function addRecipeIngredients(state, recipeId) {
     }
     if (existing) {
       if (!existing.source.includes(recipe.name)) existing.source.push(recipe.name);
+      const requirementsChanged = existing.quantity !== purchaseQuantity || previousSourceRecipeIds.length !== sourceRecipeIds.length;
       existing.sourceRecipeIds = sourceRecipeIds;
       existing.quantity = purchaseQuantity;
-      existing.checked = false;
+      if (requirementsChanged) existing.checked = false;
       return;
     }
     state.groceries.push({
@@ -253,6 +255,60 @@ function addRecipeIngredients(state, recipeId) {
     added += 1;
   });
   return added;
+}
+
+function groceryRecipeIds(state, grocery) {
+  return Array.isArray(grocery.sourceRecipeIds) && grocery.sourceRecipeIds.length
+    ? grocery.sourceRecipeIds.slice()
+    : state.recipes.filter((recipe) => (grocery.source || []).includes(recipe.name)).map((recipe) => recipe.id);
+}
+
+function removeRecipeIngredients(state, recipeId) {
+  let removed = 0;
+  state.groceries = state.groceries.reduce((items, grocery) => {
+    const sourceRecipeIds = groceryRecipeIds(state, grocery);
+    if (!sourceRecipeIds.includes(recipeId)) {
+      items.push(grocery);
+      return items;
+    }
+
+    const remainingRecipeIds = sourceRecipeIds.filter((id) => id !== recipeId);
+    if (!remainingRecipeIds.length) {
+      removed += 1;
+      return items;
+    }
+
+    const totalRequired = state.recipes
+      .filter((recipe) => remainingRecipeIds.includes(recipe.id))
+      .reduce((total, recipe) => total + ingredientItemsForRecipe(recipe)
+        .filter((ingredient) => ingredientKey(ingredient.name) === ingredientKey(grocery.name) && ingredient.unit === grocery.unit)
+        .reduce((recipeTotal, ingredient) => recipeTotal + ingredient.quantity, 0), 0);
+    const stock = ingredientStock(state.inventory, { name: grocery.name, quantity: totalRequired, unit: grocery.unit });
+    if (!stock.shortage) {
+      removed += 1;
+      return items;
+    }
+
+    items.push({
+      ...grocery,
+      source: state.recipes.filter((recipe) => remainingRecipeIds.includes(recipe.id)).map((recipe) => recipe.name),
+      sourceRecipeIds: remainingRecipeIds,
+      quantity: stock.shortage,
+      checked: false
+    });
+    return items;
+  }, []);
+  return removed;
+}
+
+function syncTodayGroceries(state) {
+  const before = JSON.stringify(state.groceries);
+  const todayIds = Array.from(new Set(todayRecipeIds(state)));
+  const todayIdSet = new Set(todayIds);
+  const currentSourceIds = Array.from(new Set(state.groceries.flatMap((grocery) => groceryRecipeIds(state, grocery))));
+  currentSourceIds.filter((recipeId) => !todayIdSet.has(recipeId)).forEach((recipeId) => removeRecipeIngredients(state, recipeId));
+  todayIds.forEach((recipeId) => addRecipeIngredients(state, recipeId));
+  return before !== JSON.stringify(state.groceries);
 }
 
 function movePurchasedToInventory(state) {
@@ -317,6 +373,7 @@ function addRecipeToTodayMeal(state, recipeId, mealKey) {
   state.todayPlan = normalizedTodayPlan(state);
   if (state.todayPlan.meals[mealKey].includes(recipeId)) return false;
   state.todayPlan.meals[mealKey].push(recipeId);
+  syncTodayGroceries(state);
   return true;
 }
 
@@ -325,7 +382,9 @@ function removeRecipeFromTodayMeal(state, recipeId, mealKey) {
   if (!state.todayPlan.meals[mealKey]) return false;
   const previousLength = state.todayPlan.meals[mealKey].length;
   state.todayPlan.meals[mealKey] = state.todayPlan.meals[mealKey].filter((id) => id !== recipeId);
-  return state.todayPlan.meals[mealKey].length !== previousLength;
+  const removed = state.todayPlan.meals[mealKey].length !== previousLength;
+  if (removed) syncTodayGroceries(state);
+  return removed;
 }
 
 function mealContextForHour(hour) {
@@ -393,8 +452,10 @@ module.exports = {
   normalizeInventoryItem,
   normalizeState,
   recipeById,
+  removeRecipeIngredients,
   removeRecipeFromTodayMeal,
   selectedTodayRecipes,
   stepItemsForRecipe,
+  syncTodayGroceries,
   todayRecipeIds
 };

@@ -52,23 +52,6 @@
       </view>
     </view>
 
-    <view wx:if="{{selectedCount}}" class="grocery-summary" bindtap="goGrocery" aria-role="button" aria-label="查看今日采购清单">
-      <image class="grocery-leaves" src="/assets/illustrations/grocery-leaves.svg" mode="aspectFit" />
-      <view class="grocery-main-row">
-        <view class="grocery-icon"><image src="/assets/illustrations/grocery-basket.svg" mode="aspectFit" /></view>
-        <view class="grocery-copy">
-          <text class="grocery-title">今日采购清单</text>
-          <text class="grocery-note">根据今天菜单自动生成</text>
-        </view>
-        <view class="grocery-link"><text>去采购</text><text class="link-chevron">›</text></view>
-      </view>
-      <view class="grocery-chips">
-        <text wx:for="{{groceryIngredients}}" wx:key="*this" class="grocery-chip">{{item}}</text>
-        <text wx:if="{{groceryHasMore}}" class="grocery-chip">…</text>
-        <text wx:if="{{!groceryIngredients.length}}" class="grocery-chip ready">食材已齐</text>
-      </view>
-    </view>
-
     <view class="section" wx:if="{{recent.length}}">
       <text class="section-title">{{selectedCount ? '顺手再选一道' : '最近常做'}}</text>
       <scroll-view scroll-x class="scroll-row" enable-flex>

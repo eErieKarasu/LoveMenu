@@ -1,5 +1,5 @@
 const { createInitialState } = require("./utils/data");
-const { normalizeState } = require("./utils/domain");
+const { normalizeState, syncTodayGroceries } = require("./utils/domain");
 const stateService = require("./services/state");
 const { CLOUD_ENV_ID } = require("./env");
 
@@ -25,9 +25,10 @@ App({
     const result = await stateService.loadState(this.globalData.state);
     const migrated = !result.state || result.state.version !== 5;
     this.globalData.state = normalizeState(result.state);
+    const groceriesSynced = syncTodayGroceries(this.globalData.state);
     this.globalData.ready = true;
     this.globalData.syncStatus = result.source === "cloud" ? "已同步到微信云" : "当前使用本地缓存";
-    if (migrated || (result.source === "local" && this.globalData.cloudEnabled)) this.scheduleSave();
+    if (migrated || groceriesSynced || (result.source === "local" && this.globalData.cloudEnabled)) this.scheduleSave();
     return this.globalData.state;
   },
 
@@ -54,6 +55,7 @@ App({
   update(mutator) {
     mutator(this.globalData.state);
     this.globalData.state = normalizeState(this.globalData.state);
+    syncTodayGroceries(this.globalData.state);
     this.scheduleSave();
     return this.globalData.state;
   },

@@ -1,10 +1,10 @@
 const {
   TODAY_MEALS,
-  addRecipeIngredients,
   dateKeyForDate,
   mealContextForHour,
   removeRecipeFromTodayMeal,
   selectedTodayRecipes,
+  syncTodayGroceries,
   todayRecipeIds
 } = require("../../utils/domain");
 const { selectTab } = require("../../utils/tab-bar");
@@ -29,16 +29,14 @@ Page({
     dateLabel: "",
     selectedCount: 0,
     plannedMealCount: 0,
-    totalTime: 0,
-    groceryIngredients: [],
-    groceryHasMore: false
+    totalTime: 0
   },
 
   async onShow() {
     selectTab(this, 0);
     await app.ensureReady();
     app.clearTodayMealTarget();
-    if (app.getState().todayPlan.dateKey !== dateKeyForDate()) app.update(() => {});
+    if (app.getState().todayPlan.dateKey !== dateKeyForDate()) app.update((state) => syncTodayGroceries(state));
     this.refresh();
   },
 
@@ -70,14 +68,6 @@ Page({
     const selectedCount = todayIds.length;
     const plannedMealCount = meals.filter((meal) => meal.dishes.length).length;
     const totalTime = meals.reduce((sum, meal) => sum + meal.totalTime, 0);
-    const shortageNames = [];
-    meals.forEach((meal) => meal.dishes.forEach((dish) => {
-      (dish.ingredientItems || []).forEach((ingredient) => {
-        if (ingredient.stockStatus === "enough" || shortageNames.includes(ingredient.name)) return;
-        shortageNames.push(ingredient.name);
-      });
-    }));
-
     this.setData({
       loading: false,
       meals,
@@ -88,9 +78,7 @@ Page({
       dateLabel: `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
       selectedCount,
       plannedMealCount,
-      totalTime,
-      groceryIngredients: shortageNames.slice(0, 3),
-      groceryHasMore: shortageNames.length > 3
+      totalTime
     });
   },
 
@@ -121,11 +109,5 @@ Page({
         this.refresh();
       }
     });
-  },
-
-  goGrocery() {
-    const ids = Array.from(new Set(todayRecipeIds(app.getState())));
-    app.update((state) => ids.forEach((id) => addRecipeIngredients(state, id)));
-    wx.switchTab({ url: "/pages/grocery/index" });
   }
 });
