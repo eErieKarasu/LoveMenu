@@ -139,6 +139,19 @@ test("已购买项目可以入库并从采购清单移除", () => {
   assert.deepEqual(state.groceries.map((item) => item.name), ["番茄"]);
 });
 
+test("可以只从采购清单导入指定食材", () => {
+  const state = normalizeState({
+    ...createInitialState(),
+    groceries: [
+      { id: "sugar", category: "调味品", name: "白糖", quantity: 1, unit: "袋", source: ["红烧肉"], checked: false },
+      { id: "salt", category: "调味品", name: "盐", quantity: 1, unit: "袋", source: ["番茄炒蛋"], checked: true }
+    ]
+  });
+  assert.equal(movePurchasedToInventory(state, ["sugar"]), 1);
+  assert.deepEqual(state.inventory.map((item) => item.name), ["白糖"]);
+  assert.deepEqual(state.groceries.map((item) => ({ name: item.name, checked: item.checked })), [{ name: "盐", checked: true }]);
+});
+
 test("采购包装单位与菜谱用量分开记录", () => {
   assert.deepEqual(purchaseAmountForIngredient({ name: "食用油", quantity: 10, unit: "毫升" }), { quantity: 1, unit: "瓶" });
   assert.deepEqual(purchaseAmountForIngredient({ name: "鸡蛋", quantity: 3, unit: "个" }), { quantity: 3, unit: "个" });

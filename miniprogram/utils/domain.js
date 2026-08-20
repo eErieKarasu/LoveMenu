@@ -340,8 +340,10 @@ function syncTodayGroceries(state) {
   return before !== JSON.stringify(state.groceries);
 }
 
-function movePurchasedToInventory(state) {
-  const purchased = state.groceries.filter((item) => item.checked);
+function movePurchasedToInventory(state, groceryIds) {
+  const selectedIds = Array.isArray(groceryIds) ? new Set(groceryIds) : null;
+  const purchased = state.groceries.filter((item) => selectedIds ? selectedIds.has(item.id) : item.checked);
+  const purchasedIds = new Set(purchased.map((item) => item.id));
   purchased.forEach((grocery) => {
     const purchaseAmount = purchaseAmountForIngredient({
       name: grocery.name,
@@ -371,7 +373,7 @@ function movePurchasedToInventory(state) {
       updatedAt: Date.now()
     }));
   });
-  state.groceries = state.groceries.filter((item) => !item.checked);
+  state.groceries = state.groceries.filter((item) => !purchasedIds.has(item.id));
   return purchased.length;
 }
 

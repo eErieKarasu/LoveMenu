@@ -3,7 +3,7 @@
   <block wx:else>
     <view class="page-header today-header">
       <view>
-        <text class="eyebrow">{{dateLabel}} · 今日菜单</text>
+        <text class="eyebrow">{{dateLabel}}</text>
         <text class="title">今天吃什么？</text>
         <view class="today-summary" aria-live="polite">
           <text>已安排 </text><text class="summary-progress">{{plannedMealCount}}/3</text><text> 餐</text>
