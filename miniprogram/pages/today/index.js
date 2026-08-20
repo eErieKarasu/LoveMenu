@@ -10,16 +10,28 @@ const {
 const { selectTab } = require("../../utils/tab-bar");
 const app = getApp();
 
+const MEAL_ILLUSTRATIONS = {
+  lunch: "/assets/illustrations/meal-lunch-bowl.svg",
+  dinner: "/assets/illustrations/meal-dinner-pot.svg"
+};
+
+function imageForRecipe(recipe) {
+  return /(番茄|西红柿).*(蛋)|(蛋).*(番茄|西红柿)/.test(recipe.name)
+    ? "/assets/images/dish-tomato-eggs-20260820.jpg"
+    : "";
+}
+
 Page({
   data: {
     loading: true,
     meals: [],
     recent: [],
     dateLabel: "",
-    summaryText: "",
     selectedCount: 0,
     plannedMealCount: 0,
-    totalTime: 0
+    totalTime: 0,
+    groceryIngredients: [],
+    groceryHasMore: false
   },
 
   async onShow() {
@@ -39,7 +51,8 @@ Page({
       const dishes = selectedTodayRecipes(state, meal.key).map((recipe) => ({
         ...recipe,
         initial: recipe.name.charAt(0),
-        categoryLabel: recipe.categories[0] || "家常菜"
+        categoryLabel: recipe.categories[0] || "家常菜",
+        imageSrc: imageForRecipe(recipe)
       }));
       const totalTime = dishes.reduce((sum, recipe) => sum + (Number(recipe.time) || 0), 0);
       return {
@@ -49,7 +62,7 @@ Page({
         isCurrent: meal.key === currentMeal.key,
         statusText: dishes.length ? `${dishes.length} 道 · 约 ${totalTime} 分钟` : "待安排",
         actionText: dishes.length ? "再加一道" : `安排${meal.label}`,
-        actionQuiet: dishes.length || meal.key !== currentMeal.key
+        illustrationSrc: MEAL_ILLUSTRATIONS[meal.key] || ""
       };
     });
     const todayIds = todayRecipeIds(state);
@@ -57,9 +70,13 @@ Page({
     const selectedCount = todayIds.length;
     const plannedMealCount = meals.filter((meal) => meal.dishes.length).length;
     const totalTime = meals.reduce((sum, meal) => sum + meal.totalTime, 0);
-    const summaryText = selectedCount
-      ? `已安排 ${plannedMealCount}/3 餐 · 共 ${selectedCount} 道菜 · 约 ${totalTime} 分钟`
-      : "把三餐慢慢安排好，今天吃得更从容。";
+    const shortageNames = [];
+    meals.forEach((meal) => meal.dishes.forEach((dish) => {
+      (dish.ingredientItems || []).forEach((ingredient) => {
+        if (ingredient.stockStatus === "enough" || shortageNames.includes(ingredient.name)) return;
+        shortageNames.push(ingredient.name);
+      });
+    }));
 
     this.setData({
       loading: false,
@@ -69,10 +86,11 @@ Page({
         .slice(0, 6)
         .map((recipe) => ({ ...recipe, tagSummary: recipe.tags.slice(0, 2).join(" / ") })),
       dateLabel: `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
-      summaryText,
       selectedCount,
       plannedMealCount,
-      totalTime
+      totalTime,
+      groceryIngredients: shortageNames.slice(0, 3),
+      groceryHasMore: shortageNames.length > 3
     });
   },
 
@@ -91,9 +109,23 @@ Page({
     this.refresh();
   },
 
-  addAllToGrocery() {
+  openMealMenu(event) {
+    const mealKey = event.currentTarget.dataset.meal;
+    const meal = this.data.meals.find((item) => item.key === mealKey);
+    if (!meal || !meal.dishes.length) return;
+    const dishes = meal.dishes.slice(0, 6);
+    wx.showActionSheet({
+      itemList: dishes.map((dish) => `移除${dish.name}`),
+      success: ({ tapIndex }) => {
+        app.update((state) => { removeRecipeFromTodayMeal(state, dishes[tapIndex].id, mealKey); });
+        this.refresh();
+      }
+    });
+  },
+
+  goGrocery() {
     const ids = Array.from(new Set(todayRecipeIds(app.getState())));
     app.update((state) => ids.forEach((id) => addRecipeIngredients(state, id)));
-    wx.showToast({ title: "已汇总今日缺货", icon: "success" });
+    wx.switchTab({ url: "/pages/grocery/index" });
   }
 });
