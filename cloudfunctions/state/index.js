@@ -3,8 +3,31 @@ const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
-const collection = db.collection("app_states");
+const COLLECTION_NAME = "app_states";
+const collection = db.collection(COLLECTION_NAME);
 const MAX_PAYLOAD_BYTES = 900000;
+
+function errorText(error) {
+  return [error && error.errCode, error && error.code, error && error.errMsg, error && error.message]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function isMissingCollection(error) {
+  return /-502005|COLLECTION_NOT_EXIST|collection.*(?:not exist|not found)|集合.*不存在/i.test(errorText(error));
+}
+
+function isExistingCollection(error) {
+  return /COLLECTION_ALREADY_EXIST|collection.*already exists|集合.*已存在/i.test(errorText(error));
+}
+
+async function createCollectionIfNeeded() {
+  try {
+    await db.createCollection(COLLECTION_NAME);
+  } catch (error) {
+    if (!isExistingCollection(error)) throw error;
+  }
+}
 
 function validState(value) {
   return Boolean(
@@ -28,7 +51,7 @@ exports.main = async (event) => {
       const result = await collection.doc(OPENID).get();
       return { ok: true, state: result.data.state, updatedAt: result.data.updatedAt };
     } catch (error) {
-      if (error.errCode === -1 || /not exist|not found/i.test(error.errMsg || error.message || "")) {
+      if (error.errCode === -1 || isMissingCollection(error) || /not exist|not found/i.test(error.errMsg || error.message || "")) {
         return { ok: true, state: null };
       }
       console.error(JSON.stringify({ level: "error", event: "state.load", openidSuffix: OPENID.slice(-6), message: error.message }));
@@ -42,7 +65,14 @@ exports.main = async (event) => {
       return { ok: false, code: "PAYLOAD_TOO_LARGE", message: "菜单数据过大" };
     }
     try {
-      await collection.doc(OPENID).set({ data: { ownerId: OPENID, state: event.state, updatedAt: db.serverDate() } });
+      const data = { ownerId: OPENID, state: event.state, updatedAt: db.serverDate() };
+      try {
+        await collection.doc(OPENID).set({ data });
+      } catch (error) {
+        if (!isMissingCollection(error)) throw error;
+        await createCollectionIfNeeded();
+        await collection.doc(OPENID).set({ data });
+      }
       return { ok: true };
     } catch (error) {
       console.error(JSON.stringify({ level: "error", event: "state.save", openidSuffix: OPENID.slice(-6), message: error.message }));
