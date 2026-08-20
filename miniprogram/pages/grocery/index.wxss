@@ -1,1 +1,53 @@
-/* shared styles live in app.wxss */
+.grocery-screen { padding-top: 28rpx; padding-bottom: calc(272rpx + env(safe-area-inset-bottom)); }
+.grocery-header { margin-bottom: 26rpx; }
+
+.purchase-progress-card { display: grid; grid-template-columns: 104rpx minmax(0, 1fr) auto; align-items: center; gap: 20rpx; min-height: 154rpx; padding: 22rpx 24rpx; border: 1rpx solid #e7dbcf; border-radius: 30rpx; background: rgba(255, 253, 249, .92); box-shadow: 0 10rpx 28rpx rgba(75, 52, 34, .045); }
+.progress-ring { display: flex; align-items: center; justify-content: center; width: 104rpx; height: 104rpx; border-radius: 52rpx; background: #ece5dd; }
+.progress-ring-inner { display: flex; align-items: baseline; justify-content: center; width: 78rpx; height: 78rpx; border-radius: 39rpx; background: var(--paper); color: var(--accent); line-height: 78rpx; }
+.progress-number { font-size: 29rpx; font-weight: 800; }
+.progress-unit { font-size: 18rpx; font-weight: 800; margin-left: 1rpx; }
+.progress-copy { min-width: 0; }
+.progress-main { display: block; color: var(--ink); font-size: 25rpx; font-weight: 700; line-height: 1.4; }
+.progress-main text { font-size: 29rpx; font-weight: 850; }
+.progress-source { display: block; color: var(--muted); font-size: 22rpx; margin-top: 8rpx; }
+.copy-action { display: flex; align-items: center; justify-content: center; gap: 8rpx; min-height: 66rpx; padding: 0 16rpx; border: 2rpx solid rgba(212, 98, 69, .42); border-radius: 999rpx; background: transparent; color: var(--accent); font-size: 20rpx; font-weight: 700; line-height: 66rpx; white-space: nowrap; }
+.copy-action image { width: 30rpx; height: 30rpx; }
+.copy-action:active { opacity: .72; transform: scale(.97); }
+
+.grocery-groups { margin-top: 22rpx; }
+.grocery-group + .grocery-group { margin-top: 12rpx; }
+.grocery-group-title { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 68rpx; padding: 0 8rpx; background: transparent; color: var(--ink); text-align: left; }
+.group-name-wrap, .group-meta { display: flex; align-items: center; }
+.group-name-wrap { gap: 13rpx; }
+.group-name-wrap image { width: 38rpx; height: 38rpx; }
+.group-name-wrap .name { font-family: "Songti SC", serif; font-size: 31rpx; font-weight: 800; }
+.group-meta { gap: 13rpx; }
+.group-meta .count { color: var(--muted); font-size: 22rpx; }
+.group-chevron { display: inline-block; color: #8e847b; font-family: Arial, sans-serif; font-size: 34rpx; line-height: 1; transform: rotate(0deg); }
+.group-chevron.collapsed { transform: rotate(-90deg); }
+.grocery-group-title:active { opacity: .68; transform: scale(.992); }
+
+.grocery-card { overflow: hidden; padding: 0 24rpx; border: 1rpx solid rgba(86, 68, 52, .07); border-radius: 28rpx; background: rgba(255, 253, 249, .95); box-shadow: 0 8rpx 24rpx rgba(75, 52, 34, .045); }
+.grocery-item { display: flex; align-items: center; gap: 18rpx; min-height: 112rpx; padding: 17rpx 0; border-bottom: 1rpx solid var(--line); }
+.grocery-item:last-child { border-bottom: 0; }
+.grocery-item.checked { opacity: .54; }
+.grocery-item.checked .grocery-name { text-decoration: line-through; }
+.check-box { display: flex; align-items: center; justify-content: center; flex: 0 0 50rpx; width: 50rpx; height: 50rpx; min-height: 50rpx; padding: 0; border: 2rpx solid #cdb9a6; border-radius: 15rpx; background: transparent; color: transparent; font-size: 27rpx; line-height: 50rpx; }
+.check-box.checked { border-color: var(--sage); background: var(--sage); color: white; }
+.check-box:active { transform: scale(.9); }
+.grocery-main { flex: 1; min-width: 0; }
+.grocery-title { display: flex; align-items: baseline; justify-content: space-between; gap: 18rpx; }
+.grocery-name { display: block; overflow: hidden; font-size: 28rpx; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.grocery-amount { flex: 0 0 auto; color: var(--ink); font-size: 25rpx; font-weight: 750; }
+.grocery-source { display: block; overflow: hidden; color: var(--muted); font-size: 21rpx; margin-top: 5rpx; text-overflow: ellipsis; white-space: nowrap; }
+
+.purchase-action-panel { position: sticky; z-index: 20; bottom: calc(118rpx + env(safe-area-inset-bottom)); margin: 22rpx -4rpx -10rpx; padding: 14rpx 4rpx 12rpx; background: linear-gradient(180deg, rgba(246, 241, 233, 0), rgba(246, 241, 233, .96) 25%); }
+.purchase-hint { display: flex; align-items: center; justify-content: center; gap: 8rpx; min-height: 42rpx; color: var(--muted); font-size: 21rpx; text-align: center; }
+.purchase-hint image { width: 27rpx; height: 27rpx; }
+.inventory-cta { gap: 13rpx; width: 100%; min-height: 88rpx; margin-top: 7rpx; border-radius: 24rpx; }
+.inventory-cta image { width: 38rpx; height: 38rpx; }
+.inventory-cta:active { opacity: .82; transform: scale(.985); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .copy-action, .grocery-group-title, .group-chevron, .check-box, .inventory-cta { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
+}

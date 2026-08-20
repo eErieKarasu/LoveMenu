@@ -1,24 +1,42 @@
-<view class="screen tab-screen">
-  <view class="page-header">
-    <view><text class="title">采购清单</text></view>
-    <button class="round-btn" bindtap="completePurchased">✓</button>
-  </view>
+<view class="screen tab-screen grocery-screen">
+  <view class="page-header grocery-header"><view><text class="title">采购清单</text></view></view>
+
   <view wx:if="{{loading}}" class="loading">正在整理采购清单…</view>
   <block wx:elif="{{groups.length}}">
-    <view wx:for="{{groups}}" wx:key="name">
-      <view class="group-title"><text class="name">{{item.name}}</text><text class="count">{{item.items.length}} 项</text></view>
-      <view class="card">
-        <view class="grocery-item {{food.checked ? 'checked' : ''}}" wx:for="{{item.items}}" wx:for-item="food" wx:key="id">
-          <button class="check-box {{food.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{food.id}}">✓</button>
-          <view class="grocery-main">
-            <view class="grocery-title"><text class="grocery-name">{{food.name}}</text><text class="grocery-amount">× {{food.quantityText}}</text></view>
-            <text class="grocery-source">来自：{{food.sourceText}}</text>
+    <view class="purchase-progress-card" aria-live="polite">
+      <view class="progress-ring" style="{{progressStyle}}">
+        <view class="progress-ring-inner"><text class="progress-number">{{progressPercent}}</text><text class="progress-unit">%</text></view>
+      </view>
+      <view class="progress-copy">
+        <text class="progress-main">已买 <text>{{purchasedCount}}/{{totalCount}}</text> 项 · 还剩 <text>{{remainingCount}}</text> 项</text>
+        <text class="progress-source">来自 {{sourceCount}} 道菜</text>
+      </view>
+      <button class="copy-action" bindtap="copyList"><image src="/assets/icons/grocery-copy.svg" mode="aspectFit" /><text>复制未购买清单</text></button>
+    </view>
+
+    <view class="grocery-groups">
+      <view class="grocery-group" wx:for="{{groups}}" wx:key="name">
+        <button class="grocery-group-title" data-name="{{item.name}}" bindtap="toggleGroup" aria-expanded="{{!item.collapsed}}" aria-label="{{item.collapsed ? '展开' : '收起'}}{{item.name}}">
+          <view class="group-name-wrap"><image src="{{item.iconSrc}}" mode="aspectFit" /><text class="name">{{item.name}}</text></view>
+          <view class="group-meta"><text class="count">{{item.items.length}} 项</text><text class="group-chevron {{item.collapsed ? 'collapsed' : ''}}">⌄</text></view>
+        </button>
+        <view wx:if="{{!item.collapsed}}" class="grocery-card">
+          <view class="grocery-item {{food.checked ? 'checked' : ''}}" wx:for="{{item.items}}" wx:for-item="food" wx:key="id">
+            <button class="check-box {{food.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{food.id}}" aria-label="{{food.checked ? '取消已购' : '标记已购'}}{{food.name}}" aria-checked="{{food.checked}}">✓</button>
+            <view class="grocery-main">
+              <view class="grocery-title"><text class="grocery-name">{{food.name}}</text><text class="grocery-amount">× {{food.quantityText}}</text></view>
+              <text class="grocery-source">来自：{{food.sourceText}}</text>
+            </view>
           </view>
         </view>
       </view>
     </view>
-    <button class="primary" style="margin-top: 30rpx" bindtap="copyList">复制未购买清单</button>
-    <text class="grocery-hint">勾选买到的食材，再点右上角即可一起加入库存。</text>
+
+    <view class="purchase-action-panel">
+      <view class="purchase-hint"><image src="/assets/icons/grocery-hint.svg" mode="aspectFit" /><text>{{purchasedCount ? '已勾选 ' + purchasedCount + ' 项，确认后将加入库存' : '勾选买到的食材后，可一键加入库存'}}</text></view>
+      <button class="primary inventory-cta" bindtap="completePurchased"><image src="/assets/icons/grocery-to-inventory.svg" mode="aspectFit" /><text>将已买食材加入库存</text></button>
+    </view>
   </block>
+
   <view wx:else class="empty-state"><text class="headline">采购清单已清空</text><text>今日菜单中有缺少的食材时，会在这里自动生成。</text></view>
 </view>

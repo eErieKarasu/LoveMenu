@@ -11,6 +11,7 @@ const {
   mealContextForHour,
   movePurchasedToInventory,
   normalizeState,
+  purchaseAmountForIngredient,
   removeRecipeFromTodayMeal,
   selectedTodayRecipes,
   stepItemsForRecipe,
@@ -136,6 +137,28 @@ test("已购买项目可以入库并从采购清单移除", () => {
   assert.equal(movePurchasedToInventory(state), 1);
   assert.equal(state.inventory.find((item) => item.name === "鸡蛋").quantity, 6);
   assert.deepEqual(state.groceries.map((item) => item.name), ["番茄"]);
+});
+
+test("采购包装单位与菜谱用量分开记录", () => {
+  assert.deepEqual(purchaseAmountForIngredient({ name: "食用油", quantity: 10, unit: "毫升" }), { quantity: 1, unit: "瓶" });
+  assert.deepEqual(purchaseAmountForIngredient({ name: "鸡蛋", quantity: 3, unit: "个" }), { quantity: 3, unit: "个" });
+  const state = normalizeState({
+    ...createInitialState(),
+    groceries: [{
+      id: "oil",
+      category: "其他",
+      name: "食用油",
+      quantity: 10,
+      unit: "毫升",
+      source: ["番茄炒蛋"],
+      checked: true
+    }]
+  });
+  assert.equal(state.groceries[0].purchaseQuantity, 1);
+  assert.equal(state.groceries[0].purchaseUnit, "瓶");
+  assert.equal(movePurchasedToInventory(state), 1);
+  assert.equal(state.inventory[0].quantity, 1);
+  assert.equal(state.inventory[0].unit, "瓶");
 });
 
 test("旧菜谱做法自动迁移为结构化步骤", () => {

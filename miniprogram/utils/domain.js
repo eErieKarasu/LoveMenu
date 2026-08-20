@@ -67,6 +67,25 @@ function normalizeQuantity(value) {
   return Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
 }
 
+function purchaseAmountForIngredient(ingredient) {
+  const name = String(ingredient && ingredient.name || "").trim();
+  const quantity = normalizeQuantity(ingredient && ingredient.quantity);
+  const unit = String(ingredient && ingredient.unit || "份").trim() || "份";
+  const volumeUnits = ["毫升", "升", "勺"];
+  const weightUnits = ["克", "斤"];
+
+  if (/(食用油|菜籽油|花生油|橄榄油|香油)/.test(name) && volumeUnits.includes(unit)) {
+    return { quantity: 1, unit: "瓶" };
+  }
+  if (/(生抽|老抽|酱油|醋|料酒|蚝油)/.test(name) && volumeUnits.includes(unit)) {
+    return { quantity: 1, unit: "瓶" };
+  }
+  if (/(盐|白糖|糖|淀粉|面粉)/.test(name) && weightUnits.includes(unit)) {
+    return { quantity: 1, unit: "袋" };
+  }
+  return { quantity, unit };
+}
+
 function normalizeStockQuantity(value) {
   if (value === "" || value === null || typeof value === "undefined") return null;
   const quantity = Number(value);
@@ -240,15 +259,21 @@ function addRecipeIngredients(state, recipeId) {
       const requirementsChanged = existing.quantity !== purchaseQuantity || previousSourceRecipeIds.length !== sourceRecipeIds.length;
       existing.sourceRecipeIds = sourceRecipeIds;
       existing.quantity = purchaseQuantity;
+      const purchaseAmount = purchaseAmountForIngredient({ ...ingredient, quantity: purchaseQuantity });
+      existing.purchaseQuantity = purchaseAmount.quantity;
+      existing.purchaseUnit = purchaseAmount.unit;
       if (requirementsChanged) existing.checked = false;
       return;
     }
+    const purchaseAmount = purchaseAmountForIngredient({ ...ingredient, quantity: purchaseQuantity });
     state.groceries.push({
       id: `g-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       category: inferGroceryCategory(ingredient.name),
       name: ingredient.name,
       quantity: purchaseQuantity,
       unit: ingredient.unit,
+      purchaseQuantity: purchaseAmount.quantity,
+      purchaseUnit: purchaseAmount.unit,
       source: [recipe.name],
       sourceRecipeIds: [recipe.id],
       checked: false
@@ -290,11 +315,14 @@ function removeRecipeIngredients(state, recipeId) {
       return items;
     }
 
+    const purchaseAmount = purchaseAmountForIngredient({ name: grocery.name, quantity: stock.shortage, unit: grocery.unit });
     items.push({
       ...grocery,
       source: state.recipes.filter((recipe) => remainingRecipeIds.includes(recipe.id)).map((recipe) => recipe.name),
       sourceRecipeIds: remainingRecipeIds,
       quantity: stock.shortage,
+      purchaseQuantity: purchaseAmount.quantity,
+      purchaseUnit: purchaseAmount.unit,
       checked: false
     });
     return items;
@@ -315,10 +343,18 @@ function syncTodayGroceries(state) {
 function movePurchasedToInventory(state) {
   const purchased = state.groceries.filter((item) => item.checked);
   purchased.forEach((grocery) => {
+    const purchaseAmount = purchaseAmountForIngredient({
+      name: grocery.name,
+      quantity: grocery.purchaseQuantity || grocery.quantity,
+      unit: grocery.purchaseUnit || grocery.unit
+    });
     const existing = inventoryItemForIngredient(state, grocery.name);
     if (existing) {
-      if (existing.quantity !== null && existing.unit === grocery.unit) {
-        existing.quantity += normalizeQuantity(grocery.quantity);
+      if (existing.quantity !== null && existing.unit === purchaseAmount.unit) {
+        existing.quantity += purchaseAmount.quantity;
+      } else if (existing.quantity !== null && existing.unit !== purchaseAmount.unit) {
+        existing.quantity = purchaseAmount.quantity;
+        existing.unit = purchaseAmount.unit;
       }
       existing.level = "enough";
       existing.category = grocery.category || existing.category;
@@ -330,8 +366,8 @@ function movePurchasedToInventory(state) {
       name: grocery.name,
       category: grocery.category,
       level: "enough",
-      quantity: normalizeQuantity(grocery.quantity),
-      unit: grocery.unit,
+      quantity: purchaseAmount.quantity,
+      unit: purchaseAmount.unit,
       updatedAt: Date.now()
     }));
   });
@@ -420,13 +456,22 @@ function normalizeState(state) {
     version: 5,
     recipes: normalizedRecipes.map((recipe) => decorateRecipeWithInventory(recipe, inventory)),
     inventory,
-    groceries: Array.isArray(state.groceries) ? state.groceries.map((item) => ({
-      ...item,
-      quantity: normalizeQuantity(item.quantity),
-      unit: item.unit || "份",
-      source: Array.isArray(item.source) ? item.source : [],
-      sourceRecipeIds: Array.isArray(item.sourceRecipeIds) ? item.sourceRecipeIds : []
-    })) : [],
+    groceries: Array.isArray(state.groceries) ? state.groceries.map((item) => {
+      const quantity = normalizeQuantity(item.quantity);
+      const unit = item.unit || "份";
+      const purchaseAmount = item.purchaseQuantity && item.purchaseUnit
+        ? { quantity: normalizeQuantity(item.purchaseQuantity), unit: item.purchaseUnit }
+        : purchaseAmountForIngredient({ name: item.name, quantity, unit });
+      return {
+        ...item,
+        quantity,
+        unit,
+        purchaseQuantity: purchaseAmount.quantity,
+        purchaseUnit: purchaseAmount.unit,
+        source: Array.isArray(item.source) ? item.source : [],
+        sourceRecipeIds: Array.isArray(item.sourceRecipeIds) ? item.sourceRecipeIds : []
+      };
+    }) : [],
     todayPlan: normalizedTodayPlan(state),
     weekPlan: Array.isArray(state.weekPlan) && state.weekPlan.length === 7
       ? state.weekPlan
@@ -452,6 +497,7 @@ module.exports = {
   movePurchasedToInventory,
   normalizeInventoryItem,
   normalizeState,
+  purchaseAmountForIngredient,
   recipeById,
   removeRecipeIngredients,
   removeRecipeFromTodayMeal,
