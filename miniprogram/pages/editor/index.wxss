@@ -150,15 +150,18 @@
 }
 
 .ingredient-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 48rpx;
   height: 48rpx;
   min-height: 48rpx;
   padding: 0;
   background: transparent;
-  color: #aa9d93;
-  font-size: 34rpx;
-  line-height: 48rpx;
 }
+
+.ingredient-remove image, .step-remove image { width: 29rpx; height: 29rpx; }
+.ingredient-remove:active, .step-remove:active { background: #eee6de; transform: scale(.92); }
 
 .add-ingredient {
   width: 100%;
@@ -220,15 +223,15 @@
 }
 
 .step-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 48rpx;
   width: 48rpx;
   height: 48rpx;
   min-height: 48rpx;
   padding: 0;
   background: transparent;
-  color: #aa9d93;
-  font-size: 34rpx;
-  line-height: 48rpx;
 }
 
 .add-step {
