@@ -174,7 +174,7 @@ exports.main = async (event) => {
   if (!OPENID) return { ok: false, code: "UNAUTHORIZED", message: "无法识别当前微信用户" };
 
   const prompt = cleanText(event && event.prompt, 600);
-  if (prompt.length < 4) return { ok: false, code: "INVALID_PROMPT", message: "请描述想做的菜" };
+  if (!prompt) return { ok: false, code: "INVALID_PROMPT", message: "请输入菜名或做菜需求" };
   const inventory = (Array.isArray(event && event.inventory) ? event.inventory : [])
     .map((item) => cleanText(item, 24))
     .filter(Boolean)
@@ -198,7 +198,7 @@ exports.main = async (event) => {
     const content = response && response.choices && response.choices[0] && response.choices[0].message && response.choices[0].message.content;
     const recipe = normalizeRecipe(parseJsonContent(content));
     if (!recipe) throw new RecipeAiError("INVALID_AI_RESPONSE", "AI 未返回完整菜谱");
-    console.info(JSON.stringify({ level: "info", event: "recipe-ai.generate", requestId, openidSuffix: OPENID.slice(-6), model: provider.model }));
+    console.info(JSON.stringify({ level: "info", event: "recipe-ai.generate", requestId, openidSuffix: OPENID.slice(-6), model: provider.model, inventoryCount: inventory.length }));
     return { ok: true, recipe, requestId };
   } catch (error) {
     const code = error instanceof RecipeAiError ? error.code : "GENERATION_FAILED";

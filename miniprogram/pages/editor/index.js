@@ -104,6 +104,7 @@ Page({
       setTimeout(() => wx.navigateBack(), 500);
       return;
     }
+    const draftImage = String(stored && stored.imagePreview || "");
     const form = {
       name: recipe.name,
       categories: recipe.categories.slice(),
@@ -111,8 +112,8 @@ Page({
       cook: recipe.cook,
       difficulty: recipe.difficulty,
       image: "",
-      imagePreview: "",
-      pendingImagePath: "",
+      imagePreview: draftImage,
+      pendingImagePath: draftImage,
       ingredientItems: recipe.ingredientItems.map((item) => ({
         id: blankIngredient().id,
         name: item.name,

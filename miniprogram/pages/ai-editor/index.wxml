@@ -3,7 +3,7 @@
     <view>
       <text class="eyebrow ai-eyebrow">AI 创建</text>
       <text class="title">想做什么菜？</text>
-      <text class="subtitle">说说口味、家里有的食材或想花多少时间。AI 会生成一份可编辑初稿，不会直接保存。</text>
+      <text class="subtitle">告诉 AI 你的口味、现有食材或可用时间，AI 会生成一份可编辑的菜谱初稿，不会直接保存。</text>
     </view>
   </view>
 
@@ -12,30 +12,49 @@
       <text class="label">你的想法</text>
       <text class="prompt-count">{{promptLength}} / 600</text>
     </view>
-    <textarea
-      class="ai-prompt"
-      value="{{prompt}}"
-      maxlength="600"
-      placeholder="例如：我想做一道 30 分钟内完成、微辣的鸡肉下饭菜，家里有土豆和青椒。"
-      bindinput="updatePrompt"
-      disabled="{{generating}}"
-      auto-focus
-    />
+    <view class="ai-prompt-wrap">
+      <textarea
+        class="ai-prompt"
+        value="{{prompt}}"
+        maxlength="600"
+        bindinput="updatePrompt"
+        disabled="{{generating}}"
+        auto-focus
+      />
+      <view wx:if="{{!prompt}}" class="prompt-examples" aria-hidden="true">
+        <text>例如：番茄炒蛋</text>
+        <text>或：30 分钟内完成的微辣鸡肉菜，家里有土豆和青椒。</text>
+      </view>
+    </view>
     <text wx:if="{{errorMessage}}" class="ai-error" aria-live="polite">{{errorMessage}}</text>
+    <view class="image-input-divider"></view>
+    <view class="image-input-row {{imagePreview ? 'selected' : ''}}" bindtap="chooseAiImage" aria-role="button" aria-label="{{imagePreview ? '更换已添加的图片' : '添加图片，可选'}}">
+      <image wx:if="{{imagePreview}}" class="image-input-preview" src="{{imagePreview}}" mode="aspectFill" />
+      <image wx:else class="image-input-icon" src="/assets/icons/ai-image-add.svg" mode="aspectFit" />
+      <view class="image-input-copy">
+        <text class="image-input-title">{{imageBusy ? '正在处理图片…' : imagePreview ? '已添加图片' : '添加图片（可选）'}}</text>
+        <text wx:if="{{imagePreview}}" class="image-input-note">点击可更换</text>
+      </view>
+      <button wx:if="{{imagePreview}}" class="image-input-remove" catchtap="removeAiImage" aria-label="移除图片">×</button>
+      <text wx:else class="image-input-chevron">›</text>
+    </view>
   </view>
 
   <view class="suggestion-section">
     <text class="suggestion-title">没想好？可以从这里开始</text>
     <button
       wx:for="{{suggestions}}"
-      wx:key="*this"
+      wx:key="prompt"
       class="suggestion-item"
-      data-value="{{item}}"
+      data-value="{{item.prompt}}"
       bindtap="useSuggestion"
       disabled="{{generating}}"
     >
       <image src="/assets/icons/create-ai.svg" mode="aspectFit" />
-      <text>{{item}}</text>
+      <view class="suggestion-copy">
+        <text class="suggestion-item-title">{{item.title}}</text>
+        <text wx:if="{{item.subtitle}}" class="suggestion-item-note">{{item.subtitle}}</text>
+      </view>
       <text class="suggestion-chevron">›</text>
     </button>
   </view>
@@ -50,10 +69,14 @@
     </view>
   </view>
 
+  <view class="ai-safety-note">
+    <image src="/assets/icons/ai-draft-safe.svg" mode="aspectFit" />
+    <text>AI 生成可编辑的菜谱初稿，你可以在保存前随时修改。</text>
+  </view>
+
   <view class="ai-actions">
-    <button class="secondary" bindtap="cancel" disabled="{{generating}}">取消</button>
-    <button class="primary ai-generate" bindtap="generate" loading="{{generating}}" disabled="{{generating}}">
-      {{generating ? '正在生成' : '生成菜谱初稿'}}
+    <button class="primary ai-generate" bindtap="generate" loading="{{generating}}" disabled="{{generating || imageBusy}}">
+      {{generating ? '正在生成' : imageBusy ? '正在处理图片' : '生成菜谱初稿'}}
     </button>
   </view>
 </view>

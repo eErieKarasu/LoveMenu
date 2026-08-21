@@ -11,7 +11,7 @@ class RecipeAiError extends Error {
 function errorMessage(code) {
   switch (code) {
     case "AI_NOT_CONFIGURED": return "AI 创建还没有配置，可以先手动新增";
-    case "INVALID_PROMPT": return "请再多描述一点想做的菜";
+    case "INVALID_PROMPT": return "请输入菜名，或描述你想做的菜";
     case "RATE_LIMITED": return "AI 有点忙，稍后再试一次";
     case "INVALID_AI_RESPONSE": return "AI 没有生成完整菜谱，请换种说法再试";
     case "CLOUD_UNAVAILABLE": return "当前无法连接 AI，请检查网络后重试";
