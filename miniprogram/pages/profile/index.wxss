@@ -1,0 +1,29 @@
+.profile-screen { padding-top: 28rpx; }
+.profile-hero { display: flex; align-items: center; gap: 26rpx; margin: 8rpx 4rpx 32rpx; padding: 28rpx 6rpx; }
+.profile-avatar-large { display: flex; align-items: center; justify-content: center; flex: 0 0 112rpx; width: 112rpx; height: 112rpx; border: 6rpx solid rgba(255,255,255,.92); border-radius: 56rpx; background: linear-gradient(145deg, #f4e7d8, #fffdf9); font-family: "Songti SC", serif; font-size: 50rpx; font-weight: 800; box-shadow: 0 12rpx 34rpx rgba(75, 52, 34, .13); }
+.profile-identity { min-width: 0; }
+.profile-name { display: block; font-family: "Songti SC", serif; font-size: 44rpx; font-weight: 800; }
+.profile-note { display: block; color: var(--muted); font-size: 24rpx; margin-top: 10rpx; }
+
+.profile-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14rpx; }
+.profile-metric { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130rpx; padding: 16rpx 8rpx; border: 1rpx solid rgba(86, 68, 52, .07); border-radius: 26rpx; background: var(--paper); box-shadow: 0 8rpx 24rpx rgba(75, 52, 34, .05); line-height: 1.2; }
+.metric-value { color: var(--ink); font-size: 38rpx; font-weight: 800; }
+.metric-label { color: var(--muted); font-size: 22rpx; margin-top: 10rpx; }
+.profile-metric:active { opacity: .76; transform: scale(.97); }
+
+.profile-section { margin-top: 38rpx; }
+.profile-section-title { display: block; margin: 0 4rpx 16rpx; font-family: "Songti SC", serif; font-size: 32rpx; font-weight: 800; }
+.settings-card { overflow: hidden; border: 1rpx solid rgba(86, 68, 52, .07); border-radius: 30rpx; background: var(--paper); box-shadow: 0 10rpx 30rpx rgba(75, 52, 34, .055); }
+.setting-row { display: flex; align-items: center; gap: 18rpx; min-height: 132rpx; padding: 22rpx 24rpx; }
+.setting-icon { display: flex; align-items: center; justify-content: center; flex: 0 0 68rpx; width: 68rpx; height: 68rpx; border-radius: 22rpx; font-size: 32rpx; }
+.cloud-icon { background: var(--sage-soft); color: var(--sage); }
+.heart-icon { background: var(--accent-soft); color: var(--accent); }
+.setting-copy { flex: 1; min-width: 0; }
+.setting-name { display: block; font-size: 28rpx; font-weight: 800; }
+.setting-description { display: block; color: var(--muted); font-size: 21rpx; line-height: 1.45; margin-top: 7rpx; }
+.setting-status { flex: 0 0 auto; max-width: 164rpx; color: var(--sage); font-size: 21rpx; line-height: 1.4; text-align: right; }
+.version { color: var(--muted); font-size: 22rpx; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .profile-metric { transition: transform 180ms ease, opacity 180ms ease; }
+}

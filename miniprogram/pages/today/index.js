@@ -8,7 +8,14 @@ const {
   todayRecipeIds
 } = require("../../utils/domain");
 const { selectTab } = require("../../utils/tab-bar");
+const { recentRecipeCard } = require("../../utils/today");
 const app = getApp();
+
+const MEAL_ICONS = {
+  breakfast: "/assets/icons/meal-breakfast.svg",
+  lunch: "/assets/icons/meal-lunch.svg",
+  dinner: "/assets/icons/meal-dinner.svg"
+};
 
 const MEAL_ILLUSTRATIONS = {
   lunch: "/assets/illustrations/meal-lunch-bowl.svg",
@@ -19,7 +26,7 @@ Page({
   data: {
     loading: true,
     meals: [],
-    recent: [],
+    recentRecipe: null,
     dateLabel: "",
     selectedCount: 0,
     plannedMealCount: 0,
@@ -54,6 +61,9 @@ Page({
         isCurrent: meal.key === currentMeal.key,
         statusText: dishes.length ? `${dishes.length} 道 · 约 ${totalTime} 分钟` : "待安排",
         actionText: dishes.length ? "再加一道" : `安排${meal.label}`,
+        iconSrc: meal.key === currentMeal.key
+          ? MEAL_ICONS[meal.key].replace(".svg", "-active.svg")
+          : MEAL_ICONS[meal.key],
         illustrationSrc: MEAL_ILLUSTRATIONS[meal.key] || ""
       };
     });
@@ -65,15 +75,16 @@ Page({
     this.setData({
       loading: false,
       meals,
-      recent: state.recipes
-        .filter((recipe) => !selectedIds.has(recipe.id))
-        .slice(0, 6)
-        .map((recipe) => ({ ...recipe, tagSummary: recipe.tags.slice(0, 2).join(" / ") })),
+      recentRecipe: recentRecipeCard(state.recipes.find((recipe) => !selectedIds.has(recipe.id)) || state.recipes[0]),
       dateLabel: `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
       selectedCount,
       plannedMealCount,
       totalTime
     });
+  },
+
+  openProfile() {
+    wx.navigateTo({ url: "/pages/profile/index" });
   },
 
   goRecipes(event) {

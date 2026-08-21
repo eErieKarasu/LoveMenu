@@ -2,7 +2,7 @@
   <view wx:if="{{loading}}" class="loading">正在整理今天的菜单…</view>
   <block wx:else>
     <view class="page-header today-header">
-      <view>
+      <view class="today-hero-copy">
         <text class="eyebrow">{{dateLabel}}</text>
         <text class="title">今天吃什么？</text>
         <view class="today-summary" aria-live="polite">
@@ -10,56 +10,73 @@
           <text wx:if="{{selectedCount}}"> · 共 {{selectedCount}} 道菜 · 约 {{totalTime}} 分钟</text>
         </view>
       </view>
+      <button class="profile-entry" bindtap="openProfile" aria-label="进入个人与设置中心">
+        <text class="profile-avatar">王</text>
+        <text class="profile-chevron">›</text>
+      </button>
     </view>
 
     <view class="meal-list">
       <view wx:for="{{meals}}" wx:key="key" class="meal-card {{item.isCurrent ? 'current' : ''}} {{item.dishes.length ? 'planned' : 'unplanned'}}">
-        <view class="meal-card-head">
-          <view class="meal-title-group">
-            <view class="meal-name-line">
-              <text class="meal-name">{{item.label}}</text>
-              <text wx:if="{{item.isCurrent}}" class="now-pill">现在</text>
+        <view class="meal-card-layout">
+          <view class="meal-icon-wrap {{item.isCurrent ? 'current' : ''}}">
+            <image class="meal-icon" src="{{item.iconSrc}}" mode="aspectFit" aria-label="{{item.label}}图标" />
+          </view>
+          <view class="meal-card-body">
+            <view class="meal-card-head">
+              <view class="meal-title-group">
+                <view class="meal-name-line">
+                  <text class="meal-name">{{item.label}}</text>
+                  <text wx:if="{{item.isCurrent}}" class="now-pill">现在</text>
+                </view>
+                <text class="meal-time">{{item.timeLabel}}</text>
+              </view>
+              <view class="meal-head-actions">
+                <text class="meal-status">{{item.statusText}}</text>
+                <button wx:if="{{item.dishes.length}}" class="more-action" catchtap="openMealMenu" data-meal="{{item.key}}" aria-label="{{item.label}}更多操作">⋮</button>
+              </view>
             </view>
-            <text class="meal-time">{{item.timeLabel}}</text>
-          </view>
-          <view class="meal-head-actions">
-            <text class="meal-status">{{item.statusText}}</text>
-            <button wx:if="{{item.dishes.length}}" class="more-action" catchtap="openMealMenu" data-meal="{{item.key}}" aria-label="{{item.label}}更多操作">⋮</button>
-          </view>
-        </view>
 
-        <block wx:if="{{item.dishes.length}}">
-          <view class="today-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" bindtap="openRecipe" data-id="{{dish.id}}" aria-role="button" aria-label="查看{{dish.name}}">
-            <image wx:if="{{dish.imageSrc}}" class="dish-thumb" src="{{dish.imageSrc}}" mode="aspectFill" aria-label="{{dish.name}}菜品图片" />
-            <image wx:else class="dish-thumb dish-thumb-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{dish.name}}暂无菜品图片" />
-            <view class="dish-main">
-              <text class="dish-name">{{dish.name}}</text>
-              <text class="dish-detail">{{dish.categoryLabel}} · {{dish.time}} 分钟 · {{dish.spice}}</text>
+            <block wx:if="{{item.dishes.length}}">
+              <view class="today-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" bindtap="openRecipe" data-id="{{dish.id}}" aria-role="button" aria-label="查看{{dish.name}}">
+                <image wx:if="{{dish.imageSrc}}" class="dish-thumb" src="{{dish.imageSrc}}" mode="aspectFill" aria-label="{{dish.name}}菜品图片" />
+                <image wx:else class="dish-thumb dish-thumb-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{dish.name}}暂无菜品图片" />
+                <view class="dish-main">
+                  <text class="dish-name">{{dish.name}}</text>
+                  <text class="dish-detail">{{dish.categoryLabel}} · {{dish.time}} 分钟 · {{dish.spice}}</text>
+                </view>
+                <text class="dish-chevron">›</text>
+              </view>
+              <button class="add-dish-action" bindtap="goRecipes" data-meal="{{item.key}}"><text class="plus">＋</text> 再加一道</button>
+            </block>
+
+            <view wx:else class="meal-empty">
+              <view class="meal-empty-copy">
+                <text class="meal-prompt">{{item.prompt}}</text>
+                <text class="meal-empty-note">选一道家里真正想吃的。</text>
+              </view>
+              <image wx:if="{{item.illustrationSrc}}" class="meal-illustration {{item.key}}" src="{{item.illustrationSrc}}" mode="aspectFit" />
+              <button class="meal-cta" bindtap="goRecipes" data-meal="{{item.key}}">{{item.actionText}}</button>
             </view>
-            <text class="dish-chevron">›</text>
           </view>
-          <button class="add-dish-action" bindtap="goRecipes" data-meal="{{item.key}}"><text class="plus">＋</text> 再加一道</button>
-        </block>
-
-        <view wx:else class="meal-empty">
-          <view class="meal-empty-copy">
-            <text class="meal-prompt">{{item.prompt}}</text>
-            <text class="meal-empty-note">选一道家里真正想吃的。</text>
-          </view>
-          <image wx:if="{{item.illustrationSrc}}" class="meal-illustration {{item.key}}" src="{{item.illustrationSrc}}" mode="aspectFit" />
-          <button class="meal-cta" bindtap="goRecipes" data-meal="{{item.key}}">{{item.actionText}}</button>
         </view>
       </view>
     </view>
 
-    <view class="section" wx:if="{{recent.length}}">
-      <text class="section-title">{{selectedCount ? '顺手再选一道' : '最近常做'}}</text>
-      <scroll-view scroll-x class="scroll-row" enable-flex>
-        <view class="mini-card" wx:for="{{recent}}" wx:key="id" bindtap="openRecipe" data-id="{{item.id}}">
-          <text class="name">{{item.name}}</text>
-          <text class="note">{{item.recent}} · {{item.tagSummary}}</text>
+    <view class="section recent-section" wx:if="{{recentRecipe}}">
+      <text class="section-title">最近常做</text>
+      <view class="recent-card" bindtap="openRecipe" data-id="{{recentRecipe.id}}" aria-role="button" aria-label="查看最近常做的{{recentRecipe.name}}">
+        <image wx:if="{{recentRecipe.imageSrc}}" class="recent-image" src="{{recentRecipe.imageSrc}}" mode="aspectFill" aria-label="{{recentRecipe.name}}菜品图片" />
+        <image wx:else class="recent-image recent-image-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{recentRecipe.name}}暂无菜品图片" />
+        <view class="recent-main">
+          <view class="recent-title-line">
+            <text class="recent-name">{{recentRecipe.name}}</text>
+            <text class="recent-status">{{recentRecipe.statusText}}</text>
+          </view>
+          <text class="recent-description">{{recentRecipe.descriptionText}}</text>
         </view>
-      </scroll-view>
+        <text class="recent-chevron">›</text>
+      </view>
     </view>
   </block>
 </view>

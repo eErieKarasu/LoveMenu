@@ -6,7 +6,8 @@
     "pages/inventory/index",
     "pages/detail/index",
     "pages/ai-editor/index",
-    "pages/editor/index"
+    "pages/editor/index",
+    "pages/profile/index"
   ],
   "window": {
     "navigationBarTitleText": "大王今天的饭",

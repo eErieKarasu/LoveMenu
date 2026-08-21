@@ -1,0 +1,55 @@
+<view class="screen profile-screen">
+  <view wx:if="{{loading}}" class="loading">正在整理你的菜单数据…</view>
+  <block wx:else>
+    <view class="profile-hero">
+      <text class="profile-avatar-large">王</text>
+      <view class="profile-identity">
+        <text class="profile-name">王</text>
+        <text class="profile-note">大王今天的饭 · 私人菜单</text>
+      </view>
+    </view>
+
+    <view class="profile-metrics" aria-label="菜单数据概览">
+      <button class="profile-metric" bindtap="goRecipes">
+        <text class="metric-value">{{recipeCount}}</text>
+        <text class="metric-label">菜谱</text>
+      </button>
+      <button class="profile-metric" bindtap="goInventory">
+        <text class="metric-value">{{inventoryCount}}</text>
+        <text class="metric-label">库存</text>
+      </button>
+      <button class="profile-metric" bindtap="goGrocery">
+        <text class="metric-value">{{groceryCount}}</text>
+        <text class="metric-label">待采购</text>
+      </button>
+    </view>
+
+    <view class="profile-section">
+      <text class="profile-section-title">数据与同步</text>
+      <view class="settings-card">
+        <view class="setting-row">
+          <view class="setting-icon cloud-icon">☁</view>
+          <view class="setting-copy">
+            <text class="setting-name">菜单数据</text>
+            <text class="setting-description">菜谱、今日安排、采购和库存统一保存</text>
+          </view>
+          <text class="setting-status">{{syncStatus}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="profile-section">
+      <text class="profile-section-title">关于</text>
+      <view class="settings-card">
+        <view class="setting-row">
+          <view class="setting-icon heart-icon">♡</view>
+          <view class="setting-copy">
+            <text class="setting-name">大王今天的饭</text>
+            <text class="setting-description">给家里人用的私人菜单小工具</text>
+          </view>
+          <text class="version">v1.0</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>
