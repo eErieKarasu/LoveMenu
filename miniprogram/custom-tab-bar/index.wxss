@@ -16,6 +16,8 @@
   box-sizing: border-box;
 }
 
+.tab-bar--locked { pointer-events: none; }
+
 .tab-bar__item {
   display: flex;
   flex: 1;

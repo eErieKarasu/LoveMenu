@@ -1,7 +1,7 @@
 const { CATEGORIES } = require("../../utils/constants");
 const { recipeById } = require("../../utils/domain");
+const { AI_DRAFT_STORAGE_KEY, INGREDIENT_UNITS, normalizeGeneratedRecipe } = require("../../utils/recipe-ai");
 const app = getApp();
-const INGREDIENT_UNITS = ["个", "克", "斤", "毫升", "升", "勺", "根", "把", "片", "块", "颗", "瓶", "袋", "盒", "份"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 let ingredientIdSeed = 0;
 let stepIdSeed = 0;
@@ -61,16 +61,22 @@ function saveLocalFile(tempFilePath) {
 Page({
   data: {
     id: "",
+    source: "",
     dishCategories: CATEGORIES.filter((item) => item !== "全部").map((name) => ({ name, active: name === "快手菜" })),
     difficulties: ["简单", "普通", "进阶"],
     ingredientUnits: INGREDIENT_UNITS,
     form: blankForm(),
+    aiMeta: { flavor: "家常", spice: "不辣", tags: [] },
     nameError: false,
     saving: false
   },
-  onLoad(options) { this.setData({ id: options.id || "" }); },
+  onLoad(options) { this.setData({ id: options.id || "", source: options.source || "" }); },
   async onReady() {
     await app.ensureReady();
+    if (this.data.source === "ai" && !this.data.id) {
+      this.loadAiDraft();
+      return;
+    }
     if (!this.data.id) return;
     const recipe = recipeById(app.getState(), this.data.id);
     if (!recipe) return;
@@ -89,6 +95,38 @@ Page({
       steps: recipe.steps.length ? recipe.steps.map((step) => ({ ...step })) : [blankStep()]
     };
     this.setData({ form, dishCategories: this.data.dishCategories.map((item) => ({ ...item, active: form.categories.includes(item.name) })) });
+  },
+  loadAiDraft() {
+    const stored = wx.getStorageSync(AI_DRAFT_STORAGE_KEY);
+    const recipe = normalizeGeneratedRecipe(stored && stored.recipe);
+    if (!recipe) {
+      wx.showToast({ title: "AI 初稿已失效，请重新生成", icon: "none" });
+      setTimeout(() => wx.navigateBack(), 500);
+      return;
+    }
+    const form = {
+      name: recipe.name,
+      categories: recipe.categories.slice(),
+      prep: recipe.prep,
+      cook: recipe.cook,
+      difficulty: recipe.difficulty,
+      image: "",
+      imagePreview: "",
+      pendingImagePath: "",
+      ingredientItems: recipe.ingredientItems.map((item) => ({
+        id: blankIngredient().id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitIndex: Math.max(0, INGREDIENT_UNITS.indexOf(item.unit))
+      })),
+      steps: recipe.steps.map((step) => ({ id: blankStep().id, text: step.text }))
+    };
+    this.setData({
+      form,
+      aiMeta: { flavor: recipe.flavor, spice: recipe.spice, tags: recipe.tags.slice() },
+      dishCategories: this.data.dishCategories.map((item) => ({ ...item, active: form.categories.includes(item.name) }))
+    });
   },
   updateField(event) {
     const field = event.currentTarget.dataset.field;
@@ -212,7 +250,10 @@ Page({
     });
   },
   setDifficulty(event) { this.setData({ "form.difficulty": event.currentTarget.dataset.value }); },
-  cancel() { wx.navigateBack(); },
+  cancel() {
+    if (this.data.source === "ai") wx.removeStorageSync(AI_DRAFT_STORAGE_KEY);
+    wx.navigateBack();
+  },
   async save() {
     if (this.data.saving) return;
     const form = this.data.form;
@@ -249,9 +290,9 @@ Page({
       categories: form.categories.length ? form.categories : ["快手菜"],
       prep: Number(form.prep), cook: Number(form.cook), time: Number(form.prep) + Number(form.cook),
       difficulty: form.difficulty,
-      flavor: existingRecipe && existingRecipe.flavor ? existingRecipe.flavor : "家常",
-      spice: existingRecipe && existingRecipe.spice ? existingRecipe.spice : "不辣",
-      tags: existingRecipe && Array.isArray(existingRecipe.tags) ? existingRecipe.tags : [],
+      flavor: existingRecipe && existingRecipe.flavor ? existingRecipe.flavor : this.data.aiMeta.flavor,
+      spice: existingRecipe && existingRecipe.spice ? existingRecipe.spice : this.data.aiMeta.spice,
+      tags: existingRecipe && Array.isArray(existingRecipe.tags) ? existingRecipe.tags : this.data.aiMeta.tags,
       ingredientItems,
       steps,
       ingredients: ingredientItems.map((item) => item.name),
@@ -262,8 +303,12 @@ Page({
       if (this.data.id) Object.assign(recipeById(state, this.data.id), data);
       else state.recipes.unshift({ id: `recipe-${Date.now()}`, ...data });
     });
+    if (this.data.source === "ai") wx.removeStorageSync(AI_DRAFT_STORAGE_KEY);
     wx.showToast({ title: "菜谱已保存", icon: "success" });
     setTimeout(() => wx.navigateBack(), 500);
     this.setData({ saving: false });
+  },
+  onUnload() {
+    if (this.data.source === "ai") wx.removeStorageSync(AI_DRAFT_STORAGE_KEY);
   }
 });

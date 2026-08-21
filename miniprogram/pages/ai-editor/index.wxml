@@ -1,0 +1,59 @@
+<view class="screen ai-editor-screen">
+  <view class="page-header ai-page-header">
+    <view>
+      <text class="eyebrow ai-eyebrow">AI 创建</text>
+      <text class="title">想做什么菜？</text>
+      <text class="subtitle">说说口味、家里有的食材或想花多少时间。AI 会生成一份可编辑初稿，不会直接保存。</text>
+    </view>
+  </view>
+
+  <view class="card ai-prompt-card">
+    <view class="ai-label-line">
+      <text class="label">你的想法</text>
+      <text class="prompt-count">{{promptLength}} / 600</text>
+    </view>
+    <textarea
+      class="ai-prompt"
+      value="{{prompt}}"
+      maxlength="600"
+      placeholder="例如：我想做一道 30 分钟内完成、微辣的鸡肉下饭菜，家里有土豆和青椒。"
+      bindinput="updatePrompt"
+      disabled="{{generating}}"
+      auto-focus
+    />
+    <text wx:if="{{errorMessage}}" class="ai-error" aria-live="polite">{{errorMessage}}</text>
+  </view>
+
+  <view class="suggestion-section">
+    <text class="suggestion-title">没想好？可以从这里开始</text>
+    <button
+      wx:for="{{suggestions}}"
+      wx:key="*this"
+      class="suggestion-item"
+      data-value="{{item}}"
+      bindtap="useSuggestion"
+      disabled="{{generating}}"
+    >
+      <image src="/assets/icons/create-ai.svg" mode="aspectFit" />
+      <text>{{item}}</text>
+      <text class="suggestion-chevron">›</text>
+    </button>
+  </view>
+
+  <view wx:if="{{generating}}" class="generating-card" aria-live="polite">
+    <view class="generating-mark">
+      <image src="/assets/icons/create-ai.svg" mode="aspectFit" />
+    </view>
+    <view>
+      <text class="generating-title">正在整理菜谱初稿</text>
+      <text class="generating-note">菜名、食材和步骤都生成后，再交给你确认。</text>
+    </view>
+  </view>
+
+  <view class="ai-actions">
+    <button class="secondary" bindtap="cancel" disabled="{{generating}}">取消</button>
+    <button class="primary ai-generate" bindtap="generate" loading="{{generating}}" disabled="{{generating}}">
+      {{generating ? '正在生成' : '生成菜谱初稿'}}
+    </button>
+  </view>
+</view>

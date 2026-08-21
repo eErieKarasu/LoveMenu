@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
+const { normalizeGeneratedRecipe } = require("../miniprogram/utils/recipe-ai");
 const {
   addRecipeToTodayMeal,
   addRecipeIngredients,
@@ -33,6 +34,39 @@ function sampleRecipe() {
     favorite: false
   };
 }
+
+test("AI 菜谱初稿会被标准化后再进入确认页", () => {
+  const recipe = normalizeGeneratedRecipe({
+    name: "  番茄炒蛋  ",
+    categories: ["快手菜", "不存在的分类"],
+    prep: 8.4,
+    cook: 12.2,
+    difficulty: "简单",
+    flavor: "酸甜",
+    spice: "不辣",
+    tags: ["下饭", "下饭"],
+    ingredientItems: [
+      { name: "番茄", quantity: 2, unit: "个" },
+      { name: "鸡蛋", quantity: 3, unit: "个" }
+    ],
+    steps: [{ text: "鸡蛋打散。" }, "番茄炒软后合炒。"]
+  });
+  assert.equal(recipe.name, "番茄炒蛋");
+  assert.deepEqual(recipe.categories, ["快手菜"]);
+  assert.equal(recipe.prep, 8);
+  assert.equal(recipe.cook, 12);
+  assert.deepEqual(recipe.tags, ["下饭"]);
+  assert.deepEqual(recipe.steps.map((step) => step.text), ["鸡蛋打散。", "番茄炒软后合炒。"]);
+});
+
+test("AI 菜谱缺少完整食材或步骤时会被拒绝", () => {
+  assert.equal(normalizeGeneratedRecipe({ name: "只有名字", ingredientItems: [], steps: [] }), null);
+  assert.equal(normalizeGeneratedRecipe({
+    name: "缺步骤",
+    ingredientItems: [{ name: "鸡蛋" }, { name: "盐" }],
+    steps: [{ text: "只有一步" }]
+  }), null);
+});
 
 test("菜谱封面图为可选字段且会在标准化时保留", () => {
   const withImage = normalizeState({ ...createInitialState(), recipes: [{ ...sampleRecipe(), image: "cloud://demo/recipe.jpg" }] });

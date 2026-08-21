@@ -44,6 +44,7 @@ if (appConfig.tabBar.custom) {
 }
 
 if (!fs.existsSync(path.join(root, "cloudfunctions/state/index.js"))) errors.push("缺少 state 云函数");
+if (!fs.existsSync(path.join(root, "cloudfunctions/recipe-ai/index.js"))) errors.push("缺少 recipe-ai 云函数");
 
 if (errors.length) {
   errors.forEach((error) => console.error(`ERROR: ${error}`));

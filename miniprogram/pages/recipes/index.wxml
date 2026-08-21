@@ -1,7 +1,7 @@
 <view class="screen tab-screen recipes-screen">
   <view class="page-header recipes-header">
     <view><text class="title">菜谱库</text></view>
-    <button class="round-btn add-recipe" bindtap="openEditor" aria-label="新增菜谱">＋</button>
+    <button class="round-btn add-recipe" bindtap="openCreateSheet" aria-label="新增菜品" aria-expanded="{{createSheetVisible}}">＋</button>
   </view>
 
   <view wx:if="{{mealTargetLabel}}" class="meal-target-bar">
@@ -54,4 +54,51 @@
     </view>
   </view>
   <view wx:else class="empty-state"><text class="headline">{{emptyTitle}}</text><text>{{emptyCopy}}</text></view>
+</view>
+
+<view
+  wx:if="{{createSheetVisible}}"
+  class="create-sheet-layer {{createSheetActive ? 'active' : ''}}"
+  catchtap="closeCreateSheet"
+  catchtouchmove="stopPropagation"
+  aria-role="dialog"
+  aria-modal="true"
+  aria-label="选择新增菜品方式"
+>
+  <view
+    class="create-sheet"
+    style="{{createSheetStyle}}"
+    catchtap="stopPropagation"
+    bindtouchstart="onSheetTouchStart"
+    catchtouchmove="onSheetTouchMove"
+    bindtouchend="onSheetTouchEnd"
+    bindtouchcancel="onSheetTouchEnd"
+  >
+    <view class="sheet-handle" aria-hidden="true"></view>
+    <text class="sheet-title">新增菜品</text>
+
+    <button class="create-option" bindtap="openManualEditor">
+      <view class="create-option-icon manual-icon">
+        <image src="/assets/icons/create-manual.svg" mode="aspectFit" />
+      </view>
+      <view class="create-option-copy">
+        <text class="create-option-title">手动新增</text>
+        <text class="create-option-note">自己填写菜名、食材和做法</text>
+      </view>
+      <text class="create-option-chevron">›</text>
+    </button>
+
+    <button class="create-option" bindtap="openAiEditor">
+      <view class="create-option-icon ai-icon">
+        <image src="/assets/icons/create-ai.svg" mode="aspectFit" />
+      </view>
+      <view class="create-option-copy">
+        <text class="create-option-title">AI 帮我创建</text>
+        <text class="create-option-note">描述想做的菜，AI 自动生成后再确认保存</text>
+      </view>
+      <text class="create-option-chevron">›</text>
+    </button>
+
+    <button class="create-cancel" bindtap="closeCreateSheet">取消</button>
+  </view>
 </view>

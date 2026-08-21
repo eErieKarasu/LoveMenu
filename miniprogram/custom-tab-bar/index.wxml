@@ -1,4 +1,4 @@
-<view class="tab-bar">
+<view class="tab-bar {{locked ? 'tab-bar--locked' : ''}}">
   <button
     wx:for="{{list}}"
     wx:key="pagePath"

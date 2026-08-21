@@ -1,5 +1,9 @@
 <view class="screen">
-  <view class="page-header"><view><text class="eyebrow">{{id ? '更新家常菜' : '记录家常菜'}}</text><text class="title">{{id ? '编辑菜谱' : '新增菜品'}}</text></view></view>
+  <view class="page-header"><view><text class="eyebrow {{source === 'ai' ? 'ai-eyebrow' : ''}}">{{id ? '更新家常菜' : source === 'ai' ? 'AI 初稿待确认' : '记录家常菜'}}</text><text class="title">{{id ? '编辑菜谱' : source === 'ai' ? '确认菜品' : '新增菜品'}}</text></view></view>
+  <view wx:if="{{source === 'ai'}}" class="ai-draft-notice" aria-live="polite">
+    <view class="ai-draft-icon"><image src="/assets/icons/create-ai.svg" mode="aspectFit" /></view>
+    <view><text class="ai-draft-title">AI 已生成可编辑初稿</text><text class="ai-draft-note">请检查食材用量和做法，确认后再保存到菜谱库。</text></view>
+  </view>
   <view class="card form-card">
     <view class="field"><text class="label">菜名 *</text><input class="input {{nameError ? 'error' : ''}}" value="{{form.name}}" placeholder="请输入菜名" data-field="name" bindinput="updateField" /></view>
     <view class="field image-field">
@@ -71,5 +75,5 @@
       <button class="add-step" bindtap="addStep">＋ 添加步骤</button>
     </view>
   </view>
-  <view class="save-bar"><button class="secondary" bindtap="cancel" disabled="{{saving}}">取消</button><button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">{{saving ? '正在保存' : '保存菜谱'}}</button></view>
+  <view class="save-bar"><button class="secondary" bindtap="cancel" disabled="{{saving}}">{{source === 'ai' ? '返回修改描述' : '取消'}}</button><button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">{{saving ? '正在保存' : source === 'ai' ? '确认并保存' : '保存菜谱'}}</button></view>
 </view>

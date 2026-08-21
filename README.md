@@ -30,6 +30,19 @@ cloudfunctions/state/ 读取和保存状态的云函数
 7. 右键 `cloudfunctions/state`，选择“上传并部署：云端安装依赖”。
 8. 点击“编译”，用真机预览验证微信云同步。
 
+## 配置 AI 创建菜品
+
+菜谱页的“AI 帮我创建”使用 `cloudfunctions/recipe-ai` 调用兼容 Chat Completions 的 HTTPS 接口。密钥只保存在云函数环境变量中，不会进入小程序包。
+
+1. 在微信开发者工具中为 `recipe-ai` 云函数配置环境变量：
+   - `RECIPE_AI_API_URL`：完整的 Chat Completions HTTPS 地址。
+   - `RECIPE_AI_API_KEY`：服务端 API Key。
+   - `RECIPE_AI_MODEL`：该接口支持的模型名称。
+2. 右键 `cloudfunctions/recipe-ai`，选择“上传并部署：云端安装依赖”。
+3. 确保云环境允许访问所配置的 HTTPS 域名，再用真机发起一次生成测试。
+
+AI 只生成可编辑初稿。用户在确认页点击“确认并保存”前，菜谱不会写入本地或云端状态。
+
 首次启动时菜谱、今日菜单、周计划内容和采购清单均为空。云函数以当前微信 OpenID 作为文档 ID，因此不需要额外注册账号，也不会信任客户端传入的用户 ID。
 
 ## 发布

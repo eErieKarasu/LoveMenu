@@ -5,6 +5,7 @@
     "pages/grocery/index",
     "pages/inventory/index",
     "pages/detail/index",
+    "pages/ai-editor/index",
     "pages/editor/index"
   ],
   "window": {

@@ -17,10 +17,14 @@ Page({
     recipes: [],
     mealTarget: "",
     mealTargetLabel: "",
+    createSheetVisible: false,
+    createSheetActive: false,
+    createSheetStyle: "",
     emptyTitle: "还没有菜谱",
     emptyCopy: "点击右上角的加号，记录第一道家常菜。"
   },
   async onShow() {
+    this.createNavigating = false;
     selectTab(this, 1);
     await app.ensureReady();
     const mealTarget = app.getTodayMealTarget();
@@ -70,7 +74,69 @@ Page({
     });
     this.filter();
   },
-  openEditor() { wx.navigateTo({ url: "/pages/editor/index" }); },
+  openCreateSheet() {
+    if (this.createSheetTimer) clearTimeout(this.createSheetTimer);
+    this.setCreateTabBarLocked(true);
+    this.setData({ createSheetVisible: true, createSheetStyle: "" }, () => {
+      wx.nextTick(() => this.setData({ createSheetActive: true }));
+    });
+  },
+  setCreateTabBarLocked(locked) {
+    const tabBar = this.getTabBar && this.getTabBar();
+    if (tabBar && tabBar.setData) tabBar.setData({ locked });
+  },
+  closeCreateSheet() {
+    if (!this.data.createSheetVisible) return;
+    this.setData({ createSheetActive: false, createSheetStyle: "" });
+    this.createSheetTimer = setTimeout(() => {
+      this.setData({ createSheetVisible: false });
+      this.setCreateTabBarLocked(false);
+      this.createSheetTimer = null;
+    }, 240);
+  },
+  stopPropagation() {},
+  onSheetTouchStart(event) {
+    const touch = event.touches && event.touches[0];
+    if (!touch) return;
+    this.sheetTouchStartY = touch.clientY;
+    this.sheetTouchStartedAt = Date.now();
+  },
+  onSheetTouchMove(event) {
+    const touch = event.touches && event.touches[0];
+    if (!touch || typeof this.sheetTouchStartY !== "number") return;
+    const distance = Math.max(0, touch.clientY - this.sheetTouchStartY);
+    this.sheetDragDistance = distance;
+    this.setData({ createSheetStyle: `transform: translateY(${distance}px);` });
+  },
+  onSheetTouchEnd() {
+    const distance = this.sheetDragDistance || 0;
+    const elapsed = Math.max(1, Date.now() - (this.sheetTouchStartedAt || Date.now()));
+    this.sheetTouchStartY = undefined;
+    this.sheetDragDistance = 0;
+    if (distance > 72 || distance / elapsed > 0.55) {
+      this.closeCreateSheet();
+      return;
+    }
+    this.setData({ createSheetStyle: "" });
+  },
+  openManualEditor() {
+    if (this.createNavigating) return;
+    this.createNavigating = true;
+    this.closeCreateSheet();
+    this.createNavigationTimer = setTimeout(() => wx.navigateTo({
+      url: "/pages/editor/index",
+      fail: () => { this.createNavigating = false; }
+    }), 180);
+  },
+  openAiEditor() {
+    if (this.createNavigating) return;
+    this.createNavigating = true;
+    this.closeCreateSheet();
+    this.createNavigationTimer = setTimeout(() => wx.navigateTo({
+      url: "/pages/ai-editor/index",
+      fail: () => { this.createNavigating = false; }
+    }), 180);
+  },
   clearMealTarget() {
     app.clearTodayMealTarget();
     this.setData({ mealTarget: "", mealTargetLabel: "" });
@@ -93,5 +159,10 @@ Page({
     app.clearTodayMealTarget();
     this.setData({ mealTarget: "", mealTargetLabel: "" });
     wx.showToast({ title: added ? `已加入${mealLabel(mealKey)}` : `${mealLabel(mealKey)}已有这道菜`, icon: "none" });
+  },
+  onUnload() {
+    if (this.createSheetTimer) clearTimeout(this.createSheetTimer);
+    if (this.createNavigationTimer) clearTimeout(this.createNavigationTimer);
+    this.setCreateTabBarLocked(false);
   }
 });

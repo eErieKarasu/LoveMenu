@@ -1,5 +1,21 @@
 .image-field { margin-bottom: 30rpx; }
 
+.ai-eyebrow { color: #7b55a4; }
+.ai-draft-notice {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-bottom: 20rpx;
+  padding: 20rpx 22rpx;
+  border: 1rpx solid #e2d7e9;
+  border-radius: 24rpx;
+  background: #f5f0f7;
+}
+.ai-draft-icon { display: flex; align-items: center; justify-content: center; flex: 0 0 66rpx; width: 66rpx; height: 66rpx; border-radius: 19rpx; background: #ebe1f0; }
+.ai-draft-icon image { width: 40rpx; height: 40rpx; }
+.ai-draft-title { display: block; font-size: 25rpx; font-weight: 800; }
+.ai-draft-note { display: block; margin-top: 5rpx; color: var(--muted); font-size: 21rpx; line-height: 1.5; }
+
 .image-label-line {
   display: flex;
   align-items: baseline;
