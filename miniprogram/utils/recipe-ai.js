@@ -15,6 +15,13 @@ function boundedNumber(value, fallback, min, max) {
   return Math.max(min, Math.min(max, Math.round(number)));
 }
 
+function shouldIncludeInventory(prompt) {
+  const text = cleanText(prompt, 600);
+  if (!text) return false;
+  if (/不(?:要|用|使用|考虑).{0,6}库存|无需.{0,6}库存/.test(text)) return false;
+  return text === "用家里现有的食材做一道菜" || /库存/.test(text);
+}
+
 function normalizeGeneratedRecipe(value) {
   if (!value || typeof value !== "object") return null;
   const name = cleanText(value.name, 30);
@@ -60,5 +67,6 @@ module.exports = {
   DIFFICULTIES,
   INGREDIENT_UNITS,
   RECIPE_CATEGORIES,
-  normalizeGeneratedRecipe
+  normalizeGeneratedRecipe,
+  shouldIncludeInventory
 };

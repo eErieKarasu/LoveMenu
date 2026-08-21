@@ -1,5 +1,14 @@
 const STORAGE_KEY = "lovemenu-state-v5";
 const LEGACY_STORAGE_KEYS = ["lovemenu-state-v4", "lovemenu-state-v3", "lovemenu-state-v2"];
+const { classifyCloudError, cloudMessage } = require("../utils/cloud-error");
+
+class StateCloudError extends Error {
+  constructor(code) {
+    super(cloudMessage(code, "state"));
+    this.name = "StateCloudError";
+    this.code = code;
+  }
+}
 
 function supportedState(state) {
   return Boolean(state && (state.version === 3 || state.version === 4 || state.version === 5));
@@ -38,18 +47,24 @@ async function loadState(fallback) {
     }
     return { state: local, source: "local" };
   } catch (error) {
-    return { state: local, source: "local", error };
+    const code = classifyCloudError(error);
+    return { state: local, source: "local", error: new StateCloudError(code) };
   }
 }
 
 async function saveState(state) {
   writeLocal(state);
   if (!cloudAvailable()) return { source: "local" };
-  const response = await wx.cloud.callFunction({ name: "state", data: { action: "save", state } });
+  let response;
+  try {
+    response = await wx.cloud.callFunction({ name: "state", data: { action: "save", state } });
+  } catch (error) {
+    throw new StateCloudError(classifyCloudError(error));
+  }
   if (!response.result || !response.result.ok) {
     throw new Error((response.result && response.result.message) || "云端保存失败");
   }
   return { source: "cloud" };
 }
 
-module.exports = { loadState, saveState, STORAGE_KEY, LEGACY_STORAGE_KEYS };
+module.exports = { loadState, saveState, StateCloudError, STORAGE_KEY, LEGACY_STORAGE_KEYS };

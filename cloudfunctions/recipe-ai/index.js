@@ -42,6 +42,12 @@ function config(override) {
   return { apiUrl: parsed, apiKey, model };
 }
 
+function providerRequestOptions(provider) {
+  const isDeepSeek = /(^|\.)api\.deepseek\.com$/i.test(provider.apiUrl.hostname)
+    || /^deepseek-/i.test(provider.model);
+  return isDeepSeek ? { thinking: { type: "disabled" } } : {};
+}
+
 function cleanText(value, maxLength) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
@@ -193,6 +199,7 @@ exports.main = async (event) => {
     if (action === "check") {
       await postJson(provider.apiUrl, provider.apiKey, {
         model: provider.model,
+        ...providerRequestOptions(provider),
         messages: [{ role: "user", content: "只回复 OK" }],
         temperature: 0,
         max_tokens: 4
@@ -205,6 +212,7 @@ exports.main = async (event) => {
       : `做菜需求：${prompt}`;
     const response = await postJson(provider.apiUrl, provider.apiKey, {
       model: provider.model,
+      ...providerRequestOptions(provider),
       messages: [
         { role: "system", content: systemPrompt() },
         { role: "user", content: userContent }
@@ -228,3 +236,4 @@ exports.main = async (event) => {
 module.exports.normalizeRecipe = normalizeRecipe;
 module.exports.parseJsonContent = parseJsonContent;
 module.exports.config = config;
+module.exports.providerRequestOptions = providerRequestOptions;

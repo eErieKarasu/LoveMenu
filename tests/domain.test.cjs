@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
-const { normalizeGeneratedRecipe } = require("../miniprogram/utils/recipe-ai");
+const { normalizeGeneratedRecipe, shouldIncludeInventory } = require("../miniprogram/utils/recipe-ai");
 const {
   addRecipeToTodayMeal,
   addRecipeIngredients,
@@ -66,6 +66,14 @@ test("AI 菜谱缺少完整食材或步骤时会被拒绝", () => {
     ingredientItems: [{ name: "鸡蛋" }, { name: "盐" }],
     steps: [{ text: "只有一步" }]
   }), null);
+});
+
+test("只在用户明确要求时向 AI 提供库存", () => {
+  assert.equal(shouldIncludeInventory("用家里现有的食材做一道菜"), true);
+  assert.equal(shouldIncludeInventory("请根据库存做一道晚餐"), true);
+  assert.equal(shouldIncludeInventory("番茄炒蛋"), false);
+  assert.equal(shouldIncludeInventory("30 分钟内完成的微辣鸡肉菜，家里有土豆和青椒"), false);
+  assert.equal(shouldIncludeInventory("不要考虑库存，随便推荐一道菜"), false);
 });
 
 test("菜谱封面图为可选字段且会在标准化时保留", () => {

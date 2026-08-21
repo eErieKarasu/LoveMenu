@@ -27,7 +27,9 @@ App({
     this.globalData.state = normalizeState(result.state);
     const groceriesSynced = syncTodayGroceries(this.globalData.state);
     this.globalData.ready = true;
-    this.globalData.syncStatus = result.source === "cloud" ? "已同步到微信云" : "当前使用本地缓存";
+    this.globalData.syncStatus = result.source === "cloud"
+      ? "已同步到微信云"
+      : result.error ? result.error.message : "当前使用本地缓存";
     if (migrated || groceriesSynced || (result.source === "local" && this.globalData.cloudEnabled)) this.scheduleSave();
     return this.globalData.state;
   },
@@ -71,7 +73,7 @@ App({
       const result = await stateService.saveState(this.globalData.state);
       this.globalData.syncStatus = result.source === "cloud" ? "已同步到微信云" : "已保存到本机";
     } catch (error) {
-      this.globalData.syncStatus = "云同步失败，已保存在本机";
+      this.globalData.syncStatus = error.message || "云同步失败，已保存在本机";
     }
   }
 });

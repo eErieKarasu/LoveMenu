@@ -1,5 +1,6 @@
 const { normalizeGeneratedRecipe } = require("../utils/recipe-ai");
 const { getLocalAiProvider } = require("../utils/ai-config");
+const { classifyCloudError, cloudMessage } = require("../utils/cloud-error");
 
 class RecipeAiError extends Error {
   constructor(code, message) {
@@ -16,6 +17,10 @@ function errorMessage(code) {
     case "RATE_LIMITED": return "AI 有点忙，稍后再试一次";
     case "PROVIDER_FAILED": return "接口连接失败，请检查地址、模型和 API Key";
     case "INVALID_AI_RESPONSE": return "AI 没有生成完整菜谱，请换种说法再试";
+    case "CLOUD_FUNCTION_MISSING": return cloudMessage(code, "ai");
+    case "CLOUD_APPID_MISSING": return cloudMessage(code, "ai");
+    case "CLOUD_ENV_INVALID": return cloudMessage(code, "ai");
+    case "CLOUD_TIMEOUT": return cloudMessage(code, "ai");
     case "CLOUD_UNAVAILABLE": return "当前无法连接 AI，请检查网络后重试";
     default: return "暂时没有生成成功，请稍后重试";
   }
@@ -38,7 +43,8 @@ async function generateRecipe(prompt, inventory) {
       }
     });
   } catch (error) {
-    throw new RecipeAiError("CLOUD_UNAVAILABLE", errorMessage("CLOUD_UNAVAILABLE"));
+    const code = classifyCloudError(error);
+    throw new RecipeAiError(code, errorMessage(code));
   }
 
   const result = response && response.result;
@@ -63,7 +69,8 @@ async function checkAiConnection(providerConfig) {
       data: { action: "check", providerConfig }
     });
   } catch (error) {
-    throw new RecipeAiError("CLOUD_UNAVAILABLE", errorMessage("CLOUD_UNAVAILABLE"));
+    const code = classifyCloudError(error);
+    throw new RecipeAiError(code, errorMessage(code));
   }
   const result = response && response.result;
   if (!result || !result.ok) {

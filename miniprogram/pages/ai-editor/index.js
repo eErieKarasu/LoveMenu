@@ -1,5 +1,5 @@
 const { generateRecipe } = require("../../services/recipe-ai");
-const { AI_DRAFT_STORAGE_KEY } = require("../../utils/recipe-ai");
+const { AI_DRAFT_STORAGE_KEY, shouldIncludeInventory } = require("../../utils/recipe-ai");
 const app = getApp();
 const MAX_SOURCE_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -108,7 +108,8 @@ Page({
 
     this.setData({ generating: true, errorMessage: "" });
     try {
-      const recipe = await generateRecipe(prompt, this.inventoryNames || []);
+      const inventory = shouldIncludeInventory(prompt) ? this.inventoryNames || [] : [];
+      const recipe = await generateRecipe(prompt, inventory);
       wx.setStorageSync(AI_DRAFT_STORAGE_KEY, {
         prompt,
         recipe,
