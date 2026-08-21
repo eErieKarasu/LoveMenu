@@ -16,10 +16,17 @@ class RecipeAiError extends Error {
   }
 }
 
-function config() {
-  const apiUrl = String(process.env.RECIPE_AI_API_URL || "").trim();
-  const apiKey = String(process.env.RECIPE_AI_API_KEY || "").trim();
-  const model = String(process.env.RECIPE_AI_MODEL || "").trim();
+function config(override) {
+  const hasOverride = override && typeof override === "object"
+    && [override.apiUrl, override.apiKey, override.model].some((value) => String(value || "").trim());
+  const source = hasOverride ? override : {
+    apiUrl: process.env.RECIPE_AI_API_URL,
+    apiKey: process.env.RECIPE_AI_API_KEY,
+    model: process.env.RECIPE_AI_MODEL
+  };
+  const apiUrl = String(source.apiUrl || "").trim().slice(0, 500);
+  const apiKey = String(source.apiKey || "").trim().slice(0, 500);
+  const model = String(source.model || "").trim().slice(0, 120);
   if (!apiUrl || !apiKey || !model) {
     throw new RecipeAiError("AI_NOT_CONFIGURED", "AI 创建服务还没有配置");
   }
@@ -173,15 +180,26 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   if (!OPENID) return { ok: false, code: "UNAUTHORIZED", message: "无法识别当前微信用户" };
 
+  const action = cleanText(event && event.action, 20);
   const prompt = cleanText(event && event.prompt, 600);
-  if (!prompt) return { ok: false, code: "INVALID_PROMPT", message: "请输入菜名或做菜需求" };
+  if (action !== "check" && !prompt) return { ok: false, code: "INVALID_PROMPT", message: "请输入菜名或做菜需求" };
   const inventory = (Array.isArray(event && event.inventory) ? event.inventory : [])
     .map((item) => cleanText(item, 24))
     .filter(Boolean)
     .slice(0, 40);
 
   try {
-    const provider = config();
+    const provider = config(event && event.providerConfig);
+    if (action === "check") {
+      await postJson(provider.apiUrl, provider.apiKey, {
+        model: provider.model,
+        messages: [{ role: "user", content: "只回复 OK" }],
+        temperature: 0,
+        max_tokens: 4
+      });
+      console.info(JSON.stringify({ level: "info", event: "recipe-ai.check", requestId, openidSuffix: OPENID.slice(-6), model: provider.model }));
+      return { ok: true, model: provider.model, requestId };
+    }
     const userContent = inventory.length
       ? `做菜需求：${prompt}\n家里现有食材：${inventory.join("、")}\n现有食材可以优先用，但不必强行全部使用。`
       : `做菜需求：${prompt}`;
@@ -209,3 +227,4 @@ exports.main = async (event) => {
 
 module.exports.normalizeRecipe = normalizeRecipe;
 module.exports.parseJsonContent = parseJsonContent;
+module.exports.config = config;

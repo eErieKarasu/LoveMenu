@@ -1,0 +1,25 @@
+.ai-settings-screen { padding-top: 28rpx; }
+.ai-settings-header { margin-bottom: 26rpx; }
+.ai-settings-header .title { font-size: 48rpx; }
+.config-card { padding: 28rpx; }
+.config-card .field:last-child { margin-bottom: 0; }
+.key-label-row { display: flex; align-items: center; justify-content: space-between; }
+.key-toggle { min-width: 84rpx; min-height: 52rpx; padding: 0 8rpx; background: transparent; color: var(--accent); font-size: 23rpx; line-height: 52rpx; }
+.field-error { display: block; color: #b94e36; font-size: 22rpx; margin-top: 8rpx; }
+
+.privacy-note { display: flex; align-items: flex-start; gap: 14rpx; margin: 20rpx 4rpx 0; padding: 18rpx 20rpx; border-radius: 22rpx; background: var(--sage-soft); color: #58705a; font-size: 21rpx; line-height: 1.55; }
+.privacy-note image { flex: 0 0 34rpx; width: 34rpx; height: 34rpx; margin-top: 1rpx; }
+.config-feedback { margin: 18rpx 4rpx 0; padding: 18rpx 20rpx; border-radius: 20rpx; font-size: 22rpx; line-height: 1.5; }
+.config-feedback.success { background: var(--sage-soft); color: #4f6f52; }
+.config-feedback.failure { background: #fff0eb; color: #ae4b36; }
+
+.config-actions { display: grid; grid-template-columns: 1fr 1.35fr; gap: 14rpx; margin-top: 24rpx; }
+.config-actions button { width: 100%; }
+.test-button[disabled], .save-button[disabled], .clear-config[disabled] { opacity: .55; }
+.clear-config { width: 100%; min-height: 76rpx; margin-top: 14rpx; padding: 0 20rpx; background: transparent; color: #a55a48; font-size: 23rpx; line-height: 76rpx; }
+.key-toggle:active, .clear-config:active { opacity: .66; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .key-toggle, .clear-config, .config-actions button { transition: transform 180ms ease, opacity 180ms ease; }
+  .config-actions button:active { transform: scale(.98); }
+}

@@ -1,4 +1,5 @@
 const app = getApp();
+const { getLocalAiProvider } = require("../../utils/ai-config");
 
 Page({
   data: {
@@ -6,7 +7,8 @@ Page({
     recipeCount: 0,
     inventoryCount: 0,
     groceryCount: 0,
-    syncStatus: "正在读取菜单"
+    syncStatus: "正在读取菜单",
+    aiConfigStatus: "跟随云端"
   },
 
   async onShow() {
@@ -17,7 +19,8 @@ Page({
       recipeCount: state.recipes.length,
       inventoryCount: state.inventory.length,
       groceryCount: state.groceries.filter((item) => !item.checked).length,
-      syncStatus: app.globalData.syncStatus
+      syncStatus: app.globalData.syncStatus,
+      aiConfigStatus: getLocalAiProvider() ? "本机配置" : "跟随云端"
     });
   },
 
@@ -31,5 +34,9 @@ Page({
 
   goGrocery() {
     wx.switchTab({ url: "/pages/grocery/index" });
+  },
+
+  openAiSettings() {
+    wx.navigateTo({ url: "/pages/ai-settings/index" });
   }
 });

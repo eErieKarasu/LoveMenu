@@ -25,6 +25,23 @@
     </view>
 
     <view class="profile-section">
+      <text class="profile-section-title">智能创建</text>
+      <view class="settings-card">
+        <view class="setting-row setting-action" bindtap="openAiSettings" aria-role="button" aria-label="进入 AI 配置">
+          <view class="setting-icon ai-icon">
+            <image src="/assets/icons/create-ai.svg" mode="aspectFit" />
+          </view>
+          <view class="setting-copy">
+            <text class="setting-name">AI 配置</text>
+            <text class="setting-description">设置接口地址、模型和个人 API Key</text>
+          </view>
+          <text class="ai-config-status">{{aiConfigStatus}}</text>
+          <text class="setting-chevron">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="profile-section">
       <text class="profile-section-title">数据与同步</text>
       <view class="settings-card">
         <view class="setting-row">

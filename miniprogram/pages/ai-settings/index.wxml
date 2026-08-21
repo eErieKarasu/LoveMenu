@@ -1,0 +1,48 @@
+<view class="screen ai-settings-screen">
+  <view class="page-header ai-settings-header">
+    <view>
+      <text class="eyebrow">AI 创建</text>
+      <text class="title">连接你的模型</text>
+      <text class="subtitle">支持兼容 Chat Completions 的 HTTPS 接口。保存后，AI 创建菜品会优先使用这套个人配置。</text>
+    </view>
+  </view>
+
+  <view class="card config-card">
+    <view class="field">
+      <text class="label">接口地址</text>
+      <input class="input {{apiUrlError ? 'error' : ''}}" value="{{apiUrl}}" bindinput="updateApiUrl" maxlength="500" placeholder="https://api.example.com/v1/chat/completions" />
+      <text wx:if="{{apiUrlError}}" class="field-error">{{apiUrlError}}</text>
+      <text wx:else class="hint">请填写完整的 Chat Completions HTTPS 地址</text>
+    </view>
+
+    <view class="field">
+      <text class="label">模型名称</text>
+      <input class="input {{modelError ? 'error' : ''}}" value="{{model}}" bindinput="updateModel" maxlength="120" placeholder="例如：gpt-4.1-mini" />
+      <text wx:if="{{modelError}}" class="field-error">{{modelError}}</text>
+    </view>
+
+    <view class="field key-field">
+      <view class="key-label-row">
+        <text class="label">API Key</text>
+        <button class="key-toggle" bindtap="toggleApiKey">{{showApiKey ? '隐藏' : '显示'}}</button>
+      </view>
+      <input class="input {{apiKeyError ? 'error' : ''}}" value="{{apiKey}}" bindinput="updateApiKey" maxlength="500" password="{{!showApiKey}}" placeholder="输入服务端 API Key" />
+      <text wx:if="{{apiKeyError}}" class="field-error">{{apiKeyError}}</text>
+    </view>
+  </view>
+
+  <view class="privacy-note">
+    <image src="/assets/icons/ai-draft-safe.svg" mode="aspectFit" />
+    <text>个人配置只保存在当前设备的小程序缓存中，生成和测试时通过云函数发送给你填写的接口，不会写入菜谱数据。</text>
+  </view>
+
+  <view wx:if="{{savedMessage}}" class="config-feedback success" aria-live="polite">{{savedMessage}}</view>
+  <view wx:if="{{errorMessage}}" class="config-feedback failure" aria-live="polite">{{errorMessage}}</view>
+
+  <view class="config-actions">
+    <button class="secondary test-button" loading="{{testing}}" disabled="{{testing}}" bindtap="testConnection">{{testing ? '正在测试…' : '测试连接'}}</button>
+    <button class="primary save-button" disabled="{{testing}}" bindtap="saveConfig">保存配置</button>
+  </view>
+
+  <button wx:if="{{hasSavedConfig}}" class="clear-config" disabled="{{testing}}" bindtap="clearConfig">清除个人配置，改用云端默认值</button>
+</view>

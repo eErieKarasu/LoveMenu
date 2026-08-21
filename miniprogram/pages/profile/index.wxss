@@ -18,12 +18,17 @@
 .setting-icon { display: flex; align-items: center; justify-content: center; flex: 0 0 68rpx; width: 68rpx; height: 68rpx; border-radius: 22rpx; font-size: 32rpx; }
 .cloud-icon { background: var(--sage-soft); color: var(--sage); }
 .heart-icon { background: var(--accent-soft); color: var(--accent); }
+.ai-icon { background: #f0e7f3; }
+.ai-icon image { width: 44rpx; height: 44rpx; }
 .setting-copy { flex: 1; min-width: 0; }
 .setting-name { display: block; font-size: 28rpx; font-weight: 800; }
 .setting-description { display: block; color: var(--muted); font-size: 21rpx; line-height: 1.45; margin-top: 7rpx; }
 .setting-status { flex: 0 0 auto; max-width: 164rpx; color: var(--sage); font-size: 21rpx; line-height: 1.4; text-align: right; }
+.ai-config-status { flex: 0 0 auto; color: #7b55a4; font-size: 21rpx; }
+.setting-chevron { flex: 0 0 auto; color: #9b9187; font-family: Arial, sans-serif; font-size: 44rpx; font-weight: 300; line-height: 1; }
+.setting-action:active { background: #faf5ef; }
 .version { color: var(--muted); font-size: 22rpx; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .profile-metric { transition: transform 180ms ease, opacity 180ms ease; }
+  .profile-metric, .setting-action { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
 }
