@@ -306,7 +306,13 @@ Page({
     });
     if (this.data.source === "ai") wx.removeStorageSync(AI_DRAFT_STORAGE_KEY);
     wx.showToast({ title: "菜谱已保存", icon: "success" });
-    setTimeout(() => wx.navigateBack(), 500);
+    setTimeout(() => {
+      if (this.data.source === "ai") {
+        wx.switchTab({ url: "/pages/recipes/index" });
+        return;
+      }
+      wx.navigateBack();
+    }, 500);
     this.setData({ saving: false });
   },
   onUnload() {
