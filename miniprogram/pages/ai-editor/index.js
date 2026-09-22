@@ -1,7 +1,7 @@
 const { generateRecipe } = require("../../services/recipe-ai");
 const { AI_DRAFT_STORAGE_KEY, shouldIncludeInventory } = require("../../utils/recipe-ai");
+const { prepareRecipeImage } = require("../../utils/recipe-image");
 const app = getApp();
-const MAX_SOURCE_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function suggestionsForInventory(count) {
   return [
@@ -13,12 +13,6 @@ function suggestionsForInventory(count) {
     { prompt: "20 分钟内做一道下饭菜", title: "20 分钟内做一道下饭菜", subtitle: "" },
     { prompt: "帮我想一道今晚的晚餐", title: "帮我想一道今晚的晚餐", subtitle: "" }
   ];
-}
-
-function inspectImage(filePath) {
-  return new Promise((resolve) => {
-    wx.getImageInfo({ src: filePath, success: resolve, fail: () => resolve({}) });
-  });
 }
 
 Page({
@@ -68,7 +62,7 @@ Page({
         count: 1,
         mediaType: ["image"],
         sourceType: [sourceType],
-        sizeType: ["original"],
+        sizeType: ["compressed"],
         success: ({ tempFiles }) => handle(tempFiles[0])
       });
       return;
@@ -76,20 +70,15 @@ Page({
     wx.chooseImage({
       count: 1,
       sourceType: [sourceType],
-      sizeType: ["original"],
+      sizeType: ["compressed"],
       success: ({ tempFilePaths, tempFiles }) => handle((tempFiles && tempFiles[0]) || { tempFilePath: tempFilePaths[0] })
     });
   },
   async prepareAiImage(file) {
-    const sourcePath = file.tempFilePath || file.path || "";
-    if (!sourcePath) return;
     this.setData({ imageBusy: true, errorMessage: "" });
     try {
-      if (Number(file.size) > MAX_SOURCE_IMAGE_BYTES) throw new Error("图片不能超过 5MB");
-      const sourceInfo = await inspectImage(sourcePath);
-      const sourceType = String(sourceInfo.type || "").toLowerCase();
-      if (sourceType && !["jpg", "jpeg", "png"].includes(sourceType)) throw new Error("请选择 JPG 或 PNG 图片");
-      this.setData({ imageBusy: false, imagePreview: sourcePath });
+      const preparedPath = await prepareRecipeImage(file || {});
+      this.setData({ imageBusy: false, imagePreview: preparedPath });
     } catch (error) {
       this.setData({ imageBusy: false, imagePreview: "", errorMessage: error.message || "图片处理失败，请重试" });
     }

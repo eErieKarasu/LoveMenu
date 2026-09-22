@@ -9,6 +9,7 @@ const {
 } = require("../../utils/domain");
 const { selectTab } = require("../../utils/tab-bar");
 const { recentRecipeCard } = require("../../utils/today");
+const { createMenuSnapshot, decodeMenuSnapshot, encodeMenuSnapshot, menuShareTitle } = require("../../utils/share-menu");
 const app = getApp();
 
 const MEAL_ICONS = {
@@ -30,10 +31,25 @@ Page({
     dateLabel: "",
     selectedCount: 0,
     plannedMealCount: 0,
-    totalTime: 0
+    totalTime: 0,
+    sharePath: "/pages/today/index",
+    shareTitle: "今天的菜单，等你一起安排"
+  },
+
+  onLoad(options) {
+    const sharedSnapshot = decodeMenuSnapshot(options && options.menu);
+    if (sharedSnapshot) {
+      this.incomingSharePath = `/pages/menu-share/index?menu=${encodeMenuSnapshot(sharedSnapshot)}`;
+    }
   },
 
   async onShow() {
+    if (this.incomingSharePath) {
+      const url = this.incomingSharePath;
+      this.incomingSharePath = "";
+      wx.navigateTo({ url });
+      return;
+    }
     selectTab(this, 0);
     await app.ensureReady();
     app.clearTodayMealTarget();
@@ -72,6 +88,11 @@ Page({
     const selectedCount = todayIds.length;
     const plannedMealCount = meals.filter((meal) => meal.dishes.length).length;
     const totalTime = meals.reduce((sum, meal) => sum + meal.totalTime, 0);
+    const snapshot = createMenuSnapshot(
+      `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
+      dateKeyForDate(now),
+      meals
+    );
     this.setData({
       loading: false,
       meals,
@@ -79,7 +100,9 @@ Page({
       dateLabel: `${now.getMonth() + 1}月${now.getDate()}日 ${week}`,
       selectedCount,
       plannedMealCount,
-      totalTime
+      totalTime,
+      sharePath: `/pages/menu-share/index?menu=${encodeMenuSnapshot(snapshot)}`,
+      shareTitle: menuShareTitle(snapshot)
     });
   },
 
@@ -114,5 +137,14 @@ Page({
         this.refresh();
       }
     });
+  },
+
+  onShareAppMessage() {
+    return { title: this.data.shareTitle, path: this.data.sharePath };
+  },
+
+  onShareTimeline() {
+    const query = this.data.sharePath.includes("?") ? this.data.sharePath.split("?")[1] : "";
+    return { title: this.data.shareTitle, query };
   }
 });

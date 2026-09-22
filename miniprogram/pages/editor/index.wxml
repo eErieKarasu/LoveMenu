@@ -15,11 +15,11 @@
           <button class="image-action remove" catchtap="removeDishImage">移除</button>
         </view>
       </view>
-      <button wx:else class="image-picker" bindtap="chooseDishImage" aria-label="添加菜品图片">
+      <button wx:else class="image-picker" bindtap="chooseDishImage" loading="{{imageBusy}}" disabled="{{imageBusy}}" aria-label="添加菜品图片">
         <image src="/assets/illustrations/camera-add.svg" mode="aspectFit" />
         <view class="image-picker-copy">
           <text class="image-picker-title">添加成品图，用于菜谱列表展示</text>
-          <text class="image-picker-note">支持 JPG / PNG，大小不超过 5MB</text>
+          <text class="image-picker-note">JPG / PNG，选择后会自动压缩加速加载</text>
         </view>
       </button>
       <text class="hint image-hint">一张就够了，也可以以后再补充。</text>
@@ -64,7 +64,11 @@
   </view>
   <view class="card form-card">
     <view class="field step-field">
-      <text class="label">做法步骤</text>
+      <view class="step-heading">
+        <view><text class="label">做法步骤</text><text class="step-ai-note">AI 会以上方当前的食材和用量为准</text></view>
+        <button class="generate-steps" bindtap="generateSteps" loading="{{generatingSteps}}" disabled="{{generatingSteps || saving}}">{{generatingSteps ? '生成中' : 'AI 生成'}}</button>
+      </view>
+      <text wx:if="{{stepGenerationMessage}}" class="step-generation-message" aria-live="polite">{{stepGenerationMessage}}</text>
       <view class="step-list">
         <view class="step-edit-row" wx:for="{{form.steps}}" wx:key="id">
           <view class="step-edit-number">{{index + 1}}</view>
@@ -75,5 +79,5 @@
       <button class="add-step" bindtap="addStep">＋ 添加步骤</button>
     </view>
   </view>
-  <view class="save-bar"><button class="secondary" bindtap="cancel" disabled="{{saving}}">{{source === 'ai' ? '返回修改描述' : '取消'}}</button><button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">{{saving ? '正在保存' : source === 'ai' ? '确认并保存' : '保存菜谱'}}</button></view>
+  <view class="save-bar"><button class="secondary" bindtap="cancel" disabled="{{saving || generatingSteps}}">{{source === 'ai' ? '返回修改描述' : '取消'}}</button><button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving || generatingSteps || imageBusy}}">{{saving ? '正在保存' : source === 'ai' ? '确认并保存' : '保存菜谱'}}</button></view>
 </view>

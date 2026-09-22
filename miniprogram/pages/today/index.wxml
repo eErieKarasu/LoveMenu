@@ -10,10 +10,13 @@
           <text wx:if="{{selectedCount}}"> · 共 {{selectedCount}} 道菜 · 约 {{totalTime}} 分钟</text>
         </view>
       </view>
-      <button class="profile-entry" bindtap="openProfile" aria-label="进入个人与设置中心">
-        <text class="profile-avatar">王</text>
-        <text class="profile-chevron">›</text>
-      </button>
+      <view class="today-header-actions">
+        <button class="share-entry" open-type="share" aria-label="分享今天的菜单"><text class="share-symbol">↗</text><text>分享</text></button>
+        <button class="profile-entry" bindtap="openProfile" aria-label="进入个人与设置中心">
+          <text class="profile-avatar">王</text>
+          <text class="profile-chevron">›</text>
+        </button>
+      </view>
     </view>
 
     <view class="meal-list">
@@ -39,7 +42,7 @@
 
             <block wx:if="{{item.dishes.length}}">
               <view class="today-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="id" bindtap="openRecipe" data-id="{{dish.id}}" aria-role="button" aria-label="查看{{dish.name}}">
-                <image wx:if="{{dish.imageSrc}}" class="dish-thumb" src="{{dish.imageSrc}}" mode="aspectFill" aria-label="{{dish.name}}菜品图片" />
+                <image wx:if="{{dish.imageSrc}}" class="dish-thumb" src="{{dish.imageSrc}}" mode="aspectFill" lazy-load aria-label="{{dish.name}}菜品图片" />
                 <image wx:else class="dish-thumb dish-thumb-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{dish.name}}暂无菜品图片" />
                 <view class="dish-main">
                   <text class="dish-name">{{dish.name}}</text>
@@ -66,7 +69,7 @@
     <view class="section recent-section" wx:if="{{recentRecipe}}">
       <text class="section-title">最近常做</text>
       <view class="recent-card" bindtap="openRecipe" data-id="{{recentRecipe.id}}" aria-role="button" aria-label="查看最近常做的{{recentRecipe.name}}">
-        <image wx:if="{{recentRecipe.imageSrc}}" class="recent-image" src="{{recentRecipe.imageSrc}}" mode="aspectFill" aria-label="{{recentRecipe.name}}菜品图片" />
+        <image wx:if="{{recentRecipe.imageSrc}}" class="recent-image" src="{{recentRecipe.imageSrc}}" mode="aspectFill" lazy-load aria-label="{{recentRecipe.name}}菜品图片" />
         <image wx:else class="recent-image recent-image-placeholder" src="/assets/illustrations/dish-placeholder.svg" mode="aspectFit" aria-label="{{recentRecipe.name}}暂无菜品图片" />
         <view class="recent-main">
           <view class="recent-title-line">

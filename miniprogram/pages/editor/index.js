@@ -1,8 +1,9 @@
 const { CATEGORIES } = require("../../utils/constants");
 const { recipeById } = require("../../utils/domain");
 const { AI_DRAFT_STORAGE_KEY, INGREDIENT_UNITS, normalizeGeneratedRecipe } = require("../../utils/recipe-ai");
+const { generateRecipeSteps } = require("../../services/recipe-ai");
+const { prepareRecipeImage } = require("../../utils/recipe-image");
 const app = getApp();
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 let ingredientIdSeed = 0;
 let stepIdSeed = 0;
 
@@ -42,12 +43,6 @@ function imageExtension(filePath) {
   return explicitImageExtension(filePath) || "jpg";
 }
 
-function inspectImage(filePath) {
-  return new Promise((resolve) => {
-    wx.getImageInfo({ src: filePath, success: resolve, fail: () => resolve({}) });
-  });
-}
-
 function saveLocalFile(tempFilePath) {
   return new Promise((resolve, reject) => {
     wx.saveFile({
@@ -68,7 +63,10 @@ Page({
     form: blankForm(),
     aiMeta: { flavor: "家常", spice: "不辣", tags: [] },
     nameError: false,
-    saving: false
+    saving: false,
+    imageBusy: false,
+    generatingSteps: false,
+    stepGenerationMessage: ""
   },
   onLoad(options) { this.setData({ id: options.id || "", source: options.source || "" }); },
   async onReady() {
@@ -141,22 +139,18 @@ Page({
   },
   pickDishImage(sourceType) {
     const handleImage = async (file) => {
-      const tempFilePath = file.tempFilePath || file.path || "";
-      if (!tempFilePath) return;
-      if (Number(file.size) > MAX_IMAGE_SIZE) {
-        wx.showToast({ title: "图片不能超过 5MB", icon: "none" });
-        return;
+      this.setData({ imageBusy: true });
+      try {
+        const preparedPath = await prepareRecipeImage(file || {});
+        this.setData({
+          imageBusy: false,
+          "form.imagePreview": preparedPath,
+          "form.pendingImagePath": preparedPath
+        });
+      } catch (error) {
+        this.setData({ imageBusy: false });
+        wx.showToast({ title: error.message || "图片处理失败，请重试", icon: "none" });
       }
-      const info = await inspectImage(tempFilePath);
-      const type = String(info.type || explicitImageExtension(tempFilePath)).toLowerCase();
-      if (type && !["jpg", "jpeg", "png"].includes(type)) {
-        wx.showToast({ title: "请选择 JPG 或 PNG 图片", icon: "none" });
-        return;
-      }
-      this.setData({
-        "form.imagePreview": tempFilePath,
-        "form.pendingImagePath": tempFilePath
-      });
     };
 
     if (wx.chooseMedia) {
@@ -164,7 +158,7 @@ Page({
         count: 1,
         mediaType: ["image"],
         sourceType: [sourceType],
-        sizeType: ["original"],
+        sizeType: ["compressed"],
         success: ({ tempFiles }) => handleImage(tempFiles[0] || {})
       });
       return;
@@ -173,7 +167,7 @@ Page({
     wx.chooseImage({
       count: 1,
       sourceType: [sourceType],
-      sizeType: ["original"],
+      sizeType: ["compressed"],
       success: ({ tempFilePaths, tempFiles }) => handleImage((tempFiles && tempFiles[0]) || { tempFilePath: tempFilePaths[0] })
     });
   },
@@ -240,6 +234,53 @@ Page({
     const steps = this.data.form.steps.filter((_, stepIndex) => stepIndex !== index);
     this.setData({ "form.steps": steps.length ? steps : [blankStep()] });
   },
+  generateSteps() {
+    if (this.data.generatingSteps || this.data.saving) return;
+    const hasSteps = this.data.form.steps.some((step) => String(step.text || "").trim());
+    if (!hasSteps) {
+      this.requestGeneratedSteps();
+      return;
+    }
+    wx.showModal({
+      title: "替换当前做法？",
+      content: "AI 会根据现在的食材重新生成步骤，当前做法将被替换。",
+      confirmText: "继续生成",
+      success: ({ confirm }) => { if (confirm) this.requestGeneratedSteps(); }
+    });
+  },
+  async requestGeneratedSteps() {
+    const ingredientItems = this.data.form.ingredientItems
+      .filter((item) => String(item.name || "").trim())
+      .map((item) => ({
+        name: String(item.name).trim(),
+        quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
+        unit: item.unit
+      }));
+    if (!ingredientItems.length) {
+      this.setData({ stepGenerationMessage: "请先填写至少一种食材" });
+      return;
+    }
+    this.setData({ generatingSteps: true, stepGenerationMessage: "" });
+    try {
+      const steps = await generateRecipeSteps({
+        name: this.data.form.name,
+        prep: this.data.form.prep,
+        cook: this.data.form.cook,
+        difficulty: this.data.form.difficulty,
+        ingredientItems
+      });
+      this.setData({
+        generatingSteps: false,
+        stepGenerationMessage: "已根据当前食材生成，还可以继续修改。",
+        "form.steps": steps.map((step) => ({ id: blankStep().id, text: step.text }))
+      });
+    } catch (error) {
+      this.setData({
+        generatingSteps: false,
+        stepGenerationMessage: error.message || "做法生成失败，请稍后重试"
+      });
+    }
+  },
   toggleCategory(event) {
     const value = event.currentTarget.dataset.value;
     const selected = this.data.form.categories.includes(value)
@@ -256,7 +297,7 @@ Page({
     wx.navigateBack();
   },
   async save() {
-    if (this.data.saving) return;
+    if (this.data.saving || this.data.generatingSteps || this.data.imageBusy) return;
     const form = this.data.form;
     const existingRecipe = this.data.id ? recipeById(app.getState(), this.data.id) : null;
     const name = form.name.trim();

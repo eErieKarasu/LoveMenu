@@ -97,6 +97,37 @@ function normalizeRecipe(value) {
   };
 }
 
+function normalizeSteps(value) {
+  const source = Array.isArray(value) ? value : value && value.steps;
+  if (!Array.isArray(source)) return null;
+  const steps = source
+    .map((step) => cleanText(typeof step === "string" ? step : step && step.text, 180))
+    .filter(Boolean)
+    .slice(0, 12)
+    .map((text) => ({ text }));
+  return steps.length >= 2 ? steps : null;
+}
+
+function normalizeStepRequest(value) {
+  if (!value || typeof value !== "object") return null;
+  const ingredientItems = (Array.isArray(value.ingredientItems) ? value.ingredientItems : [])
+    .map((item) => ({
+      name: cleanText(item && item.name, 24),
+      quantity: boundedNumber(item && item.quantity, 1, 1, 9999),
+      unit: UNITS.includes(item && item.unit) ? item.unit : "份"
+    }))
+    .filter((item) => item.name)
+    .slice(0, 20);
+  if (!ingredientItems.length) return null;
+  return {
+    name: cleanText(value.name, 30) || "这道菜",
+    prep: boundedNumber(value.prep, 10, 1, 180),
+    cook: boundedNumber(value.cook, 15, 1, 180),
+    difficulty: DIFFICULTIES.includes(value.difficulty) ? value.difficulty : "简单",
+    ingredientItems
+  };
+}
+
 function parseJsonContent(content) {
   const text = String(content || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   try {
@@ -187,6 +218,17 @@ function systemPrompt() {
   ].join("\n");
 }
 
+function stepsSystemPrompt() {
+  return [
+    "你是擅长中文家常菜的菜谱助手。你只需要根据用户已确认的菜名和食材生成做法步骤。",
+    "严格使用用户提供的食材和用量；可以使用水、火和常规厨具，不得擅自添加未列出的主要食材或调味料。",
+    "步骤必须按实际操作顺序排列，说清处理方式、火候、时间或完成状态，并符合食品安全。",
+    "输出 2 至 12 个步骤，每步不超过 180 个字。",
+    "只返回一个合法 JSON 对象，不要返回 Markdown、代码围栏、解释或额外文字。",
+    '{"steps":[{"text":""}]}'
+  ].join("\n");
+}
+
 exports.main = async (event) => {
   const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   const { OPENID } = cloud.getWXContext();
@@ -194,7 +236,9 @@ exports.main = async (event) => {
 
   const action = cleanText(event && event.action, 20);
   const prompt = cleanText(event && event.prompt, 600);
-  if (action !== "check" && !prompt) return { ok: false, code: "INVALID_PROMPT", message: "请输入菜名或做菜需求" };
+  if (action !== "check" && action !== "steps" && !prompt) {
+    return { ok: false, code: "INVALID_PROMPT", message: "请输入菜名或做菜需求" };
+  }
   const inventory = (Array.isArray(event && event.inventory) ? event.inventory : [])
     .map((item) => cleanText(item, 24))
     .filter(Boolean)
@@ -212,6 +256,32 @@ exports.main = async (event) => {
       });
       console.info(JSON.stringify({ level: "info", event: "recipe-ai.check", requestId, openidSuffix: OPENID.slice(-6), model: provider.model }));
       return { ok: true, model: provider.model, requestId };
+    }
+    if (action === "steps") {
+      const recipe = normalizeStepRequest(event && event.recipe);
+      if (!recipe) return { ok: false, code: "INVALID_INGREDIENTS", message: "请至少提供一种食材" };
+      const ingredientText = recipe.ingredientItems
+        .map((item) => `${item.name} ${item.quantity}${item.unit}`)
+        .join("、");
+      const response = await postJson(provider.apiUrl, provider.apiKey, {
+        model: provider.model,
+        ...providerRequestOptions(provider, true),
+        messages: [
+          { role: "system", content: stepsSystemPrompt() },
+          {
+            role: "user",
+            content: `菜名：${recipe.name}\n准备时间：${recipe.prep}分钟\n烹饪时间：${recipe.cook}分钟\n难度：${recipe.difficulty}\n已确认食材：${ingredientText}\n请生成与这份食材完全匹配的操作步骤。`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.35,
+        max_tokens: 1200
+      });
+      const content = response && response.choices && response.choices[0] && response.choices[0].message && response.choices[0].message.content;
+      const steps = normalizeSteps(parseJsonContent(content));
+      if (!steps) throw new RecipeAiError("INVALID_AI_RESPONSE", "AI 未返回完整做法");
+      console.info(JSON.stringify({ level: "info", event: "recipe-ai.steps", requestId, openidSuffix: OPENID.slice(-6), model: provider.model, ingredientCount: recipe.ingredientItems.length }));
+      return { ok: true, steps, requestId };
     }
     const userContent = inventory.length
       ? `用户需求：\n${prompt}\n\n可优先使用的库存食材：\n${inventory.join("、")}\n\n请直接生成一份可编辑的菜谱初稿。`
@@ -240,6 +310,8 @@ exports.main = async (event) => {
 };
 
 module.exports.normalizeRecipe = normalizeRecipe;
+module.exports.normalizeSteps = normalizeSteps;
+module.exports.normalizeStepRequest = normalizeStepRequest;
 module.exports.parseJsonContent = parseJsonContent;
 module.exports.config = config;
 module.exports.providerRequestOptions = providerRequestOptions;

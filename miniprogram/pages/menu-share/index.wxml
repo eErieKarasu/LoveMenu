@@ -1,0 +1,41 @@
+<view class="screen share-screen">
+  <view wx:if="{{invalid}}" class="empty-state">
+    <text class="headline">这份菜单已经无法打开</text>
+    <text>可以让分享者重新发送一次。</text>
+    <button class="primary empty-action" bindtap="openApp">去安排我的今日菜单</button>
+  </view>
+
+  <block wx:elif="{{snapshot}}">
+    <view class="share-hero">
+      <text class="eyebrow">{{snapshot.dateLabel}}</text>
+      <text class="title">今天的菜单</text>
+      <text class="share-summary">共 {{selectedCount}} 道菜<text wx:if="{{totalTime}}"> · 预计 {{totalTime}} 分钟</text></text>
+    </view>
+
+    <view class="share-meals">
+      <view class="share-meal" wx:for="{{snapshot.meals}}" wx:key="key">
+        <view class="share-meal-head">
+          <text class="share-meal-name">{{item.label}}</text>
+          <text class="share-meal-count">{{item.totalCount ? item.totalCount + ' 道' : '待安排'}}</text>
+        </view>
+        <block wx:if="{{item.dishes.length}}">
+          <view class="shared-dishes">
+            <view class="shared-dish" wx:for="{{item.dishes}}" wx:for-item="dish" wx:key="name">
+              <view class="shared-dot"></view>
+              <text class="shared-name">{{dish.name}}</text>
+              <text wx:if="{{dish.time}}" class="shared-time">{{dish.time}} 分钟</text>
+            </view>
+          </view>
+          <text wx:if="{{item.totalCount > item.dishes.length}}" class="shared-more">还有 {{item.totalCount - item.dishes.length}} 道菜未展开</text>
+        </block>
+        <text wx:else class="shared-empty">这一餐还没有安排。</text>
+      </view>
+    </view>
+
+    <view class="share-actions">
+      <button class="primary" open-type="share">转发这份菜单</button>
+      <button class="secondary" bindtap="openApp">安排我的菜单</button>
+    </view>
+    <text class="share-footnote">来自「大王今天的饭」</text>
+  </block>
+</view>

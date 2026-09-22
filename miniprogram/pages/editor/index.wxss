@@ -196,6 +196,13 @@
 .ingredient-hint { margin: 14rpx 4rpx 0; line-height: 1.55; }
 
 .step-field { margin-bottom: 0; }
+.step-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18rpx; margin-bottom: 14rpx; }
+.step-heading .label { margin-bottom: 5rpx; }
+.step-ai-note { display: block; color: var(--muted); font-size: 20rpx; line-height: 1.45; }
+.generate-steps { flex: 0 0 auto; min-width: 150rpx; min-height: 64rpx; padding: 0 20rpx; border-radius: 18rpx; background: #f0e7f4; color: #76508d; font-size: 23rpx; font-weight: 750; line-height: 64rpx; }
+.generate-steps:active { opacity: .75; transform: scale(.98); }
+.generate-steps[disabled] { opacity: .58; }
+.step-generation-message { display: block; margin: -2rpx 2rpx 14rpx; padding: 14rpx 16rpx; border-radius: 14rpx; background: #f8f2fa; color: #76508d; font-size: 21rpx; line-height: 1.5; }
 
 .step-list {
   overflow: hidden;

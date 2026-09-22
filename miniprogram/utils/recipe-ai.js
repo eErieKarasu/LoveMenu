@@ -62,11 +62,23 @@ function normalizeGeneratedRecipe(value) {
   };
 }
 
+function normalizeGeneratedSteps(value) {
+  const source = Array.isArray(value) ? value : value && value.steps;
+  if (!Array.isArray(source)) return null;
+  const steps = source
+    .map((item) => cleanText(typeof item === "string" ? item : item && item.text, 180))
+    .filter(Boolean)
+    .slice(0, 12)
+    .map((text) => ({ text }));
+  return steps.length >= 2 ? steps : null;
+}
+
 module.exports = {
   AI_DRAFT_STORAGE_KEY,
   DIFFICULTIES,
   INGREDIENT_UNITS,
   RECIPE_CATEGORIES,
   normalizeGeneratedRecipe,
+  normalizeGeneratedSteps,
   shouldIncludeInventory
 };

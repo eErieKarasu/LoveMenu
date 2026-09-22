@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createInitialState } = require("../miniprogram/utils/data");
-const { normalizeGeneratedRecipe, shouldIncludeInventory } = require("../miniprogram/utils/recipe-ai");
+const { normalizeGeneratedRecipe, normalizeGeneratedSteps, shouldIncludeInventory } = require("../miniprogram/utils/recipe-ai");
 const {
   addRecipeToTodayMeal,
   addRecipeIngredients,
@@ -66,6 +66,14 @@ test("AI 菜谱缺少完整食材或步骤时会被拒绝", () => {
     ingredientItems: [{ name: "鸡蛋" }, { name: "盐" }],
     steps: [{ text: "只有一步" }]
   }), null);
+});
+
+test("AI 操作步骤会被单独标准化", () => {
+  assert.deepEqual(normalizeGeneratedSteps({ steps: ["洗净番茄", { text: "切块后翻炒" }] }), [
+    { text: "洗净番茄" },
+    { text: "切块后翻炒" }
+  ]);
+  assert.equal(normalizeGeneratedSteps({ steps: [{ text: "只有一步" }] }), null);
 });
 
 test("只在用户明确要求时向 AI 提供库存", () => {

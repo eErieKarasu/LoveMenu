@@ -3,6 +3,9 @@
 .today-hero-copy { flex: 1; min-width: 0; }
 .today-summary { color: var(--muted); font-size: 26rpx; line-height: 1.55; margin-top: 18rpx; }
 .summary-progress { color: var(--accent); font-weight: 800; }
+.today-header-actions { display: flex; align-items: center; gap: 8rpx; flex: 0 0 auto; margin-left: 18rpx; }
+.share-entry { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rpx; width: 82rpx; height: 82rpx; min-height: 82rpx; padding: 0; border: 1rpx solid var(--line); border-radius: 41rpx; background: var(--paper); color: var(--muted); font-size: 18rpx; line-height: 1; box-shadow: 0 8rpx 22rpx rgba(75, 52, 34, .07); }
+.share-symbol { color: var(--accent); font-size: 30rpx; font-weight: 800; line-height: 1; }
 .profile-entry { display: flex; align-items: center; gap: 12rpx; flex: 0 0 auto; min-width: 116rpx; height: 96rpx; min-height: 96rpx; margin-left: 22rpx; padding: 0; border-radius: 48rpx; background: transparent; line-height: 1; }
 .profile-avatar { display: flex; align-items: center; justify-content: center; width: 88rpx; height: 88rpx; border: 5rpx solid rgba(255,255,255,.9); border-radius: 44rpx; background: linear-gradient(145deg, #f8efe4, #fffdf9); color: var(--ink); font-family: "Songti SC", serif; font-size: 40rpx; font-weight: 800; box-shadow: 0 8rpx 24rpx rgba(75, 52, 34, .13); }
 .profile-chevron { color: #968b80; font-family: Arial, sans-serif; font-size: 48rpx; font-weight: 300; }
@@ -63,7 +66,7 @@
 .recent-card:active { opacity: .76; transform: scale(.99); }
 
 @media (prefers-reduced-motion: no-preference) {
-  .today-dish, .add-dish-action, .meal-cta, .more-action, .profile-entry, .recent-card { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
+  .today-dish, .add-dish-action, .meal-cta, .more-action, .profile-entry, .share-entry, .recent-card { transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease; }
 }
 
 @media (max-width: 350px) {
@@ -71,4 +74,6 @@
   .meal-icon-wrap { width: 76rpx; height: 76rpx; }
   .meal-icon { width: 48rpx; height: 48rpx; }
   .meal-illustration { display: none; }
+  .profile-chevron { display: none; }
+  .profile-entry { min-width: 88rpx; margin-left: 0; }
 }
